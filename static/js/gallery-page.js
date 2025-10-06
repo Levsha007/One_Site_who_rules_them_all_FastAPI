@@ -1,8 +1,7 @@
-// public/js/gallery-page.js
-
+// static/js/gallery-page.js — галерея для FastAPI
 if (!document.getElementById('gallery-grid')) {
   console.log('[Gallery] Страница не загружена.');
-  exit;
+  return;
 }
 
 // === Универсальные утилиты (локально) ===
@@ -34,7 +33,7 @@ const grid = document.getElementById('gallery-grid');
 let currentPage = 0;
 const itemsPerPage = 150;
 
-// ========== Новая часть: управление колонками/ползунком ==========
+// ========== Управление колонками/ползунком ==========
 const sliderContainer = document.querySelector('.slider-container');
 const sliderFill = document.querySelector('.slider-fill');
 const sliderThumb = document.querySelector('.slider-thumb');
@@ -51,16 +50,13 @@ function applyNumColsToGrid(cols) {
   const gridEl = document.querySelector('.grid');
   if (!gridEl) return;
 
-  // учтём gap (gutter)
   const gap = 16; // px — совпадает с Masonry gutter
   const gridWidth = gridEl.clientWidth || gridEl.getBoundingClientRect().width || 0;
-  // Если gridWidth слишком маленький (не отрисован) — отложим
   if (!gridWidth) return;
 
   const availableWidth = Math.max(0, gridWidth - gap * (cols - 1));
   const colWidth = Math.floor(availableWidth / cols);
 
-  // Применяем ширины в px — Masonry настроен на columnWidth: '.grid-sizer'
   document.querySelectorAll('.grid-sizer').forEach(el => {
     el.style.width = `${colWidth}px`;
   });
@@ -68,7 +64,6 @@ function applyNumColsToGrid(cols) {
     el.style.width = `${colWidth}px`;
   });
 
-  // Обновляем визуальный ползунок
   if (sliderFill && sliderThumb && sizeValue) {
     const percent = ((cols - minCols) / (maxCols - minCols)) * 100;
     sliderFill.style.width = `${percent}%`;
@@ -76,46 +71,38 @@ function applyNumColsToGrid(cols) {
     sizeValue.textContent = `${cols} кол.`;
   }
 
-  // Сохраняем выбор
   localStorage.setItem('tileScaleNumCols', String(cols));
 
-  // Если Masonry уже создан — перестраиваем в реальном времени
   if (masonry) {
-    // небольшой таймаут гарантирует, что layout будет корректным после изменений размеров
     setTimeout(() => masonry.layout(), 30);
   }
 }
 
-// Обёртка, используемая при изменении (вызывается в drag/mousemove и кнопках)
 function updateSliderAndGrid() {
-  // Clamp
   numCols = Math.max(minCols, Math.min(maxCols, Math.round(numCols)));
   applyNumColsToGrid(numCols);
 }
 
-// При загрузке страницы — пытаемся восстановить сохранённое значение
-window.addEventListener('DOMContentLoaded', () => {
+// Инициализация колонок
+document.addEventListener('DOMContentLoaded', () => {
   const savedNumCols = parseInt(localStorage.getItem('tileScaleNumCols'));
   if (Number.isFinite(savedNumCols) && savedNumCols >= minCols && savedNumCols <= maxCols) {
     numCols = savedNumCols;
   } else {
     numCols = 3;
   }
-  // Если grid ещё не содержит элементов — applyNumColsToGrid не навредит (просто вернёт)
   updateSliderAndGrid();
 
-  // Обработчик ресайза — пересчитать колонки (чтобы ширины в px оставались актуальны)
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      // пересчитать исходя из текущей ширины контейнера
       applyNumColsToGrid(numCols);
     }, 100);
   });
 });
 
-// Слежение за кликом по контейнеру ползунка — вычисляем numCols и обновляем
+// Слайдер колонок
 sliderContainer?.addEventListener('mousedown', (e) => {
   const rect = sliderContainer.getBoundingClientRect();
   const totalRange = maxCols - minCols + 1;
@@ -144,7 +131,7 @@ sliderContainer?.addEventListener('mousedown', (e) => {
   document.addEventListener('mouseup', up);
 });
 
-// кнопки уменьшения/увеличения колонок
+// Кнопки колонок
 decreaseBtn?.addEventListener('click', () => {
   if (numCols > minCols) {
     numCols--;
@@ -158,15 +145,12 @@ increaseBtn?.addEventListener('click', () => {
   }
 });
 
-// ========== Конец новой части: управление колонками/ползунком ==========
-
+// ========== Загрузка галерей ==========
 async function loadGalleries(filter = 'all') {
   try {
-    const res = await fetch('/galleries');
-    if (!res.ok) throw new Error('Ошибка получения /galleries: ' + res.status);
-    const allGalleries = await res.json();
+    const allGalleries = await apiFetch('/galleries');
 
-    // select
+    // Select для загрузки
     const select = document.querySelector('select[name="gallery"]');
     if (select) {
       select.innerHTML = '<option value="" disabled selected>Выберите папку</option>';
@@ -178,7 +162,7 @@ async function loadGalleries(filter = 'all') {
       });
     }
 
-    // nav
+    // Навигация по галереям
     const nav = document.getElementById('gallery-nav');
     if (nav) {
       nav.innerHTML = '<button data-gallery="all">Все</button>';
@@ -190,7 +174,7 @@ async function loadGalleries(filter = 'all') {
       });
     }
 
-    // очистка
+    // Очистка grid
     document.querySelectorAll('.grid-item:not(.grid-sizer)').forEach(el => el.remove());
 
     let images = [];
@@ -222,7 +206,7 @@ async function loadGalleries(filter = 'all') {
     const overrides = readOverrides();
     const favorites = readFavorites();
 
-    // Показываем только текущую страницу
+    // Пагинация
     const start = currentPage * itemsPerPage;
     const end = (currentPage + 1) * itemsPerPage;
     const visibleImages = images.slice(start, end);
@@ -254,20 +238,15 @@ async function loadGalleries(filter = 'all') {
       fragment.appendChild(item);
     });
 
-    // Добавляем элементы в grid
     grid.appendChild(fragment);
-
-    // Перед инициализацией Masonry — убедимся, что .grid-sizer и .grid-item имеют нужные ширины
-    // Если колонки не установлены (например первый раз) — применяем текущие numCols
     applyNumColsToGrid(numCols);
 
-    // Удаляем старый Masonry и инициализируем заново
+    // Инициализация Masonry
     if (masonry) {
       try { masonry.destroy(); } catch (e) { /* ignore */ }
       masonry = null;
     }
 
-    // Инициализируем Masonry (немного задерживаемся, чтобы браузер успел применить ширины)
     setTimeout(() => {
       masonry = new Masonry('.grid', {
         itemSelector: '.grid-item',
@@ -275,13 +254,12 @@ async function loadGalleries(filter = 'all') {
         percentPosition: false,
         gutter: 16
       });
-      // сразу делаем layout — чтобы плитки встали на свои места
       setTimeout(() => {
         try { masonry.layout(); } catch (e) { /* ignore */ }
       }, 40);
     }, 60);
 
-    // lazy observer — если картинки лениво подгружаются
+    // Lazy loading
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -289,9 +267,7 @@ async function loadGalleries(filter = 'all') {
           img.src = img.dataset.src || img.src;
           observer.unobserve(img);
           img.onload = () => {
-            if (masonry) {
-              masonry.layout();
-            }
+            if (masonry) masonry.layout();
           };
         }
       });
@@ -339,6 +315,7 @@ function updatePaginationControls(totalItems) {
   if (nextBottom) nextBottom.disabled = currentPage >= totalPages - 1;
 }
 
+// Пагинация
 document.getElementById('prev-page-top').addEventListener('click', () => {
   if (currentPage > 0) {
     currentPage--;
@@ -349,8 +326,7 @@ document.getElementById('prev-page-top').addEventListener('click', () => {
 
 document.getElementById('next-page-top').addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  fetch('/galleries')
-    .then(res => res.json())
+  apiFetch('/galleries')
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -375,8 +351,7 @@ document.getElementById('prev-page-bottom').addEventListener('click', () => {
 
 document.getElementById('next-page-bottom').addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  fetch('/galleries')
-    .then(res => res.json())
+  apiFetch('/galleries')
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -391,6 +366,7 @@ document.getElementById('next-page-bottom').addEventListener('click', () => {
     });
 });
 
+// Навигация по галереям
 document.getElementById('gallery-nav').addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (btn) {
@@ -407,19 +383,29 @@ document.getElementById('favorites-btn').addEventListener('click', () => {
   loadGalleries('favorites');
 });
 
+// Загрузка изображений
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const loadingEl = document.getElementById('loading');
   if (loadingEl) loadingEl.style.display = 'inline';
+  
   try {
-    const res = await fetch('/upload', { method: 'POST', body: fd });
-    const r = await res.json();
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: fd
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const r = await response.json();
     if (r.success) {
       showToast(`Загружено ${r.images.length}`);
       const currentFilter = localStorage.getItem('currentGallery') || 'all';
       loadGalleries(currentFilter);
-      e.target.reset(); // Очистка textarea
+      e.target.reset();
     } else {
       showToast('Ошибка: ' + (r.error || 'неизвестно'));
     }
@@ -427,9 +413,11 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     console.error(err);
     showToast('Ошибка сети при загрузке');
   }
+  
   if (loadingEl) loadingEl.style.display = 'none';
 });
 
+// Создание галереи
 document.getElementById('create-gallery-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
@@ -438,14 +426,10 @@ document.getElementById('create-gallery-form')?.addEventListener('submit', async
     showToast('Введите имя папки');
     return;
   }
+  
   try {
-    const res = await fetch('/create-gallery', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: String(name).trim() })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
+    const data = await apiPost('/create-gallery', { name: String(name).trim() });
+    if (data.success) {
       showToast(`Папка "${data.name}" создана`);
       e.target.reset();
       loadGalleries();
@@ -458,6 +442,7 @@ document.getElementById('create-gallery-form')?.addEventListener('submit', async
   }
 });
 
+// Обработчики событий для изображений
 document.addEventListener('click', async (e) => {
   if (e.target.classList.contains('favorite-heart')) {
     const parent = e.target.closest('.grid-item');
@@ -476,6 +461,7 @@ document.addEventListener('click', async (e) => {
     }
     writeFavorites(favorites);
   }
+  
   if (e.target.classList.contains('rename-btn')) {
     const parent = e.target.closest('.grid-item');
     if (!parent) return;
@@ -497,59 +483,39 @@ document.addEventListener('click', async (e) => {
     parent.appendChild(wrap);
     input.focus();
     input.select();
+    
     cancel.addEventListener('click', () => wrap.remove());
     input.addEventListener('keydown', ev => {
       if (ev.key === 'Enter') save.click();
       if (ev.key === 'Escape') wrap.remove();
     });
+    
     save.addEventListener('click', async () => {
       const newName = input.value.trim();
       if (!newName) {
         showToast('Имя не может быть пустым');
         return;
       }
+      
       try {
-        const res = await fetch('/rename', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gallery: img.dataset.gallery, oldPath: img.dataset.path, newName })
+        await apiPost('/rename', {
+          gallery: img.dataset.gallery,
+          oldPath: img.dataset.path,
+          newName
         });
-        if (res.ok) {
-          let json;
-          try { json = await res.json(); } catch { json = { success: true }; }
-          if (json && json.success !== false) {
-            applyNameToElement(img, newName);
-            showToast('Имя сохранено на сервере');
-            wrap.remove();
-            return;
-          } else {
-            saveLocalOverride(img.dataset.path, newName);
-            applyNameToElement(img, newName);
-            showToast('Сервер вернул ошибку — имя сохранено локально');
-            wrap.remove();
-            return;
-          }
-        } else if (res.status === 404) {
-          saveLocalOverride(img.dataset.path, newName);
-          applyNameToElement(img, newName);
-          showToast('Эндпоинт /rename не найден — имя сохранено локально');
-          wrap.remove();
-          return;
-        } else {
-          const txt = await res.text();
-          showToast('Ошибка сервера: ' + res.status + ' ' + txt);
-          return;
-        }
+        applyNameToElement(img, newName);
+        showToast('Имя сохранено на сервере');
+        wrap.remove();
       } catch (err) {
-        console.warn('rename network error', err);
+        console.warn('Rename error:', err);
         saveLocalOverride(img.dataset.path, newName);
         applyNameToElement(img, newName);
         showToast('Сетевая ошибка — имя сохранено локально');
         wrap.remove();
-        return;
       }
     });
   }
+  
   if (e.target.classList.contains('delete-btn')) {
     const parent = e.target.closest('.grid-item');
     const img = parent.querySelector('img');
@@ -557,25 +523,15 @@ document.addEventListener('click', async (e) => {
     const gallery = img.dataset.gallery;
     if (!path || !gallery) return;
     if (!confirm('Удалить это изображение?')) return;
+    
     try {
-      const res = await fetch('/delete-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gallery, path })
-      });
-      if (res.ok) {
-        parent.remove();
-        showToast('Изображение удалено');
-        if (masonry) {
-          masonry.layout();
-        }
-      } else {
-        const txt = await res.text();
-        showToast('Ошибка: ' + txt);
-      }
+      await apiPost('/delete-image', { gallery, path });
+      parent.remove();
+      showToast('Изображение удалено');
+      if (masonry) masonry.layout();
     } catch (err) {
       console.error(err);
-      showToast('Ошибка сети');
+      showToast('Ошибка при удалении изображения');
     }
   }
 });
@@ -603,7 +559,7 @@ function saveLocalOverride(path, newName) {
   writeOverrides(overrides);
 }
 
-// === Модалка ===
+// ========== Модальное окно ==========
 let currentImageIndex = -1;
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modal-img');
@@ -619,6 +575,7 @@ function openModal(images, index) {
   modalImg.alt = img.alt || img.dataset.name || '';
   modalCaption.textContent = img.dataset.name || img.dataset.originalName || '';
   modalCaption.style.fontSize = '30px';
+  
   const indexBadge = document.querySelector('.modal .index-badge');
   if (indexBadge) {
     indexBadge.textContent = index + 1;
@@ -628,6 +585,7 @@ function openModal(images, index) {
     badge.textContent = index + 1;
     modalImg.parentNode.insertBefore(badge, modalImg.nextSibling);
   }
+  
   modal.style.display = 'flex';
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -639,12 +597,15 @@ function openModal(images, index) {
 }
 
 function closeModal() {
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden', 'true');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
   document.body.style.overflow = '';
   currentImageIndex = -1;
 }
 
+// Открытие модалки по клику на изображение
 document.addEventListener('click', e => {
   const img = e.target.closest('.grid-item img');
   if (img) {
@@ -659,7 +620,7 @@ document.addEventListener('click', e => {
   }
 });
 
-// === Long Press (удержание) для перехода в папку ===
+// Long press для перехода в папку
 let pressTimer = null;
 let startX, startY;
 
@@ -673,7 +634,6 @@ document.addEventListener('mousedown', (e) => {
   pressTimer = setTimeout(() => {
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    // Если мышь почти не двигалась — считаем это долгим нажатием
     if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
       const gallery = img.dataset.gallery;
       if (gallery) {
@@ -683,7 +643,7 @@ document.addEventListener('mousedown', (e) => {
         showToast(`Переход в папку: ${gallery}`);
       }
     }
-  }, 500); // 500 мс — порог удержания
+  }, 500);
 });
 
 document.addEventListener('mouseup', () => {
@@ -696,54 +656,33 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-// === Клавиши управления ===
+// Управление клавиатурой
 document.addEventListener('keydown', e => {
   if (currentImageIndex === -1) return;
   if (e.key === 'ArrowLeft') {
     e.preventDefault();
-    const prevIndex = (currentImageIndex - 1 + document.querySelectorAll('.grid-item img').length) % document.querySelectorAll('.grid-item img').length;
-    const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
-      path: el.src,
-      alt: el.alt,
-      dataset: el.dataset
-    }));
-    openModal(images, prevIndex);
+    navigateModal(-1);
   } else if (e.key === 'ArrowRight') {
     e.preventDefault();
-    const nextIndex = (currentImageIndex + 1) % document.querySelectorAll('.grid-item img').length;
-    const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
-      path: el.src,
-      alt: el.alt,
-      dataset: el.dataset
-    }));
-    openModal(images, nextIndex);
+    navigateModal(1);
   } else if (e.key === 'Escape') {
     closeModal();
   }
 });
 
-prevBtn?.addEventListener('click', () => {
-  if (currentImageIndex === -1) return;
-  const prevIndex = (currentImageIndex - 1 + document.querySelectorAll('.grid-item img').length) % document.querySelectorAll('.grid-item img').length;
-  const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
-    path: el.src,
-    alt: el.alt,
-    dataset: el.dataset
-  }));
-  openModal(images, prevIndex);
-});
-
-nextBtn?.addEventListener('click', () => {
-  if (currentImageIndex === -1) return;
-  const nextIndex = (currentImageIndex + 1) % document.querySelectorAll('.grid-item img').length;
-  const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
+function navigateModal(direction) {
+  const items = document.querySelectorAll('.grid-item img');
+  const nextIndex = (currentImageIndex + direction + items.length) % items.length;
+  const images = Array.from(items).map(el => ({
     path: el.src,
     alt: el.alt,
     dataset: el.dataset
   }));
   openModal(images, nextIndex);
-});
+}
 
+prevBtn?.addEventListener('click', () => navigateModal(-1));
+nextBtn?.addEventListener('click', () => navigateModal(1));
 closeBtn?.addEventListener('click', closeModal);
 modal?.addEventListener('click', e => {
   if (e.target.id === 'modal') {
@@ -751,7 +690,7 @@ modal?.addEventListener('click', e => {
   }
 });
 
-// === Тач для мобильных ===
+// Тач-свайпы
 let touchStartX = 0;
 let touchEndX = 0;
 modal?.addEventListener('touchstart', e => {
@@ -761,66 +700,13 @@ modal?.addEventListener('touchend', e => {
   touchEndX = e.changedTouches[0].clientX;
   const diff = touchStartX - touchEndX;
   if (diff > 50) {
-    const nextIndex = (currentImageIndex + 1) % document.querySelectorAll('.grid-item img').length;
-    const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
-      path: el.src,
-      alt: el.alt,
-      dataset: el.dataset
-    }));
-    openModal(images, nextIndex);
+    navigateModal(1);
   } else if (diff < -50) {
-    const prevIndex = (currentImageIndex - 1 + document.querySelectorAll('.grid-item img').length) % document.querySelectorAll('.grid-item img').length;
-    const images = Array.from(document.querySelectorAll('.grid-item img')).map(el => ({
-      path: el.src,
-      alt: el.alt,
-      dataset: el.dataset
-    }));
-    openModal(images, prevIndex);
+    navigateModal(-1);
   }
 }, { passive: true });
 
-// === Восстановление состояния ===
-window.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const galleryParam = urlParams.get('gallery');
-  const pageParam = parseInt(urlParams.get('page') || '0');
-  const savedGallery = localStorage.getItem('currentGallery') || 'all';
-  const currentGallery = galleryParam || savedGallery;
-  currentPage = isNaN(pageParam) ? 0 : pageParam;
-
-  const createDetails = document.getElementById('create-gallery-details');
-  const uploadDetails = document.getElementById('upload-details');
-  const galleriesDetails = document.getElementById('galleries-details');
-  const createOpen = localStorage.getItem('createDetailsOpen') === 'true';
-  const uploadOpen = localStorage.getItem('uploadDetailsOpen') === 'true';
-  const galleriesOpen = localStorage.getItem('galleriesDetailsOpen') === 'true';
-  if (createDetails) createDetails.open = createOpen;
-  if (uploadDetails) uploadDetails.open = uploadOpen;
-  if (galleriesDetails) galleriesDetails.open = galleriesOpen;
-
-  createDetails?.addEventListener('toggle', () => {
-    localStorage.setItem('createDetailsOpen', String(createDetails.open));
-  });
-  uploadDetails?.addEventListener('toggle', () => {
-    localStorage.setItem('uploadDetailsOpen', String(uploadDetails.open));
-  });
-  galleriesDetails?.addEventListener('toggle', () => {
-    localStorage.setItem('galleriesDetailsOpen', String(galleriesDetails.open));
-  });
-
-  loadGalleries(currentGallery);
-});
-
-// ✅ Исправление бага с кнопкой мыши (back/forward)
-window.addEventListener('popstate', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const gallery = urlParams.get('gallery') || localStorage.getItem('currentGallery') || 'all';
-  const page = parseInt(urlParams.get('page') || '0');
-  currentPage = isNaN(page) ? 0 : page;
-  loadGalleries(gallery);
-});
-
-// ✅ Глобальная вставка из буфера
+// Вставка из буфера
 document.addEventListener('paste', async (e) => {
   const items = e.clipboardData.items;
   const select = document.querySelector('select[name="gallery"]');
@@ -842,9 +728,18 @@ document.addEventListener('paste', async (e) => {
         e.preventDefault();
         const loadingEl = document.getElementById('loading');
         if (loadingEl) loadingEl.style.display = 'inline';
+        
         try {
-          const res = await fetch('/upload', { method: 'POST', body: formData });
-          const r = await res.json();
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const r = await response.json();
           if (r.success) {
             showToast(`✅ Загружено ${r.images.length} изображений`);
             const currentFilter = localStorage.getItem('currentGallery') || 'all';
@@ -857,9 +752,54 @@ document.addEventListener('paste', async (e) => {
           console.error(err);
           showToast('❌ Ошибка сети при загрузке');
         }
+        
         if (loadingEl) loadingEl.style.display = 'none';
         break;
       }
     }
   }
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const galleryParam = urlParams.get('gallery');
+  const pageParam = parseInt(urlParams.get('page') || '0');
+  const savedGallery = localStorage.getItem('currentGallery') || 'all';
+  const currentGallery = galleryParam || savedGallery;
+  currentPage = isNaN(pageParam) ? 0 : pageParam;
+
+  // Восстановление состояния details
+  const createDetails = document.getElementById('create-gallery-details');
+  const uploadDetails = document.getElementById('upload-details');
+  const galleriesDetails = document.getElementById('galleries-details');
+  
+  const createOpen = localStorage.getItem('createDetailsOpen') === 'true';
+  const uploadOpen = localStorage.getItem('uploadDetailsOpen') === 'true';
+  const galleriesOpen = localStorage.getItem('galleriesDetailsOpen') === 'true';
+  
+  if (createDetails) createDetails.open = createOpen;
+  if (uploadDetails) uploadDetails.open = uploadOpen;
+  if (galleriesDetails) galleriesDetails.open = galleriesOpen;
+
+  createDetails?.addEventListener('toggle', () => {
+    localStorage.setItem('createDetailsOpen', String(createDetails.open));
+  });
+  uploadDetails?.addEventListener('toggle', () => {
+    localStorage.setItem('uploadDetailsOpen', String(uploadDetails.open));
+  });
+  galleriesDetails?.addEventListener('toggle', () => {
+    localStorage.setItem('galleriesDetailsOpen', String(galleriesDetails.open));
+  });
+
+  loadGalleries(currentGallery);
+});
+
+// Обработка истории браузера
+window.addEventListener('popstate', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const gallery = urlParams.get('gallery') || localStorage.getItem('currentGallery') || 'all';
+  const page = parseInt(urlParams.get('page') || '0');
+  currentPage = isNaN(page) ? 0 : page;
+  loadGalleries(gallery);
 });

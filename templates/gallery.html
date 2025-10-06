@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/assets/images_galery.ico" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', path='assets/images_galery.ico') }}" type="image/x-icon">
   <title>Галерея Вдохновения</title>  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css" />
-  <link rel="stylesheet" href="/css/gallery-style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/gallery-style.css') }}">
 </head>
 <body>
 
@@ -115,8 +115,8 @@ https://example.com/photo.png"
   </footer>
 
   <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/gallery-page.js"></script>
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/gallery-page.js') }}"></script>
 
 </body>
 </html>

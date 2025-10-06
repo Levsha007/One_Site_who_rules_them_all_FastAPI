@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/assets/bookmarks.png" type="image/png">
+  <link rel="icon" href="{{ url_for('static', path='assets/bookmarks.png') }}" type="image/png">
   <title>Закладки</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
 <body>
   <!-- Верхняя панель -->
@@ -105,7 +105,7 @@
     &copy; 2025 Моя Галерея. Все права защищены.
   </footer>
 
-  <script src="/js/app.js"></script>
-  <script src="/js/bookmarks-page.js"></script>
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/bookmarks-page.js') }}"></script>
 </body>
 </html>

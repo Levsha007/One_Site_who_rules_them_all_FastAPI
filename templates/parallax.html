@@ -5,31 +5,18 @@
   <title>Параллакс-путь</title>
 
   <!-- Иконка -->
-  <link rel="icon" href="/assets/parallax-icon.png" type="image/png">
-
-  <!-- Шрифты -->
-  <style>
-    @font-face {
-      font-family: 'raleway_f';
-      src: url('/fonts/raleway-regular.woff2') format('woff2');
-    }
-    @font-face {
-      font-family: 'raleway_f';
-      src: url('/fonts/raleway-black.woff2') format('woff2');
-      font-weight: 900;
-    }
-  </style>
+  <link rel="icon" href="{{ url_for('static', path='img/parallax-icon.png') }}" type="image/png">
 
   <!-- Стили -->
-  <link rel="stylesheet" href="/css/parallax-style.css">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/parallax-style.css') }}">
 
   <!-- Локальные библиотеки GSAP -->
-  <script src="/libs/gsap/gsap.min.js" defer></script>
-  <script src="/libs/gsap/ScrollTrigger.min.js" defer></script>
-  <script src="/libs/gsap/ScrollSmoother.min.js" defer></script>
+  <script src="{{ url_for('static', path='libs/gsap/gsap.min.js') }}" defer></script>
+  <script src="{{ url_for('static', path='libs/gsap/ScrollTrigger.min.js') }}" defer></script>
+  <script src="{{ url_for('static', path='libs/gsap/ScrollSmoother.min.js') }}" defer></script>
 
   <!-- Ваш JS -->
-  <script src="/js/parallax-app.js" defer></script>
+  <script src="{{ url_for('static', path='js/parallax-app.js') }}" defer></script>
 </head>
 <body>
 
@@ -43,13 +30,13 @@
             <div class="layers__caption">Welcome to Parallax</div>
             <div class="layers__title">Fairy Forest</div>
           </div>
-          <div class="layer layers__base" style="background-image: url(/img/layer-base.png);"></div>
-          <div class="layer layers__middle" style="background-image: url(/img/layer-middle.png);"></div>
-          <div class="layer layers__front" style="background-image: url(/img/layer-front.png);"></div>
+          <div class="layer layers__base"></div>
+          <div class="layer layers__middle"></div>
+          <div class="layer layers__front"></div>
         </div>
       </header>
     
-      <article class="main-article" style="background-image: url(/img/dungeon.jpg);">
+      <article class="main-article">
         <div class="main-article__content">
           <h2 class="main-article__header">Секреты леса</h2>
           <p class="main-article__paragraph">
@@ -58,7 +45,7 @@
           </p>
           <p class="main-article__paragraph">
             Этот путь не для спешащих. Он для тех, кто умеет слушать тишину и видеть то, что скрыто за поворотом.
-            <a href="/" style="color: #c0392b; text-decoration: underline;">← Назад к началу</a>
+            <a href="/">← Назад к началу</a>
           </p>
         </div>
         <div class="copy">© 2025 Мой Мир. Все права защищены.</div>
@@ -68,6 +55,6 @@
   </div>
 
   <!-- Общий app.js (тема, кнопка) -->
-  <script src="/js/app.js"></script>
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
 </body>
 </html>

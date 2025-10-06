@@ -2,13 +2,13 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/assets/github_profile.ico" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', path='assets/github_profile.ico') }}" type="image/x-icon">
   <title>GitHub Профиль</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/github-style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/github-style.css') }}">
 </head>
 <body>
 
@@ -70,6 +70,6 @@
   </footer>
 
   <!-- Подключаем только свой скрипт -->
-  <script src="/js/github-app.js"></script>
+  <script src="{{ url_for('static', path='js/github-app.js') }}"></script>
 </body>
 </html>

@@ -1,47 +1,6 @@
-// public/js/github-app.js
+// static/js/github-app.js — GitHub профиль для FastAPI
 let currentProfile = 'Levsha007'; // ← замените на свой логин!
 const myUsername = 'Levsha007'; // Ваш фиксированный логин
-
-function escapeHtml(s) {
-  if (s === undefined || s === null) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function showToast(txt, ms = 3000) {
-  const t = document.getElementById('toast');
-  t.textContent = txt;
-  t.classList.add('show');
-  clearTimeout(t._hide);
-  t._hide = setTimeout(() => t.classList.remove('show'), ms);
-}
-
-// Тема
-const themeToggle = document.getElementById('theme-toggle');
-function setTheme(theme) {
-  if (theme === 'dark') {
-    document.body.removeAttribute('data-theme');
-    themeToggle.textContent = '☀️';
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.body.setAttribute('data-theme', 'light');
-    themeToggle.textContent = '🌙';
-    localStorage.setItem('theme', 'light');
-  }
-}
-
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') setTheme('light');
-else setTheme('dark');
-
-themeToggle.addEventListener('click', () => {
-  const cur = localStorage.getItem('theme') || 'dark';
-  setTheme(cur === 'dark' ? 'light' : 'dark');
-});
 
 // Правильное декодирование Base64 → UTF-8 (для кириллицы!)
 function decodeBase64(str) {
@@ -64,6 +23,9 @@ function getFileType(filename) {
 function openFileModal(filename, content, type) {
   const modal = document.getElementById('file-modal');
   const contentEl = document.getElementById('file-modal-content');
+  
+  if (!modal || !contentEl) return;
+  
   document.getElementById('file-modal-filename').textContent = filename;
 
   let htmlContent = '';
@@ -83,7 +45,8 @@ function openFileModal(filename, content, type) {
 }
 
 function closeFileModal() {
-  document.getElementById('file-modal').style.display = 'none';
+  const modal = document.getElementById('file-modal');
+  if (modal) modal.style.display = 'none';
 }
 
 function simpleMarkdown(md) {
@@ -145,6 +108,12 @@ async function loadGitHubData(username = currentProfile) {
       fetch(`https://api.github.com/users/${username}/following?per_page=100`)
     ]);
 
+    // Проверяем статусы ответов
+    if (!userRes.ok) throw new Error(`User not found: ${userRes.status}`);
+    if (!reposRes.ok) throw new Error(`Repos error: ${reposRes.status}`);
+    if (!starredRes.ok) throw new Error(`Starred error: ${starredRes.status}`);
+    if (!followingRes.ok) throw new Error(`Following error: ${followingRes.status}`);
+
     const [userData, reposData, starredData, followingData] = await Promise.all([
       userRes.json(),
       reposRes.json(),
@@ -160,10 +129,9 @@ async function loadGitHubData(username = currentProfile) {
     renderStarredRepos(starredData);
     renderFollowing(followingData);
 
-    if (username !== myUsername) {
-      document.getElementById('back-btn-container').style.display = 'block';
-    } else {
-      document.getElementById('back-btn-container').style.display = 'none';
+    const backBtnContainer = document.getElementById('back-btn-container');
+    if (backBtnContainer) {
+      backBtnContainer.style.display = username !== myUsername ? 'block' : 'none';
     }
   } catch (err) {
     console.error(err);
@@ -173,6 +141,8 @@ async function loadGitHubData(username = currentProfile) {
 
 function renderProfile(user, starredData, totalStarsOnMyRepos) {
   const container = document.getElementById('profile-section');
+  if (!container) return;
+  
   container.innerHTML = `
     <div class="profile-card">
       <div class="profile-header">Профиль</div>
@@ -210,6 +180,8 @@ function renderProfile(user, starredData, totalStarsOnMyRepos) {
 
 function renderPublicRepos(repos) {
   const container = document.getElementById('repos-list');
+  if (!container) return;
+  
   container.innerHTML = '';
 
   repos.forEach(repo => {
@@ -256,6 +228,8 @@ function renderPublicRepos(repos) {
 
 function renderStarredRepos(repos) {
   const container = document.getElementById('starred-list');
+  if (!container) return;
+  
   container.innerHTML = '';
 
   repos.forEach(repo => {
@@ -299,6 +273,8 @@ function renderStarredRepos(repos) {
 
 function renderFollowing(users) {
   const container = document.getElementById('following-list');
+  if (!container) return;
+  
   container.innerHTML = '';
 
   users.forEach(user => {
@@ -329,6 +305,8 @@ function goBackToMyProfile() {
 // Поиск профиля по логину
 function searchUser() {
   const input = document.getElementById('search-user-input');
+  if (!input) return;
+  
   const username = input.value.trim();
   if (!username) {
     showToast('Введите логин');
@@ -339,12 +317,22 @@ function searchUser() {
   input.value = ''; // очистить после поиска
 }
 
-// Кнопка "Главная"
-document.getElementById('home-btn')?.addEventListener('click', () => {
-  window.location.href = '/';
-});
-
-// Загрузка при старте
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
+  // Кнопка "Главная"
+  document.getElementById('home-btn')?.addEventListener('click', () => {
+    window.location.href = '/';
+  });
+
+  // Обработчик поиска по Enter
+  const searchInput = document.getElementById('search-user-input');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchUser();
+      }
+    });
+  }
+
   loadGitHubData();
 });

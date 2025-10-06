@@ -1,7 +1,7 @@
-// public/js/bookmarks-page.js — только закладки
+// static/js/bookmarks-page.js — только закладки для FastAPI
 if (!document.getElementById('bookmarks-grid')) {
   console.log('[Bookmarks] Страница не загружена.');
-  exit;
+  return;
 }
 
 // === Режимы отображения ===
@@ -11,17 +11,18 @@ function setViewMode(mode) {
   document.querySelectorAll('.view-mode-btn').forEach(btn => {
     btn.classList.remove('active');
   });
-  document.querySelector(`.view-mode-btn[data-mode="${mode}"]`).classList.add('active');
+  const targetBtn = document.querySelector(`.view-mode-btn[data-mode="${mode}"]`);
+  if (targetBtn) targetBtn.classList.add('active');
   localStorage.setItem('viewMode', mode);
 }
 
 // === Загрузка категорий ===
 async function loadCategories() {
   try {
-    const res = await fetch('/categories');
-    if (!res.ok) throw new Error('Ошибка получения категорий: ' + res.status);
-    const categories = await res.json();
+    const categories = await apiFetch('/categories');
     const select = document.getElementById('bookmark-category');
+    if (!select) return;
+    
     select.innerHTML = '';
     categories.forEach(category => {
       const opt = document.createElement('option');
@@ -34,7 +35,6 @@ async function loadCategories() {
     showToast('Ошибка загрузки категорий. Проверь сервер.');
   }
 }
-loadCategories();
 
 // === Загрузка закладок ===
 let bookmarks = [];
@@ -42,22 +42,20 @@ let searchTimeout = null;
 
 async function loadBookmarks() {
   try {
-    const res = await fetch('/bookmarks');
-    if (!res.ok) throw new Error('Ошибка получения закладок: ' + res.status);
-    bookmarks = await res.json();
+    bookmarks = await apiFetch('/bookmarks');
     applySort();
   } catch (err) {
     console.error(err);
     showToast('Ошибка загрузки закладок. Проверь сервер.');
   }
 }
-loadBookmarks();
 
 // === Сортировка ===
 function applySort() {
   const sortSelect = document.getElementById('sort-select');
   const sortValue = sortSelect ? sortSelect.value : 'name-asc';
   let sortedBookmarks = [...bookmarks];
+  
   if (sortValue === 'name-asc') {
     sortedBookmarks.sort((a, b) => a.title.localeCompare(b.title));
   } else if (sortValue === 'name-desc') {
@@ -67,6 +65,7 @@ function applySort() {
   } else if (sortValue === 'category-desc') {
     sortedBookmarks.sort((a, b) => b.category.localeCompare(a.category));
   }
+  
   renderBookmarks(sortedBookmarks);
 }
 
@@ -74,6 +73,7 @@ function applySort() {
 function renderBookmarks(bookmarks) {
   const grid = document.getElementById('bookmarks-grid');
   if (!grid) return;
+  
   grid.innerHTML = '';
   bookmarks.forEach(bookmark => {
     const card = document.createElement('div');
@@ -88,13 +88,16 @@ function renderBookmarks(bookmarks) {
         <button class="btn-delete" data-id="${bookmark.id}">×</button>
       </div>
     `;
+    
     card.addEventListener('click', (e) => {
       if (!e.target.closest('.btn-delete')) {
         window.open(escapeHtml(bookmark.url), '_blank');
       }
     });
+    
     grid.appendChild(card);
   });
+  
   addEventListeners();
 }
 
@@ -135,29 +138,39 @@ function addEventListeners() {
 document.getElementById('search-input')?.addEventListener('input', (e) => {
   if (searchTimeout) clearTimeout(searchTimeout);
   const query = e.target.value.trim().toLowerCase();
+  
   if (!query) {
     applySort();
     return;
   }
-  const filtered = bookmarks.filter(b =>
-    b.title.toLowerCase().includes(query) ||
-    b.url.toLowerCase().includes(query) ||
-    b.category.toLowerCase().includes(query)
-  );
-  renderBookmarks(filtered);
+  
+  searchTimeout = setTimeout(() => {
+    const filtered = bookmarks.filter(b =>
+      b.title.toLowerCase().includes(query) ||
+      b.url.toLowerCase().includes(query) ||
+      b.category.toLowerCase().includes(query)
+    );
+    renderBookmarks(filtered);
+  }, 300);
 });
 
 // === Модальное окно добавления ===
 function openAddBookmarkModal() {
   const modal = document.getElementById('add-bookmark-modal');
+  if (!modal) return;
+  
   modal.style.display = 'flex';
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
-  document.getElementById('add-bookmark-form').reset();
+  
+  const form = document.getElementById('add-bookmark-form');
+  if (form) form.reset();
 }
 
 document.getElementById('close-add-modal')?.addEventListener('click', () => {
   const modal = document.getElementById('add-bookmark-modal');
+  if (!modal) return;
+  
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
@@ -169,42 +182,33 @@ document.getElementById('add-bookmark-form')?.addEventListener('submit', async (
   const title = formData.get('title');
   const url = formData.get('url');
   const category = formData.get('category');
+  
   try {
-    const res = await fetch('/bookmarks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, url, category })
-    });
-    if (res.ok) {
-      showToast('Закладка добавлена');
-      loadBookmarks();
-      document.getElementById('add-bookmark-modal').style.display = 'none';
-      document.getElementById('add-bookmark-modal').setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-    } else {
-      const txt = await res.text();
-      showToast('Ошибка: ' + txt);
+    await apiPost('/bookmarks', { title, url, category });
+    showToast('Закладка добавлена');
+    await loadBookmarks();
+    
+    const modal = document.getElementById('add-bookmark-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
     }
+    document.body.style.overflow = '';
   } catch (err) {
     console.error(err);
-    showToast('Ошибка сети при добавлении закладки');
+    showToast('Ошибка при добавлении закладки');
   }
 });
 
 // === Удаление ===
 async function deleteBookmark(id) {
   try {
-    const res = await fetch(`/bookmarks/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      showToast('Закладка удалена');
-      loadBookmarks();
-    } else {
-      const txt = await res.text();
-      showToast('Ошибка: ' + txt);
-    }
+    await apiDelete(`/bookmarks/${id}`);
+    showToast('Закладка удалена');
+    await loadBookmarks();
   } catch (err) {
     console.error(err);
-    showToast('Ошибка сети при удалении закладки');
+    showToast('Ошибка при удалении закладки');
   }
 }
 
@@ -219,5 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     sortSelect.value = savedSort;
   }
 
+  loadCategories();
   loadBookmarks();
 });

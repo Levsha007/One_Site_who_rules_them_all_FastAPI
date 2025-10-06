@@ -151,13 +151,13 @@ body {
   margin-top: calc(var(--index) * 1.5);
 }
 
-.main-article a {
+.back-link {
   color: #c0392b;
   text-decoration: underline;
   transition: color 0.3s ease;
 }
 
-.main-article a:hover {
+.back-link:hover {
   color: #e74c3c;
 }
 

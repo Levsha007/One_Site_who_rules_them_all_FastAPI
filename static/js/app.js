@@ -54,7 +54,7 @@ async function apiDelete(endpoint) {
   });
 }
 
-// === Тема ===
+// ===  Тема  ===
 const themeToggle = document.getElementById('theme-toggle');
 function setTheme(theme) {
   if (theme === 'dark') {

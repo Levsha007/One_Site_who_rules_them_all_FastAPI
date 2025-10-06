@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/assets/images_galery.ico" type="image/x-icon">
+  <title>Галерея Вдохновения</title>  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/gallery-style.css" />
+</head>
+<body>
+
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span id="current-gallery-title" class="current-gallery-title">Все изображения</span>
+    <!-- Избранное -->
+    <button id="favorites-btn" class="favorites-btn">❤️ Избранное</button>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <!-- === Ползунок размера плиток === -->
+  <div class="scale-control" aria-hidden="false">
+    <label for="sizeSlider">Размер плиток:</label>
+    <div class="slider-container">
+      <div class="slider-track"></div>
+      <div class="slider-fill"></div>
+      <div class="slider-thumb"></div>
+    </div>
+    <span id="sizeValue">3 кол.</span>
+    <div class="scale-controls-btns">
+      <button type="button" id="decrease-cols" class="scale-btn">−</button>
+      <button type="button" id="increase-cols" class="scale-btn">+</button>
+    </div>
+  </div>
+
+  <!-- === Сворачиваемые блоки === -->
+  <details id="create-gallery-details">
+    <summary class="detail-summary">➕ Создать папку</summary>
+    <form id="create-gallery-form">
+      <input type="text" name="name" placeholder="Имя новой папки" required />
+      <button type="submit">Создать</button>
+    </form>
+  </details>
+
+  <details id="upload-details" open>
+    <summary class="detail-summary">📤 Загрузить изображения</summary>
+    <form id="upload-form" enctype="multipart/form-data">
+      <select name="gallery" required>
+        <option value="" disabled selected>Выберите папку</option>
+      </select>
+
+      <textarea 
+        name="urls" 
+        placeholder="Введите URL изображений (по одному на строку)
+Например:
+https://i.imgur.com/abc.jpg
+https://example.com/photo.png"
+        rows="3"></textarea>
+
+      <div style="font-size: 0.8rem; color: #888; margin: 5px 0;">
+        💡 Вы можете <strong>вставить изображение из буфера (Ctrl+V)</strong> — оно будет автоматически загружено.
+      </div>
+
+      <input type="file" name="images" multiple accept="image/*" />
+      <button type="submit">Загрузить</button>
+      <div id="loading" style="display: none;">Загрузка...</div>
+    </form>
+  </details>
+
+  <!-- === Папки (сворачиваемый список) === -->
+  <details id="galleries-details" open>
+    <summary class="detail-summary">📂 Галереи</summary>
+    <div class="gallery-nav" id="gallery-nav">
+      <button data-gallery="all">Все</button>
+    </div>
+  </details>
+
+  <!-- === Пагинация (в начале галереи) === -->
+  <div class="pagination-controls-top">
+    <button id="prev-page-top" class="page-btn">← Пред.</button>
+    <span id="page-info-top">Страница 1</span>
+    <button id="next-page-top" class="page-btn">След. →</button>
+  </div>
+
+  <div class="grid" id="gallery-grid" aria-live="polite">
+    <div class="grid-sizer"></div>
+  </div>
+
+  <!-- === Пагинация (в конце галереи) === -->
+  <div class="pagination-controls-bottom">
+    <button id="prev-page-bottom" class="page-btn">← Пред.</button>
+    <span id="page-info-bottom">Страница 1</span>
+    <button id="next-page-bottom" class="page-btn">След. →</button>
+  </div>
+
+  <!-- Модалка с кнопкой выхода и стрелками -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button id="close-btn" class="close-btn">&times;</button>
+      <img id="modal-img" alt="">
+      <div class="modal-caption" id="modal-caption"></div>
+      <button id="prev-btn" class="nav-btn">‹</button>
+      <button id="next-btn" class="nav-btn">›</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <footer class="site-footer">
+    &copy; 2025 Моя Галерея. Все права защищены.
+  </footer>
+
+  <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/gallery-page.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/assets/main_page_image.ico" type="image/x-icon">
+  <title>Мой Сайт</title>  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/main-page-style.css">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- Canvas для "Red Rain" -->
+  <canvas id="matrix"></canvas>
+  <!-- Оверлей для затемнения -->
+  <div class="overlay"></div>
+
+  <!-- Герой с описанием -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Привет, я создатель этого мира</h1>
+      <p>Здесь собраны мои лучшие проекты: галерея вдохновения, избранное и профиль на GitHub. Каждая часть — это история, которую я хочу поделиться.</p>
+    </div>
+  </div>
+
+  <!-- Карточки-ссылки -->
+  <div class="buttons-grid">
+    <!-- Кнопка 1: Галерея -->
+    <a href="/gallery" class="btn-card">
+      <img src="/assets/images_galery.ico" alt="Галерея">
+      <h3>Галерея Вдохновения</h3>
+      <p>Я создал эту галерею, чтобы хранить красоту мира. Каждое изображение — это момент, который я хотел бы запомнить.</p>
+    </a>
+
+    <!-- Кнопка 2: Избранное -->
+    <a href="/favorites" class="btn-card">
+      <img src="/assets/bookmarks.png" alt="Избранное">
+      <h3>Избранное</h3>
+      <p>Это мой личный космос ссылок. Я собираю всё, что мне интересно: статьи, сайты, инструменты, видео.</p>
+    </a>
+
+    <!-- Кнопка 3: GitHub -->
+    <a href="/github" class="btn-card">
+      <img src="/assets/github_profile.ico" alt="GitHub">
+      <h3>GitHub Профиль</h3>
+      <p>Тут живёт моя работа. Коды, проекты, идеи. Это мой цифровой дневник разработчика.</p>
+    </a>
+
+    <!-- Кнопка 4:"Параллакс-путь" -->
+    <a href="/parallax" class="btn-card">
+      <img src="/assets/parallax-icon.png" alt="Параллакс">
+      <h3>Параллакс-путь</h3>
+      <p>Мир, который оживает при прокрутке.</p>
+    </a>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2025 Мой Сайт. Все права защищены.
+  </footer>
+
+  <script src="/js/main-page.js"></script>
+</body>
+</html>

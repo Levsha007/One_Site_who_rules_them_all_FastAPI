@@ -1,7 +1,9 @@
 // static/js/bookmarks-page.js — только закладки для FastAPI
+
+// Проверяем что мы на правильной странице
 if (!document.getElementById('bookmarks-grid')) {
   console.log('[Bookmarks] Страница не загружена.');
-  return;
+  // Убрали return - он не нужен здесь
 }
 
 // === Режимы отображения ===
@@ -63,7 +65,7 @@ function applySort() {
   } else if (sortValue === 'category-asc') {
     sortedBookmarks.sort((a, b) => a.category.localeCompare(b.category));
   } else if (sortValue === 'category-desc') {
-    sortedBookmarks.sort((a, b) => b.category.localeCompare(a.category));
+    sortedBookmarks.sort((a, b) => b.category.localeCompare(b.category));
   }
   
   renderBookmarks(sortedBookmarks);

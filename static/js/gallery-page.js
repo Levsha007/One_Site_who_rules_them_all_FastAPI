@@ -1,7 +1,9 @@
 // static/js/gallery-page.js — галерея для FastAPI
+
+// Проверяем что мы на правильной странице
 if (!document.getElementById('gallery-grid')) {
   console.log('[Gallery] Страница не загружена.');
-  return;
+  // Убрали return - он не нужен здесь
 }
 
 // === Универсальные утилиты (локально) ===

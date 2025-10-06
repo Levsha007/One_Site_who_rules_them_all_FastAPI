@@ -69,7 +69,9 @@
     &copy; 2025 GitHub Профиль. Все права защищены.
   </footer>
 
-  <!-- Подключаем только свой скрипт -->
+  <!-- Сначала загружаем общие утилиты -->
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <!-- Потом GitHub специфичный код -->
   <script src="{{ url_for('static', path='js/github-app.js') }}"></script>
 </body>
 </html>

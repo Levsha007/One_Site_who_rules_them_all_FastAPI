@@ -1,4 +1,4 @@
-# main.py - FastAPI сервер для галереи
+# main.py - FastAPI сервер (замена server.js)
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -11,41 +11,55 @@ from pathlib import Path
 import httpx
 from typing import List, Optional
 import uuid
+from datetime import datetime
 
 # Инициализация FastAPI
-app = FastAPI(title="My Own Site", version="1.0.0")
+app = FastAPI(title="My Gallery", version="1.0.0")
 
-# Настройка путей
+# Настройка путей (аналог Express)
 BASE_DIR = Path(__file__).parent
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
 DATA_DIR = BASE_DIR / "data"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 
-# Создаём необходимые папки
-for directory in [DATA_DIR, UPLOADS_DIR]:
+# Создаём необходимые папки (аналог fs.existsSync + fs.mkdirSync)
+for directory in [DATA_DIR, UPLOADS_DIR, UPLOADS_DIR / "temp"]:
     directory.mkdir(exist_ok=True)
 
-# Файлы данных
+# Файлы данных (аналог констант в server.js)
 GALLERIES_FILE = DATA_DIR / "galleries.json"
 BOOKMARKS_FILE = DATA_DIR / "bookmarks.json"
 CATEGORIES_FILE = DATA_DIR / "categories.json"
 
-# Инициализация JSON файлов если их нет
+# Инициализация JSON файлов если их нет (аналог инициализации в server.js)
 def init_data_files():
+    # Галереи
     if not GALLERIES_FILE.exists():
         GALLERIES_FILE.write_text('[]', encoding='utf-8')
     
+    # Закладки
     if not BOOKMARKS_FILE.exists():
         BOOKMARKS_FILE.write_text('[]', encoding='utf-8')
     
+    # Категории
     if not CATEGORIES_FILE.exists():
         default_categories = ["Работа", "Образование", "Игры", "Новости", "Развлечения", "Социальные сети", "Спорт", "Технологии"]
         CATEGORIES_FILE.write_text(json.dumps(default_categories, ensure_ascii=False), encoding='utf-8')
 
 init_data_files()
 
-# Монтируем статические файлы
+# Загружаем данные (аналог let galleries = JSON.parse(...))
+def load_galleries():
+    return read_json(GALLERIES_FILE)
+
+def load_bookmarks():
+    return read_json(BOOKMARKS_FILE)
+
+def load_categories():
+    return read_json(CATEGORIES_FILE)
+
+# Монтируем статические файлы (аналог app.use(express.static('public')))
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Настраиваем шаблоны
@@ -67,7 +81,7 @@ def write_json(file_path: Path, data):
         print(f"Error writing {file_path}: {e}")
         return False
 
-# ==================== РОУТЫ ДЛЯ СТРАНИЦ ====================
+# ==================== РОУТЫ ДЛЯ СТРАНИЦ (аналог app.get) ====================
 
 @app.get("/", response_class=HTMLResponse)
 async def read_index(request: Request):
@@ -93,25 +107,34 @@ async def read_parallax(request: Request):
 
 @app.get("/api/galleries")
 async def get_galleries():
-    """Получить все галереи"""
-    return read_json(GALLERIES_FILE)
+    """Получить все галереи (аналог /galleries)"""
+    galleries = load_galleries()
+    
+    # Исправляем пути для загруженных файлов
+    for gallery in galleries:
+        for image in gallery.get('images', []):
+            if not image.get('isExternal', False) and image['path'].startswith('/uploads/'):
+                # Меняем /uploads/ на /static/uploads/
+                image['path'] = image['path'].replace('/uploads/', '/static/uploads/')
+    
+    return galleries
 
 @app.post("/api/create-gallery")
 async def create_gallery(request: Request):
-    """Создать новую галерею"""
+    """Создать новую галерею (аналог /create-gallery)"""
     data = await request.json()
     name = data.get('name')
     
     if not name:
         raise HTTPException(status_code=400, detail="Имя папки обязательно")
     
-    galleries = read_json(GALLERIES_FILE)
+    galleries = load_galleries()
     
-    # Проверяем существование
+    # Проверяем существование (аналог galleries.some(g => g.name === name))
     if any(g['name'] == name for g in galleries):
         raise HTTPException(status_code=400, detail="Папка с таким именем уже существует")
     
-    # Создаём папку
+    # Создаём папку (аналог fs.mkdirSync)
     gallery_path = UPLOADS_DIR / name
     gallery_path.mkdir(exist_ok=True)
     
@@ -134,8 +157,8 @@ async def upload_images(
     urls: Optional[str] = Form(None),
     images: List[UploadFile] = File([])
 ):
-    """Загрузить изображения в галерею"""
-    galleries = read_json(GALLERIES_FILE)
+    """Загрузить изображения в галерею (аналог /upload с multer)"""
+    galleries = load_galleries()
     gallery_index = next((i for i, g in enumerate(galleries) if g['name'] == gallery), -1)
     
     if gallery_index == -1:
@@ -143,12 +166,12 @@ async def upload_images(
     
     new_images = []
     
-    # Обработка URL
+    # Обработка URL (аналог обработки urls в server.js)
     if urls and urls.strip():
         url_list = [url.strip() for url in urls.split('\n') if url.strip()]
         for url in url_list:
             try:
-                # Простая валидация URL
+                # Простая валидация URL (аналог new URL(url))
                 if url.startswith(('http://', 'https://')):
                     new_images.append({
                         "path": url,
@@ -160,20 +183,21 @@ async def upload_images(
             except Exception:
                 continue
     
-    # Обработка файлов
+    # Обработка файлов (аналог обработки files в server.js)
     for image in images:
+        # Проверка типа файла (аналог fileFilter в multer)
         if image.content_type and image.content_type.startswith('image/'):
-            # Генерируем уникальное имя файла
+            # Генерируем уникальное имя файла (аналог логики с counter)
             file_extension = Path(image.filename).suffix if image.filename else '.jpg'
             unique_filename = f"{uuid.uuid4()}{file_extension}"
             file_path = UPLOADS_DIR / gallery / unique_filename
             
-            # Сохраняем файл
+            # Сохраняем файл (аналог fs.renameSync)
             async with aiofiles.open(file_path, 'wb') as buffer:
                 content = await image.read()
                 await buffer.write(content)
             
-            # Получаем размеры изображения (упрощённо)
+            # Получаем размеры изображения (аналог sharp)
             try:
                 from PIL import Image
                 with Image.open(file_path) as img:
@@ -188,7 +212,7 @@ async def upload_images(
                 "height": height
             })
     
-    # Обновляем галерею
+    # Обновляем галерею (аналог galleries[galleryIndex].images.unshift(...newImages))
     galleries[gallery_index]['images'] = new_images + galleries[gallery_index]['images']
     
     if write_json(GALLERIES_FILE, galleries):
@@ -198,7 +222,7 @@ async def upload_images(
 
 @app.post("/api/rename")
 async def rename_image(request: Request):
-    """Переименовать изображение"""
+    """Переименовать изображение (аналог /rename)"""
     data = await request.json()
     gallery_name = data.get('gallery')
     old_path = data.get('oldPath')
@@ -207,13 +231,13 @@ async def rename_image(request: Request):
     if not all([gallery_name, old_path, new_name]):
         raise HTTPException(status_code=400, detail="Не все параметры указаны")
     
-    galleries = read_json(GALLERIES_FILE)
+    galleries = load_galleries()
     gallery_index = next((i for i, g in enumerate(galleries) if g['name'] == gallery_name), -1)
     
     if gallery_index == -1:
         raise HTTPException(status_code=404, detail="Галерея не найдена")
     
-    # Ищем изображение
+    # Ищем изображение (аналог galleries[galleryIndex].images.find)
     image_index = next((i for i, img in enumerate(galleries[gallery_index]['images']) 
                        if img['path'] == old_path), -1)
     
@@ -230,7 +254,7 @@ async def rename_image(request: Request):
 
 @app.post("/api/delete-image")
 async def delete_image(request: Request):
-    """Удалить изображение"""
+    """Удалить изображение (аналог /delete-image)"""
     data = await request.json()
     gallery_name = data.get('gallery')
     image_path = data.get('path')
@@ -238,13 +262,13 @@ async def delete_image(request: Request):
     if not all([gallery_name, image_path]):
         raise HTTPException(status_code=400, detail="Не все параметры указаны")
     
-    galleries = read_json(GALLERIES_FILE)
+    galleries = load_galleries()
     gallery_index = next((i for i, g in enumerate(galleries) if g['name'] == gallery_name), -1)
     
     if gallery_index == -1:
         raise HTTPException(status_code=404, detail="Галерея не найдена")
     
-    # Удаляем из массива
+    # Удаляем из массива (аналог splice)
     galleries[gallery_index]['images'] = [
         img for img in galleries[gallery_index]['images'] 
         if img['path'] != image_path
@@ -259,12 +283,12 @@ async def delete_image(request: Request):
 
 @app.get("/api/bookmarks")
 async def get_bookmarks():
-    """Получить все закладки"""
-    return read_json(BOOKMARKS_FILE)
+    """Получить все закладки (аналог /bookmarks)"""
+    return load_bookmarks()
 
 @app.post("/api/bookmarks")
 async def create_bookmark(request: Request):
-    """Создать новую закладку"""
+    """Создать новую закладку (аналог POST /bookmarks)"""
     data = await request.json()
     title = data.get('title')
     url = data.get('url')
@@ -273,14 +297,14 @@ async def create_bookmark(request: Request):
     if not all([title, url, category]):
         raise HTTPException(status_code=400, detail="Все поля обязательны")
     
-    bookmarks = read_json(BOOKMARKS_FILE)
+    bookmarks = load_bookmarks()
     
     new_bookmark = {
-        "id": int(uuid.uuid4().int % 1000000),
+        "id": int(uuid.uuid4().int % 1000000),  # Аналог Date.now() но уникальнее
         "title": title,
         "url": url,
         "category": category,
-        "createdAt": datetime.now().isoformat()
+        "createdAt": datetime.now().isoformat()  # Аналог new Date().toISOString()
     }
     
     bookmarks.append(new_bookmark)
@@ -292,8 +316,8 @@ async def create_bookmark(request: Request):
 
 @app.delete("/api/bookmarks/{bookmark_id}")
 async def delete_bookmark(bookmark_id: int):
-    """Удалить закладку"""
-    bookmarks = read_json(BOOKMARKS_FILE)
+    """Удалить закладку (аналог DELETE /bookmarks/:id)"""
+    bookmarks = load_bookmarks()
     initial_length = len(bookmarks)
     
     bookmarks = [b for b in bookmarks if b['id'] != bookmark_id]
@@ -308,11 +332,12 @@ async def delete_bookmark(bookmark_id: int):
 
 @app.get("/api/categories")
 async def get_categories():
-    """Получить все категории"""
-    return read_json(CATEGORIES_FILE)
+    """Получить все категории (аналог /categories)"""
+    return load_categories()
 
 # ==================== ЗАПУСК СЕРВЕРА ====================
 
 if __name__ == "__main__":
     import uvicorn
+    print("✅ Сервер запущен: http://localhost:3000")  # Аналог console.log
     uvicorn.run(app, host="0.0.0.0", port=3000)

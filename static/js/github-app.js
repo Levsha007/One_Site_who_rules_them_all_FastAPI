@@ -2,6 +2,11 @@
 let currentProfile = 'Levsha007'; // ← замените на свой логин!
 const myUsername = 'Levsha007'; // Ваш фиксированный логин
 
+// Переменные для навигации
+let currentRepo = '';
+let currentPath = '';
+let pathHistory = [];
+
 // Правильное декодирование Base64 → UTF-8 (для кириллицы!)
 function decodeBase64(str) {
   try {
@@ -20,13 +25,14 @@ function getFileType(filename) {
   return 'text';
 }
 
-function openFileModal(filename, content, type) {
+function openFileModal(filename, content, type, isFileView = false) {
   const modal = document.getElementById('file-modal');
   const contentEl = document.getElementById('file-modal-content');
+  const filenameEl = document.getElementById('file-modal-filename');
   
-  if (!modal || !contentEl) return;
+  if (!modal || !contentEl || !filenameEl) return;
   
-  document.getElementById('file-modal-filename').textContent = filename;
+  filenameEl.textContent = filename;
 
   let htmlContent = '';
 
@@ -41,12 +47,59 @@ function openFileModal(filename, content, type) {
   }
 
   contentEl.innerHTML = htmlContent;
+  
+  // Добавляем кнопку "Назад к папке" если это просмотр файла
+  if (isFileView && pathHistory.length > 0) {
+    const backButton = document.createElement('button');
+    backButton.innerHTML = '← Назад к папке';
+    backButton.style.marginBottom = '25px'; // Увеличил отступ с 15px до 25px
+    backButton.style.padding = '10px 18px'; // Немного увеличил padding
+    backButton.style.backgroundColor = 'var(--accent)';
+    backButton.style.color = 'white';
+    backButton.style.border = 'none';
+    backButton.style.borderRadius = '8px';
+    backButton.style.cursor = 'pointer';
+    backButton.style.fontSize = '14px';
+    backButton.style.fontWeight = 'bold';
+    backButton.style.transition = 'background-color 0.2s, transform 0.1s';
+    backButton.style.boxShadow = '0 2px 8px rgba(192, 57, 43, 0.3)';
+    
+    backButton.addEventListener('mouseenter', () => {
+      backButton.style.backgroundColor = '#a01f1f';
+      backButton.style.transform = 'translateY(-1px)';
+    });
+    backButton.addEventListener('mouseleave', () => {
+      backButton.style.backgroundColor = 'var(--accent)';
+      backButton.style.transform = 'translateY(0)';
+    });
+    
+    backButton.addEventListener('click', () => {
+      navigateBack();
+    });
+    
+    // Создаем контейнер для кнопки с дополнительным отступом
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.marginBottom = '30px'; // Дополнительный отступ
+    buttonContainer.style.padding = '10px 0'; // Вертикальный отступ
+    buttonContainer.style.borderBottom = '1px solid rgba(255,255,255,0.1)'; // Разделительная линия
+    buttonContainer.appendChild(backButton);
+    
+    contentEl.insertBefore(buttonContainer, contentEl.firstChild);
+  }
+  
   modal.style.display = 'flex';
+  
+  // Блокируем прокрутку фона
+  document.body.style.overflow = 'hidden';
 }
 
 function closeFileModal() {
   const modal = document.getElementById('file-modal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.style.display = 'none';
+    // Восстанавливаем прокрутку фона
+    document.body.style.overflow = '';
+  }
 }
 
 function simpleMarkdown(md) {
@@ -62,7 +115,86 @@ function simpleMarkdown(md) {
     .replace(/\n/g, '<br>');
 }
 
-async function fetchAndShowFile(fullName, path) {
+// Функция для создания хлебных крошек
+function createBreadcrumbs(repo, path) {
+  const breadcrumbsContainer = document.createElement('div');
+  breadcrumbsContainer.className = 'breadcrumbs';
+  breadcrumbsContainer.style.marginBottom = '20px'; // Увеличил отступ
+  breadcrumbsContainer.style.padding = '12px 15px'; // Увеличил padding
+  breadcrumbsContainer.style.backgroundColor = 'rgba(255,255,255,0.05)';
+  breadcrumbsContainer.style.borderRadius = '10px';
+  breadcrumbsContainer.style.fontSize = '14px';
+  breadcrumbsContainer.style.border = '1px solid rgba(255,255,255,0.1)';
+  
+  const parts = path ? path.split('/') : [];
+  
+  // Корневая папка репозитория
+  const rootCrumb = document.createElement('span');
+  rootCrumb.innerHTML = `<strong style="color: #ffd700;">📁 ${repo}</strong>`;
+  rootCrumb.style.cursor = 'pointer';
+  rootCrumb.style.marginRight = '8px';
+  rootCrumb.style.padding = '4px 6px';
+  rootCrumb.style.borderRadius = '4px';
+  rootCrumb.style.transition = 'background-color 0.2s';
+  rootCrumb.addEventListener('mouseenter', () => {
+    rootCrumb.style.backgroundColor = 'rgba(255,215,0,0.1)';
+  });
+  rootCrumb.addEventListener('mouseleave', () => {
+    rootCrumb.style.backgroundColor = 'transparent';
+  });
+  rootCrumb.addEventListener('click', () => {
+    fetchAndShowFile(currentRepo, '');
+  });
+  breadcrumbsContainer.appendChild(rootCrumb);
+  
+  // Добавляем разделитель если есть путь
+  if (parts.length > 0) {
+    const separator = document.createElement('span');
+    separator.innerHTML = ' / ';
+    separator.style.margin = '0 8px';
+    separator.style.color = '#888';
+    breadcrumbsContainer.appendChild(separator);
+  }
+  
+  // Добавляем промежуточные папки
+  let currentPath = '';
+  parts.forEach((part, index) => {
+    if (part) {
+      currentPath += (currentPath ? '/' : '') + part;
+      
+      const crumb = document.createElement('span');
+      crumb.innerHTML = `<span style="color: #ffd700;">${part}</span>`;
+      crumb.style.cursor = 'pointer';
+      crumb.style.marginRight = '8px';
+      crumb.style.padding = '4px 6px';
+      crumb.style.borderRadius = '4px';
+      crumb.style.transition = 'background-color 0.2s';
+      crumb.addEventListener('mouseenter', () => {
+        crumb.style.backgroundColor = 'rgba(255,215,0,0.1)';
+      });
+      crumb.addEventListener('mouseleave', () => {
+        crumb.style.backgroundColor = 'transparent';
+      });
+      crumb.addEventListener('click', () => {
+        fetchAndShowFile(currentRepo, currentPath);
+      });
+      breadcrumbsContainer.appendChild(crumb);
+      
+      // Добавляем разделитель если не последний элемент
+      if (index < parts.length - 1) {
+        const separator = document.createElement('span');
+        separator.innerHTML = ' / ';
+        separator.style.margin = '0 8px';
+        separator.style.color = '#888';
+        breadcrumbsContainer.appendChild(separator);
+      }
+    }
+  });
+  
+  return breadcrumbsContainer;
+}
+
+async function fetchAndShowFile(fullName, path = '') {
   const [owner, repo] = fullName.split('/');
   const url = path 
     ? `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
@@ -75,27 +207,157 @@ async function fetchAndShowFile(fullName, path) {
     const data = await res.json();
 
     if (Array.isArray(data)) {
-      const files = data
-        .filter(f => f.type === 'file')
-        .map(f => `<li onclick="fetchAndShowFile('${fullName}', '${f.name}')">📄 ${f.name}</li>`)
-        .join('');
-      openFileModal(`${repo}/`, `<ul>${files}</ul>`, 'text');
+      // Сохраняем текущий путь для навигации
+      currentRepo = fullName;
+      currentPath = path;
+      
+      // Добавляем в историю только если это новый путь
+      const currentHistoryItem = { repo: fullName, path: path };
+      if (pathHistory.length === 0 || 
+          pathHistory[pathHistory.length - 1].repo !== currentHistoryItem.repo || 
+          pathHistory[pathHistory.length - 1].path !== currentHistoryItem.path) {
+        pathHistory.push(currentHistoryItem);
+      }
+
+      // Сортируем: сначала папки, потом файлы
+      const sortedData = data.sort((a, b) => {
+        if (a.type === b.type) return a.name.localeCompare(b.name);
+        return a.type === 'dir' ? -1 : 1;
+      });
+
+      const fileTree = document.createElement('div');
+      fileTree.className = 'file-tree';
+      
+      // Создаем хлебные крошки
+      const breadcrumbs = createBreadcrumbs(repo, path);
+      fileTree.appendChild(breadcrumbs);
+      
+      const ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.padding = '0';
+      ul.style.margin = '0';
+      ul.style.maxHeight = '60vh';
+      ul.style.overflowY = 'auto';
+      ul.style.overflowX = 'hidden';
+
+      sortedData.forEach(item => {
+        const li = document.createElement('li');
+        li.style.cursor = 'pointer';
+        li.style.padding = '10px 14px'; // Увеличил padding
+        li.style.margin = '3px 0'; // Увеличил отступ между элементами
+        li.style.borderRadius = '8px';
+        li.style.transition = 'background-color 0.2s, transform 0.1s';
+        li.style.fontSize = '14px';
+        li.style.border = '1px solid transparent';
+        
+        li.addEventListener('mouseenter', () => {
+          li.style.backgroundColor = 'rgba(255,255,255,0.1)';
+          li.style.borderColor = 'rgba(255,255,255,0.2)';
+          li.style.transform = 'translateX(5px)';
+        });
+        li.addEventListener('mouseleave', () => {
+          li.style.backgroundColor = 'transparent';
+          li.style.borderColor = 'transparent';
+          li.style.transform = 'translateX(0)';
+        });
+
+        if (item.type === 'dir') {
+          li.innerHTML = `<span style="color: #ffd700;">📁 ${escapeHtml(item.name)}/</span>`;
+          li.addEventListener('click', () => {
+            fetchAndShowFile(fullName, path ? `${path}/${item.name}` : item.name);
+          });
+        } else {
+          li.innerHTML = `<span style="color: #88ccff;">📄 ${escapeHtml(item.name)}</span>`;
+          li.addEventListener('click', () => {
+            // Для файлов загружаем содержимое
+            fetchFileContent(fullName, path ? `${path}/${item.name}` : item.name);
+          });
+        }
+
+        ul.appendChild(li);
+      });
+
+      fileTree.appendChild(ul);
+      
+      // Очищаем и добавляем новое содержимое
+      const contentEl = document.getElementById('file-modal-content');
+      contentEl.innerHTML = '';
+      contentEl.style.maxHeight = '70vh';
+      contentEl.style.overflowY = 'auto';
+      contentEl.style.padding = '20px'; // Увеличил padding
+      contentEl.appendChild(fileTree);
+      
+      // Обновляем заголовок модалки
+      const modalTitle = path ? `${repo}/${path}` : `${repo}/`;
+      document.getElementById('file-modal-filename').textContent = modalTitle;
+      
+      const modal = document.getElementById('file-modal');
+      modal.style.display = 'flex';
       return;
     }
 
+    // Если это файл (не массив) - обрабатываем в отдельной функции
     if (data.content) {
+      fetchFileContent(fullName, path);
+    }
+  } catch (err) {
+    console.error(err);
+    openFileModal('Ошибка', 'Не удалось загрузить файл.', 'text');
+  }
+}
+
+// Отдельная функция для загрузки содержимого файла
+async function fetchFileContent(fullName, filePath) {
+  const [owner, repo] = fullName.split('/');
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Не удалось загрузить файл');
+
+    const data = await res.json();
+
+    if (data.content) {
+      // Сохраняем путь к родительской папке файла в историю
+      const directoryPath = filePath.split('/').slice(0, -1).join('/');
+      const parentHistoryItem = { repo: fullName, path: directoryPath };
+      
+      // Добавляем родительскую папку в историю, если её там нет
+      if (!pathHistory.some(item => item.repo === parentHistoryItem.repo && item.path === parentHistoryItem.path)) {
+        pathHistory.push(parentHistoryItem);
+      }
+
       const binContent = decodeBase64(data.content);
       const fileType = getFileType(data.name);
 
       if (fileType === 'image') {
-        openFileModal(data.name, data.download_url, 'image');
+        openFileModal(data.name, data.download_url, 'image', true);
       } else {
-        openFileModal(data.name, binContent, fileType);
+        openFileModal(data.name, binContent, fileType, true);
       }
     }
   } catch (err) {
     console.error(err);
     openFileModal('Ошибка', 'Не удалось загрузить файл.', 'text');
+  }
+}
+
+// Функция для навигации назад - ИСПРАВЛЕННАЯ ВЕРСИЯ
+function navigateBack() {
+  if (pathHistory.length > 1) {
+    // Удаляем текущий путь (файл или папка)
+    pathHistory.pop();
+    
+    // Берем предыдущий путь из истории
+    const previous = pathHistory[pathHistory.length - 1];
+    
+    // Загружаем предыдущую папку
+    fetchAndShowFile(previous.repo, previous.path);
+  } else if (pathHistory.length === 1) {
+    // Если в истории только корень, закрываем модалку
+    closeFileModal();
+    // Очищаем историю
+    pathHistory = [];
   }
 }
 
@@ -188,14 +450,54 @@ function renderPublicRepos(repos) {
     const card = document.createElement('div');
     card.className = 'card';
 
-    const fileTree = `
-      <div class="file-tree">
-        <ul>
-          <li onclick="fetchAndShowFile('${repo.full_name}', 'README.md')">📝 README.md</li>
-          <li onclick="fetchAndShowFile('${repo.full_name}', '')">🗎 Все файлы</li>
-        </ul>
-      </div>
-    `;
+    // Создаём file-tree через DOM вместо innerHTML
+    const fileTree = document.createElement('div');
+    fileTree.className = 'file-tree';
+    
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+    
+    const readmeLi = document.createElement('li');
+    readmeLi.innerHTML = '<span style="color: #88ccff;">📝 README.md</span>';
+    readmeLi.style.cursor = 'pointer';
+    readmeLi.style.padding = '10px 14px'; // Увеличил padding
+    readmeLi.style.margin = '3px 0'; // Увеличил отступ
+    readmeLi.style.borderRadius = '8px';
+    readmeLi.style.transition = 'background-color 0.2s';
+    readmeLi.style.fontSize = '14px';
+    readmeLi.addEventListener('mouseenter', () => {
+      readmeLi.style.backgroundColor = 'rgba(255,255,255,0.1)';
+    });
+    readmeLi.addEventListener('mouseleave', () => {
+      readmeLi.style.backgroundColor = 'transparent';
+    });
+    readmeLi.addEventListener('click', () => {
+      fetchAndShowFile(repo.full_name, 'README.md');
+    });
+    ul.appendChild(readmeLi);
+    
+    const allFilesLi = document.createElement('li');
+    allFilesLi.innerHTML = '<span style="color: #ffd700;">📁 Все файлы</span>';
+    allFilesLi.style.cursor = 'pointer';
+    allFilesLi.style.padding = '10px 14px'; // Увеличил padding
+    allFilesLi.style.margin = '3px 0'; // Увеличил отступ
+    allFilesLi.style.borderRadius = '8px';
+    allFilesLi.style.transition = 'background-color 0.2s';
+    allFilesLi.style.fontSize = '14px';
+    allFilesLi.addEventListener('mouseenter', () => {
+      allFilesLi.style.backgroundColor = 'rgba(255,255,255,0.1)';
+    });
+    allFilesLi.addEventListener('mouseleave', () => {
+      allFilesLi.style.backgroundColor = 'transparent';
+    });
+    allFilesLi.addEventListener('click', () => {
+      fetchAndShowFile(repo.full_name, '');
+    });
+    ul.appendChild(allFilesLi);
+    
+    fileTree.appendChild(ul);
 
     card.innerHTML = `
       <div class="card-header">
@@ -220,8 +522,9 @@ function renderPublicRepos(repos) {
           <div class="stat-value">${repo.forks_count}</div>
         </div>
       </div>
-      ${fileTree}
     `;
+    
+    card.appendChild(fileTree);
     container.appendChild(card);
   });
 }
@@ -236,14 +539,54 @@ function renderStarredRepos(repos) {
     const card = document.createElement('div');
     card.className = 'card';
 
-    const fileTree = `
-      <div class="file-tree">
-        <ul>
-          <li onclick="fetchAndShowFile('${repo.full_name}', 'README.md')">📝 README.md</li>
-          <li onclick="fetchAndShowFile('${repo.full_name}', '')">🗎 Все файлы</li>
-        </ul>
-      </div>
-    `;
+    // Создаём file-tree через DOM вместо innerHTML
+    const fileTree = document.createElement('div');
+    fileTree.className = 'file-tree';
+    
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+    
+    const readmeLi = document.createElement('li');
+    readmeLi.innerHTML = '<span style="color: #88ccff;">📝 README.md</span>';
+    readmeLi.style.cursor = 'pointer';
+    readmeLi.style.padding = '10px 14px'; // Увеличил padding
+    readmeLi.style.margin = '3px 0'; // Увеличил отступ
+    readmeLi.style.borderRadius = '8px';
+    readmeLi.style.transition = 'background-color 0.2s';
+    readmeLi.style.fontSize = '14px';
+    readmeLi.addEventListener('mouseenter', () => {
+      readmeLi.style.backgroundColor = 'rgba(255,255,255,0.1)';
+    });
+    readmeLi.addEventListener('mouseleave', () => {
+      readmeLi.style.backgroundColor = 'transparent';
+    });
+    readmeLi.addEventListener('click', () => {
+      fetchAndShowFile(repo.full_name, 'README.md');
+    });
+    ul.appendChild(readmeLi);
+    
+    const allFilesLi = document.createElement('li');
+    allFilesLi.innerHTML = '<span style="color: #ffd700;">📁 Все файлы</span>';
+    allFilesLi.style.cursor = 'pointer';
+    allFilesLi.style.padding = '10px 14px'; // Увеличил padding
+    allFilesLi.style.margin = '3px 0'; // Увеличил отступ
+    allFilesLi.style.borderRadius = '8px';
+    allFilesLi.style.transition = 'background-color 0.2s';
+    allFilesLi.style.fontSize = '14px';
+    allFilesLi.addEventListener('mouseenter', () => {
+      allFilesLi.style.backgroundColor = 'rgba(255,255,255,0.1)';
+    });
+    allFilesLi.addEventListener('mouseleave', () => {
+      allFilesLi.style.backgroundColor = 'transparent';
+    });
+    allFilesLi.addEventListener('click', () => {
+      fetchAndShowFile(repo.full_name, '');
+    });
+    ul.appendChild(allFilesLi);
+    
+    fileTree.appendChild(ul);
 
     card.innerHTML = `
       <div class="card-header">
@@ -265,8 +608,9 @@ function renderStarredRepos(repos) {
           <div class="stat-value">${repo.stargazers_count}</div>
         </div>
       </div>
-      ${fileTree}
     `;
+    
+    card.appendChild(fileTree);
     container.appendChild(card);
   });
 }
@@ -333,6 +677,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Закрытие модалки по клику на фон или Escape
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'file-modal') {
+      closeFileModal();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeFileModal();
+    }
+  });
 
   loadGitHubData();
 });

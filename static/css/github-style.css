@@ -362,3 +362,23 @@ pre {
   margin-top: 40px;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
+
+/* Увеличиваем ширину модального окна */
+.file-modal-content {
+  max-width: 90% !important;
+  width: 90% !important;
+  margin: 2% auto !important;
+  max-height: 90vh !important;
+}
+
+/* Прокрутка для контента модалки */
+.file-modal-content > div {
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Блокировка прокрутки фона когда модалка открыта */
+body.modal-open {
+  overflow: hidden;
+}

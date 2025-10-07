@@ -3,7 +3,6 @@
 // Проверяем что мы на правильной странице
 if (!document.getElementById('gallery-grid')) {
   console.log('[Gallery] Страница не загружена.');
-  // Убрали return - он не нужен здесь
 }
 
 // === Универсальные утилиты (локально) ===
@@ -30,7 +29,7 @@ function writeFavorites(set) {
 }
 
 // === Masonry + загрузка галерей ===
-let masonry;
+let masonry = null;
 const grid = document.getElementById('gallery-grid');
 let currentPage = 0;
 const itemsPerPage = 150;
@@ -43,16 +42,27 @@ const sizeValue = document.getElementById('sizeValue');
 const decreaseBtn = document.getElementById('decrease-cols');
 const increaseBtn = document.getElementById('increase-cols');
 
-let numCols = 3; // По умолчанию
+let numCols = 3;
 const minCols = 1;
 const maxCols = 10;
+
+// Безопасный вызов masonry.layout()
+function safeMasonryLayout() {
+  if (masonry && typeof masonry.layout === 'function') {
+    try {
+      masonry.layout();
+    } catch (e) {
+      console.warn('Masonry layout error:', e);
+    }
+  }
+}
 
 // Утилита: применить размеры колонок к DOM (grid-sizer и grid-item)
 function applyNumColsToGrid(cols) {
   const gridEl = document.querySelector('.grid');
   if (!gridEl) return;
 
-  const gap = 16; // px — совпадает с Masonry gutter
+  const gap = 16;
   const gridWidth = gridEl.clientWidth || gridEl.getBoundingClientRect().width || 0;
   if (!gridWidth) return;
 
@@ -75,9 +85,8 @@ function applyNumColsToGrid(cols) {
 
   localStorage.setItem('tileScaleNumCols', String(cols));
 
-  if (masonry) {
-    setTimeout(() => masonry.layout(), 30);
-  }
+  // Безопасный вызов masonry.layout()
+  setTimeout(safeMasonryLayout, 30);
 }
 
 function updateSliderAndGrid() {
@@ -243,34 +252,42 @@ async function loadGalleries(filter = 'all') {
     grid.appendChild(fragment);
     applyNumColsToGrid(numCols);
 
-    // Инициализация Masonry
-    if (masonry) {
-      try { masonry.destroy(); } catch (e) { /* ignore */ }
-      masonry = null;
+    // Инициализация Masonry с улучшенной обработкой ошибок
+    if (masonry && typeof masonry.destroy === 'function') {
+      try { 
+        masonry.destroy(); 
+      } catch (e) { 
+        console.warn('Masonry destroy error:', e);
+      }
     }
+    masonry = null;
 
+    // Даем время DOM обновиться перед инициализацией Masonry
     setTimeout(() => {
-      masonry = new Masonry('.grid', {
-        itemSelector: '.grid-item',
-        columnWidth: '.grid-sizer',
-        percentPosition: false,
-        gutter: 16
-      });
-      setTimeout(() => {
-        try { masonry.layout(); } catch (e) { /* ignore */ }
-      }, 40);
-    }, 60);
+      try {
+        masonry = new Masonry('.grid', {
+          itemSelector: '.grid-item',
+          columnWidth: '.grid-sizer',
+          percentPosition: false,
+          gutter: 16
+        });
+        
+        // Отложенный layout для гарантии что все изображения загружены
+        setTimeout(safeMasonryLayout, 100);
+      } catch (e) {
+        console.error('Masonry initialization error:', e);
+        masonry = null;
+      }
+    }, 100);
 
-    // Lazy loading
+    // Lazy loading с улучшенной обработкой
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
           img.src = img.dataset.src || img.src;
           observer.unobserve(img);
-          img.onload = () => {
-            if (masonry) masonry.layout();
-          };
+          img.onload = safeMasonryLayout;
         }
       });
     }, { threshold: 0.1 });
@@ -284,7 +301,7 @@ async function loadGalleries(filter = 'all') {
     localStorage.setItem('currentGallery', filter);
     localStorage.setItem('currentPage', String(currentPage));
   } catch (err) {
-    console.error(err);
+    console.error('Load galleries error:', err);
     showToast('Ошибка загрузки галерей. Проверь сервер.');
   }
 }
@@ -318,7 +335,7 @@ function updatePaginationControls(totalItems) {
 }
 
 // Пагинация
-document.getElementById('prev-page-top').addEventListener('click', () => {
+document.getElementById('prev-page-top')?.addEventListener('click', () => {
   if (currentPage > 0) {
     currentPage--;
     const gallery = localStorage.getItem('currentGallery') || 'all';
@@ -326,7 +343,7 @@ document.getElementById('prev-page-top').addEventListener('click', () => {
   }
 });
 
-document.getElementById('next-page-top').addEventListener('click', () => {
+document.getElementById('next-page-top')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
   apiFetch('/galleries')
     .then(allGalleries => {
@@ -343,7 +360,7 @@ document.getElementById('next-page-top').addEventListener('click', () => {
     });
 });
 
-document.getElementById('prev-page-bottom').addEventListener('click', () => {
+document.getElementById('prev-page-bottom')?.addEventListener('click', () => {
   if (currentPage > 0) {
     currentPage--;
     const gallery = localStorage.getItem('currentGallery') || 'all';
@@ -351,7 +368,7 @@ document.getElementById('prev-page-bottom').addEventListener('click', () => {
   }
 });
 
-document.getElementById('next-page-bottom').addEventListener('click', () => {
+document.getElementById('next-page-bottom')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
   apiFetch('/galleries')
     .then(allGalleries => {
@@ -369,7 +386,7 @@ document.getElementById('next-page-bottom').addEventListener('click', () => {
 });
 
 // Навигация по галереям
-document.getElementById('gallery-nav').addEventListener('click', e => {
+document.getElementById('gallery-nav')?.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (btn) {
     const galleryName = btn.dataset.gallery;
@@ -379,14 +396,14 @@ document.getElementById('gallery-nav').addEventListener('click', e => {
   }
 });
 
-document.getElementById('favorites-btn').addEventListener('click', () => {
+document.getElementById('favorites-btn')?.addEventListener('click', () => {
   localStorage.setItem('currentGallery', 'favorites');
   currentPage = 0;
   loadGalleries('favorites');
 });
 
 // Загрузка изображений
-document.getElementById('upload-form').addEventListener('submit', async (e) => {
+document.getElementById('upload-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const fd = new FormData(e.target);
   const loadingEl = document.getElementById('loading');
@@ -530,7 +547,7 @@ document.addEventListener('click', async (e) => {
       await apiPost('/delete-image', { gallery, path });
       parent.remove();
       showToast('Изображение удалено');
-      if (masonry) masonry.layout();
+      safeMasonryLayout();
     } catch (err) {
       console.error(err);
       showToast('Ошибка при удалении изображения');

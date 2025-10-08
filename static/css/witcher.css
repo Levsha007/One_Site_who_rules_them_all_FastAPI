@@ -1,0 +1,77 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    background-color: #000;
+}
+:root {
+    --transition: 1.75s cubic-bezier(.2, .6, 0, 1);
+}
+.slider {
+    height: 100%;
+}
+.slider__layer {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+    transform-style: preserve-3d;
+}
+.slider__layer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    box-shadow: inset 0 0 250px rgb(0 0 0 / .3);
+}
+.slider__item {
+    overflow: hidden;
+}
+.slider__wrapper {
+    will-change: transform;
+    transform-style: preserve-3d;
+}
+
+/* Фоновые изображения для слайдов */
+/* Слайд 1 */
+.slider__item:nth-child(1) .layer-back {
+    background-image: url('/static/img/witcher/screen-1/layer-back.jpg');
+}
+.slider__item:nth-child(1) .layer-middle {
+    background-image: url('/static/img/witcher/screen-1/layer-middle.png');
+}
+.slider__item:nth-child(1) .layer-front {
+    background-image: url('/static/img/witcher/screen-1/layer-front.png');
+}
+
+/* Слайд 2 */
+.slider__item:nth-child(2) .layer-back {
+    background-image: url('/static/img/witcher/screen-2/layer-back.jpg');
+}
+.slider__item:nth-child(2) .layer-gera {
+    background-image: url('/static/img/witcher/screen-2/layer-gera.png');
+}
+.slider__item:nth-child(2) .layer-yen {
+    background-image: url('/static/img/witcher/screen-2/layer-yen.png');
+}
+.slider__item:nth-child(2) .layer-front {
+    background-image: url('/static/img/witcher/screen-2/layer-front.png');
+}
+
+/* Слайд 3 */
+.slider__item:nth-child(3) .layer-back {
+    background-image: url('/static/img/witcher/screen-3/layer-back.jpg');
+}
+.slider__item:nth-child(3) .layer-middle {
+    background-image: url('/static/img/witcher/screen-3/layer-middle.png');
+}
+.slider__item:nth-child(3) .layer-ciri {
+    background-image: url('/static/img/witcher/screen-3/layer-ciri.png');
+}
+.slider__item:nth-child(3) .layer-front {
+    background-image: url('/static/img/witcher/screen-3/layer-front.png');
+}

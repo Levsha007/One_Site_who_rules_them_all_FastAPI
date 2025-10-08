@@ -1,4 +1,4 @@
-// static/js/gallery-page.js — галерея для FastAPI
+// static/js/gallery-page.js — галерея для FastAPI с 3D эффектами
 
 // Проверяем что мы на правильной странице
 if (!document.getElementById('gallery-grid')) {
@@ -45,6 +45,132 @@ const increaseBtn = document.getElementById('increase-cols');
 let numCols = 3;
 const minCols = 1;
 const maxCols = 10;
+
+// === 3D Эффекты для изображений ===
+class Image3DEffect {
+  constructor(imgElement) {
+    this.img = imgElement;
+    this.container = imgElement.closest('.grid-item');
+    this.isHovering = false;
+    this.rotation = { x: 0, y: 0 };
+    this.targetRotation = { x: 0, y: 0 };
+    this.mousePosition = { x: 0, y: 0 };
+    
+    this.init();
+  }
+
+  init() {
+    // Добавляем стили для 3D преобразований
+    this.img.style.transition = 'transform 0.3s ease-out';
+    this.img.style.transformStyle = 'preserve-3d';
+    this.img.style.willChange = 'transform';
+    
+    // Добавляем тень для глубины
+    this.img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+    
+    // Обработчики событий мыши
+    this.container.addEventListener('mouseenter', this.handleMouseEnter.bind(this));
+    this.container.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+    this.container.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    
+    // Анимация
+    this.animate();
+  }
+
+  handleMouseEnter() {
+    this.isHovering = true;
+    this.img.style.transition = 'transform 0.2s ease-out, box-shadow 0.3s ease';
+    this.img.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.4)';
+  }
+
+  handleMouseLeave() {
+    this.isHovering = false;
+    this.targetRotation = { x: 0, y: 0 };
+    this.img.style.transition = 'transform 0.5s ease-out, box-shadow 0.3s ease';
+    this.img.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+  }
+
+  handleMouseMove(e) {
+    if (!this.isHovering) return;
+
+    const rect = this.container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Вычисляем относительное положение мыши
+    const mouseX = e.clientX - centerX;
+    const mouseY = e.clientY - centerY;
+    
+    // Нормализуем значения от -1 до 1
+    const normalizedX = mouseX / (rect.width / 2);
+    const normalizedY = mouseY / (rect.height / 2);
+    
+    // Устанавливаем целевое вращение (максимум 15 градусов)
+    this.targetRotation = {
+      x: normalizedY * 15, // Наклон по X зависит от положения Y
+      y: -normalizedX * 15 // Наклон по Y зависит от положения X
+    };
+  }
+
+  animate() {
+    // Плавная интерполяция текущего вращения к целевому
+    this.rotation.x += (this.targetRotation.x - this.rotation.x) * 0.2;
+    this.rotation.y += (this.targetRotation.y - this.rotation.y) * 0.2;
+
+    // Применяем преобразования
+    const transform = `
+      perspective(1000px)
+      rotateX(${this.rotation.x}deg)
+      rotateY(${this.rotation.y}deg)
+      scale3d(${this.isHovering ? 1.05 : 1}, ${this.isHovering ? 1.05 : 1}, 1)
+    `;
+    
+    this.img.style.transform = transform;
+
+    // Рекурсивная анимация
+    requestAnimationFrame(this.animate.bind(this));
+  }
+
+  destroy() {
+    // Очистка обработчиков событий
+    this.container.removeEventListener('mouseenter', this.handleMouseEnter);
+    this.container.removeEventListener('mouseleave', this.handleMouseLeave);
+    this.container.removeEventListener('mousemove', this.handleMouseMove);
+    
+    // Сброс стилей
+    this.img.style.transform = '';
+    this.img.style.boxShadow = '';
+    this.img.style.transition = '';
+  }
+}
+
+// Коллекция активных 3D эффектов
+const active3DEffects = new Map();
+
+// Функция для инициализации 3D эффектов для всех изображений
+function init3DEffects() {
+  // Удаляем старые эффекты
+  active3DEffects.forEach((effect, img) => {
+    effect.destroy();
+  });
+  active3DEffects.clear();
+
+  // Создаем новые эффекты для всех изображений
+  document.querySelectorAll('.grid-item img').forEach(img => {
+    if (!active3DEffects.has(img)) {
+      const effect = new Image3DEffect(img);
+      active3DEffects.set(img, effect);
+    }
+  });
+}
+
+// Функция для удаления 3D эффектов
+function destroy3DEffects() {
+  active3DEffects.forEach((effect, img) => {
+    effect.destroy();
+  });
+  active3DEffects.clear();
+}
 
 // Безопасный вызов masonry.layout()
 function safeMasonryLayout() {
@@ -252,6 +378,11 @@ async function loadGalleries(filter = 'all') {
     grid.appendChild(fragment);
     applyNumColsToGrid(numCols);
 
+    // Инициализация 3D эффектов после загрузки изображений
+    setTimeout(() => {
+      init3DEffects();
+    }, 100);
+
     // Инициализация Masonry с улучшенной обработкой ошибок
     if (masonry && typeof masonry.destroy === 'function') {
       try { 
@@ -287,7 +418,14 @@ async function loadGalleries(filter = 'all') {
           const img = entry.target;
           img.src = img.dataset.src || img.src;
           observer.unobserve(img);
-          img.onload = safeMasonryLayout;
+          img.onload = () => {
+            safeMasonryLayout();
+            // Переинициализируем 3D эффект после загрузки изображения
+            if (!active3DEffects.has(img)) {
+              const effect = new Image3DEffect(img);
+              active3DEffects.set(img, effect);
+            }
+          };
         }
       });
     }, { threshold: 0.1 });
@@ -545,6 +683,13 @@ document.addEventListener('click', async (e) => {
     
     try {
       await apiPost('/delete-image', { gallery, path });
+      
+      // Удаляем 3D эффект перед удалением элемента
+      if (active3DEffects.has(img)) {
+        active3DEffects.get(img).destroy();
+        active3DEffects.delete(img);
+      }
+      
       parent.remove();
       showToast('Изображение удалено');
       safeMasonryLayout();
@@ -821,4 +966,9 @@ window.addEventListener('popstate', () => {
   const page = parseInt(urlParams.get('page') || '0');
   currentPage = isNaN(page) ? 0 : page;
   loadGalleries(gallery);
+});
+
+// Очистка при размонтировании
+window.addEventListener('beforeunload', () => {
+  destroy3DEffects();
 });

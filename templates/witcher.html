@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', path='assets/witcher_parallax.png') }}" type="image/x-icon">
+    <title>Мир Ведьмака</title>
+
+    <!-- Кнопка возврата на главную -->
+    <style>
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .home-btn:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: scale(1.05);
+        }
+    </style>
+
+    <!-- Библиотеки -->
+    <link rel="stylesheet" href="{{ url_for('static', path='libs/swiper/swiper-bundle.min.css') }}">
+    <script src="{{ url_for('static', path='libs/swiper/swiper-bundle.min.js') }}" defer></script>
+    <script src="{{ url_for('static', path='libs/particles/particles.js') }}" defer></script>
+
+    <!-- Стили -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/witcher.css') }}">
+    <script src="{{ url_for('static', path='js/witcher.js') }}" defer></script>
+</head>
+<body>
+    <!-- Кнопка возврата на главную -->
+    <a href="/" class="home-btn">&larr; Главная</a>
+
+    <div class="swiper slider">
+        <div class="swiper-wrapper slider__wrapper">
+            <!-- Слайд 1 -->
+            <div class="swiper-slide slider__item">
+                <div class="slider__layer layer-back" data-swiper-parallax="35%"></div>
+                <div class="slider__layer layer-middle" data-swiper-parallax="25%"></div>
+                <canvas class="particles slider__layer" data-swiper-parallax="18%" data-color="#BE9164"></canvas>
+                <div class="slider__layer layer-front" data-swiper-parallax="14%"></div>
+            </div>
+
+            <!-- Слайд 2 -->
+            <div class="swiper-slide slider__item">
+                <div class="slider__layer layer-back" data-swiper-parallax="40%"></div>
+                <div class="slider__layer layer-gera" data-swiper-parallax="34%"></div>
+                <div class="slider__layer layer-yen" data-swiper-parallax="30%"></div>
+                <canvas class="particles slider__layer" data-swiper-parallax="20%" data-color="#525A6D"></canvas>
+                <div class="slider__layer layer-front" data-swiper-parallax="14%"></div>
+            </div>
+
+            <!-- Слайд 3 -->
+            <div class="swiper-slide slider__item">
+                <div class="slider__layer layer-back" data-swiper-parallax="48%"></div>
+                <div class="slider__layer layer-middle" data-swiper-parallax="35%"></div>
+                <div class="slider__layer layer-ciri" data-swiper-parallax="29%"></div>
+                <canvas class="particles slider__layer" data-swiper-parallax="25%" data-color="#938086"></canvas>
+                <div class="slider__layer layer-front" data-swiper-parallax="16%"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

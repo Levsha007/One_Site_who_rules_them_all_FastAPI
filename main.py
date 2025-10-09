@@ -110,6 +110,23 @@ async def read_witcher(request: Request):
 @app.get("/color-generator", response_class=HTMLResponse)
 async def read_color_generator(request: Request):
     return templates.TemplateResponse("color-generator.html", {"request": request})
+
+@app.get("/quotes", response_class=HTMLResponse)
+async def read_quotes(request: Request):
+    return templates.TemplateResponse("quotes.html", {"request": request})
+
+@app.get("/grow", response_class=HTMLResponse)
+async def read_grow(request: Request):
+    return templates.TemplateResponse("grow.html", {"request": request})
+# ==================== API ДЛЯ ЦИТАТ ====================
+
+@app.get("/api/quotes")
+async def get_quotes():
+    """Получить все цитаты из JSON файла"""
+    quotes_file = DATA_DIR / "quotes.json"
+    return read_json(quotes_file)
+
+
 # ==================== API ДЛЯ ГАЛЕРЕЙ ====================
 
 @app.get("/api/galleries")

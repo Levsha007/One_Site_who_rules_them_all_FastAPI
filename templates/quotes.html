@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/quotes.png') }}" type="image/x-icon">
+  <title>Случайные цитаты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/quotes.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span class="current-gallery-title">Случайные цитаты</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="page-container">
+    <div class="page-content">
+      
+      <!-- Главная цитата -->
+      <div class="quote-card" id="main-quote">
+        <div class="quote-content">
+          <div class="quote-text" id="quote-text">
+            Загрузка цитаты...
+          </div>
+          <div class="quote-author" id="quote-author"></div>
+          <div class="quote-tags" id="quote-tags"></div>
+          <div class="quote-metadata" id="quote-metadata"></div>
+        </div>
+        <div class="quote-actions">
+          <button id="new-quote" class="quote-btn primary">🎲 Новая цитата</button>
+          <button id="copy-quote" class="quote-btn secondary">📋 Копировать</button>
+          <button id="add-favorite" class="quote-btn secondary">❤️ В избранное</button>
+        </div>
+      </div>
+
+      <!-- Управление -->
+      <div class="controls-card">
+        <h3>⚙️ Настройки</h3>
+        <div class="controls-grid">
+          <div class="control-group">
+            <label for="category-select">Категория:</label>
+            <select id="category-select" class="control-select">
+              <option value="">Все категории</option>
+              <!-- Категории будут загружены динамически -->
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label for="language-select">Язык:</label>
+            <select id="language-select" class="control-select">
+              <option value="ru">Русский</option>
+              <option value="en">Английский</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="author-select">Автор:</label>
+            <select id="author-select" class="control-select">
+              <option value="">Все авторы</option>
+              <!-- Авторы будут загружены динамически -->
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="auto-refresh">Автообновление:</label>
+            <select id="auto-refresh" class="control-select">
+              <option value="0">Выкл</option>
+              <option value="10">10 сек</option>
+              <option value="30">30 сек</option>
+              <option value="60">1 мин</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="speak-quote" class="action-btn speech">🔊 Озвучить</button>
+          <button id="save-image" class="action-btn image">🖼️ Сохранить как изображение</button>
+        </div>
+      </div>
+
+      <!-- История цитат -->
+      <div class="history-card">
+        <div class="history-header">
+          <h3>📖 История цитат</h3>
+          <button id="clear-history" class="clear-btn">🗑️ Очистить</button>
+        </div>
+        <div class="history-list" id="history-list">
+          <!-- История будет здесь -->
+        </div>
+      </div>
+
+      <!-- Избранные цитаты -->
+      <div class="favorites-card">
+        <h3>⭐ Избранные цитаты</h3>
+        <div class="favorites-list" id="favorites-list">
+          <!-- Избранные цитаты будут здесь -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="site-footer">
+    &copy; 2025 Случайные цитаты. Все права защищены.
+  </footer>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/quotes.js') }}"></script>
+</body>
+</html>

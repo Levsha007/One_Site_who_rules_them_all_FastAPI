@@ -1,0 +1,1276 @@
+{
+    "quotes": {
+      "ru": [
+        {
+          "text": "Выбери не быть повреждённым, и ты не почувствуешь ущерб. Не чувствуй себя уязвлённым — и ты не был им.",
+          "author": "Марк Аврелий",
+          "tags": ["мудрость", "стойкость", "контроль"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления, Книга IV",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Ты владеешь властью над своим умом — не над внешними событиями. Осознай это — и ты найдёшь силу.",
+          "author": "Марк Аврелий",
+          "tags": ["сила", "контроль", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Не трать больше времени на споры о том, каким должен быть добрый человек. Стань им.",
+          "author": "Марк Аврелий",
+          "tags": ["действие", "добродетель", "философия"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Размышления, Книга X",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "То, о чём ты думаешь, определяет качество твоего ума. Душа окрашивается в цвет твоих мыслей.",
+          "author": "Марк Аврелий",
+          "tags": ["мышление", "душа", "философия"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Я часто удивлялся, как так бывает: каждый человек любит себя больше всех остальных, но при этом ценит своё мнение о себе меньше, чем мнение других.",
+          "author": "Марк Аврелий",
+          "tags": ["самопознание", "общество", "философия"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Будь снисходителен к другим и суров к себе самому.",
+          "author": "Марк Аврелий",
+          "tags": ["дисциплина", "отношения", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Начинай каждый день с того, что скажешь себе: сегодня я встречу людей, вмешивающихся, неблагодарных, дерзких, преданных, злонамеренных и эгоистичных — всё из-за их неведения о том, что есть добро и зло.",
+          "author": "Марк Аврелий",
+          "tags": ["подготовка", "общество", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления, Книга II",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Лучшая месть — не быть как твой враг.",
+          "author": "Марк Аврелий",
+          "tags": ["прощение", "мудрость", "отношения"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления, Книга VI",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Прими то, к чему судьба тебя связывает, и люби людей, с которыми судьба тебя свела, — но делай это всем сердцем.",
+          "author": "Марк Аврелий",
+          "tags": ["судьба", "любовь", "принятие"],
+          "category": "life",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Когда ты собираешься упрекнуть кого-либо, задай себе вопрос: какой из моих пороков наиболее похож на тот, который я собираюсь критиковать?",
+          "author": "Марк Аврелий",
+          "tags": ["саморефлексия", "критика", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Для счастливой жизни требуется очень мало; всё внутри тебя, в твоём способе мышления.",
+          "author": "Марк Аврелий",
+          "tags": ["счастье", "простота", "мудрость"],
+          "category": "life",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Размышляй о красоте жизни. Наблюдай за звёздами и увидь себя бегущим вместе с ними.",
+          "author": "Марк Аврелий",
+          "tags": ["красота", "природа", "вдохновение"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Никогда не позволяй будущему потревожить тебя. Ты встретишь его, если придётся, теми же оружиями разума, которыми сегодня вооружён перед настоящим.",
+          "author": "Марк Аврелий",
+          "tags": ["будущее", "спокойствие", "разум"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Не предавайся мечтам о том, чего у тебя нет, но подсчитай основные благословения, которые у тебя есть, и с благодарностью вспомни, как бы ты желал их, если бы их не было.",
+          "author": "Марк Аврелий",
+          "tags": ["благодарность", "простота", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Думай о прожитой жизни как о завершённой и, словно мёртвый человек, воспринимай то, что осталось, как бонус, и живи это согласно Природе. Люби ту руку, что судьба тебе раздаёт, и играй её как свою собственную — что может быть более подходящим?",
+          "author": "Марк Аврелий",
+          "tags": ["судьба", "принятие", "философия"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Иногда даже жить — это акт мужества.",
+          "author": "Сенека",
+          "tags": ["мужество", "жизнь", "стойкость"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Мы страдаем больше в воображении, чем в реальности.",
+          "author": "Сенека",
+          "tags": ["воображение", "страдание", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Не потому что вещи трудны, мы не осмеливаемся; а потому что мы не осмеливаемся, они трудны.",
+          "author": "Сенека",
+          "tags": ["смелость", "трудности", "действие"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Беден не тот, у кого мало, а тот, кто жаждет больше.",
+          "author": "Сенека",
+          "tags": ["богатство", "простота", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Тот страдает больше, чем нужно, кто страдает прежде, чем необходимо.",
+          "author": "Сенека",
+          "tags": ["страдание", "время", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Нет лёгкого пути от Земли к звёздам.",
+          "author": "Сенека",
+          "tags": ["труд", "цель", "вдохновение"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Геркулес на Эте",
+            "language_original": "Latin",
+            "year": "~54 CE",
+            "source": "Hercules Oetaeus"
+          }
+        },
+        {
+          "text": "Грубая дорога ведёт к высотам величия.",
+          "author": "Сенека",
+          "tags": ["трудности", "успех", "вдохновение"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Трудности укрепляют ум, как труд укрепляет тело.",
+          "author": "Сенека",
+          "tags": ["трудности", "рост", "сила"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Пока ты жив, учись жить.",
+          "author": "Сенека",
+          "tags": ["обучение", "жизнь", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Удача — это то, что происходит, когда подготовка встречается с возможностью.",
+          "author": "Сенека",
+          "tags": ["удача", "подготовка", "успех"],
+          "category": "success",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Как рассказ, такова и жизнь: важно не как долго, а как хорошо она прожита.",
+          "author": "Сенека",
+          "tags": ["жизнь", "качество", "философия"],
+          "category": "life",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Всё будущее лежит в неопределённости: живи сейчас.",
+          "author": "Сенека",
+          "tags": ["настоящее", "будущее", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Если не знаешь, к какому порту плывёшь, ни один ветер не будет попутным.",
+          "author": "Сенека",
+          "tags": ["цель", "направление", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Не в том дело, что нам дана короткая жизнь, а в том, что мы делаем её короткой. И не в том, что нам мало, а в том, что мы её расточительны.",
+          "author": "Сенека",
+          "tags": ["жизнь", "время", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "О краткости жизни",
+            "language_original": "Latin",
+            "year": "~49 CE",
+            "source": "De Brevitate Vitae"
+          }
+        },
+        {
+          "text": "Итак, должно однажды искоренить два начала — страх будущих страданий и воспоминание прошлых страданий; ибо одно уже меня не касается, а другое ещё не касается.",
+          "author": "Сенека",
+          "tags": ["страх", "прошлое", "будущее"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Письма к Луцилию",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Если хочешь совершенствоваться — будь доволен тем, что тебя будут считать глупым и тупым.",
+          "author": "Эпиктет",
+          "tags": ["рост", "общество", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Энхиридион",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "Есть только один путь к счастью — перестать тревожиться о вещах, которые вне власти нашей воли.",
+          "author": "Эпиктет",
+          "tags": ["счастье", "контроль", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Энхиридион",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "Обстоятельства не создают человека — они лишь открывают его самому себе.",
+          "author": "Эпиктет",
+          "tags": ["характер", "испытания", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Не то, что с тобой происходит, а как ты на это реагируешь, имеет значение.",
+          "author": "Эпиктет",
+          "tags": ["реакция", "контроль", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Энхиридион",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "У нас два уха и один рот, чтобы мы слушали вдвое больше, чем говорим.",
+          "author": "Эпиктет",
+          "tags": ["общение", "мудрость", "отношения"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Ни один человек не свободен, кто не хозяин самому себе.",
+          "author": "Эпиктет",
+          "tags": ["свобода", "дисциплина", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Человека тревожат не столько реальные проблемы, сколько его воображаемые тревоги о реальных проблемах.",
+          "author": "Эпиктет",
+          "tags": ["тревога", "воображение", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Не объясняй свою философию. Воплощай её.",
+          "author": "Эпиктет",
+          "tags": ["действие", "философия", "мудрость"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Богатство не в обладании великими имуществами, а в малом желании.",
+          "author": "Эпиктет",
+          "tags": ["богатство", "простота", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Ключ в том, чтобы быть в компании лишь тех, кто возвышает тебя, чьё присутствие пробуждает твоё лучшее.",
+          "author": "Эпиктет",
+          "tags": ["отношения", "рост", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Тот, кто смеётся над самим собой, никогда не иссякнет в предметах для смеха.",
+          "author": "Эпиктет",
+          "tags": ["юмор", "самоирония", "мудрость"],
+          "category": "life",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Когда тебя оскорбляет чья-то ошибка, обратись к себе и изучи свои собственные недостатки. Тогда ты забудешь гнев.",
+          "author": "Эпиктет",
+          "tags": ["гнев", "саморефлексия", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Энхиридион",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "Люди не потревожены вещами, а взглядами, которые они на них возлагают.",
+          "author": "Эпиктет",
+          "tags": ["восприятие", "мудрость", "философия"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Энхиридион",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "Обвинять других в своих несчастьях — признак невоспитанности. Обвинять себя — начало воспитания. Не обвинять ни себя, ни других — это признак полного воспитания.",
+          "author": "Эпиктет",
+          "tags": ["ответственность", "рост", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Невозможно научиться тому, что человек думает, что он уже знает.",
+          "author": "Эпиктет",
+          "tags": ["обучение", "скромность", "мудрость"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Никто не имеет права оставаться дилетантом в вопросах телесной тренировки. Стыд для человека состариться, не увидев красоты и силы, на которые способен его организм.",
+          "author": "Сократ",
+          "tags": ["тело", "дисциплина", "рост"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Диалоги Платона",
+            "language_original": "Greek",
+            "year": "~399 BCE",
+            "source": "Plato's Dialogues"
+          }
+        },
+        {
+          "text": "Если это выносимо — выноси. Хватит жаловаться.",
+          "author": "Марк Аврелий",
+          "tags": ["стойкость", "действие", "дисциплина"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Размышления",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Чем больше трудность, тем больше славы в её преодолении.",
+          "author": "Эпиктет",
+          "tags": ["трудности", "успех", "вдохновение"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Беседы",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Дисциплина — мост между целями и достижениями.",
+          "author": "Джим Рон",
+          "tags": ["дисциплина", "цели", "успех"],
+          "category": "success",
+          "metadata": {
+            "origin": "Мотивационная речь",
+            "language_original": "English",
+            "year": "1980s",
+            "source": "Jim Rohn International"
+          }
+        },
+        {
+          "text": "Всё в жизни — игра ума! Когда нас уносит драмами жизни, большими и малыми, мы забываем: как бы не была велика боль, как бы не был суров мучение — всё плохое заканчивается.",
+          "author": "Дэвид Гоггинс",
+          "tags": ["сознание", "стойкость", "вдохновение"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Книга 'Нельзя меня обидеть'",
+            "language_original": "English",
+            "year": "2018",
+            "source": "Can't Hurt Me"
+          }
+        },
+        {
+          "text": "Единственный способ делать великие дела — любить то, что ты делаешь.",
+          "author": "Стив Джобс",
+          "tags": ["любовь", "работа", "успех"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Стэнфордская речь",
+            "language_original": "English",
+            "year": 2005,
+            "source": "Stanford University Speech"
+          }
+        },
+        {
+          "text": "Будь собой; все остальные роли уже заняты.",
+          "author": "Оскар Уайльд",
+          "tags": ["индивидуальность", "жизнь", "мудрость"],
+          "category": "life",
+          "metadata": {
+            "origin": "Афоризмы",
+            "language_original": "English",
+            "year": "~1890",
+            "source": "Oscar Wilde's Wit"
+          }
+        }
+      ],
+      "en": [
+        {
+          "text": "Choose not to be harmed, and you won't feel harmed. Don't feel harmed, and you haven't been.",
+          "author": "Marcus Aurelius",
+          "tags": ["wisdom", "resilience", "control"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations, Book IV",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "You have power over your mind — not outside events. Realize this, and you will find strength.",
+          "author": "Marcus Aurelius",
+          "tags": ["strength", "control", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Waste no more time arguing about what a good man should be. Be one.",
+          "author": "Marcus Aurelius",
+          "tags": ["action", "virtue", "philosophy"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Meditations, Book X",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "The things you think about determine the quality of your mind. Your soul takes on the color of your thoughts.",
+          "author": "Marcus Aurelius",
+          "tags": ["thinking", "soul", "philosophy"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "I have often wondered how it is that every man loves himself more than all the rest of men, but yet sets less value on his own opinion of himself than on the opinion of others.",
+          "author": "Marcus Aurelius",
+          "tags": ["self-knowledge", "society", "philosophy"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Be tolerant with others and strict with yourself.",
+          "author": "Marcus Aurelius",
+          "tags": ["discipline", "relationships", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Begin each day by telling yourself: Today I will meet people who are meddling, ungrateful, insolent, disloyal, malicious and selfish — all because of their ignorance of what is good and evil.",
+          "author": "Marcus Aurelius",
+          "tags": ["preparation", "society", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations, Book II",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "The best revenge is not to be like your enemy.",
+          "author": "Marcus Aurelius",
+          "tags": ["forgiveness", "wisdom", "relationships"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations, Book VI",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart.",
+          "author": "Marcus Aurelius",
+          "tags": ["fate", "love", "acceptance"],
+          "category": "life",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Whenever you are about to find fault with someone, ask yourself the following question: What fault of mine most nearly resembles the one I am about to criticize?",
+          "author": "Marcus Aurelius",
+          "tags": ["self-reflection", "criticism", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.",
+          "author": "Marcus Aurelius",
+          "tags": ["happiness", "simplicity", "wisdom"],
+          "category": "life",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Dwell on the beauty of life. Watch the stars, and see yourself running with them.",
+          "author": "Marcus Aurelius",
+          "tags": ["beauty", "nature", "inspiration"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Never let the future disturb you. You will meet it, if you have to, with the same weapons of reason which today arm you against the present.",
+          "author": "Marcus Aurelius",
+          "tags": ["future", "calm", "reason"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Do not indulge in dreams of having what you have not, but reckon up the chief of the blessings you do possess, and then thankfully remember how you would crave for them if they were not yours.",
+          "author": "Marcus Aurelius",
+          "tags": ["gratitude", "simplicity", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Think of the life you have lived until now as over and, as a dead man, see what's left as a bonus and live it according to Nature. Love the hand that fate deals you and play it as your own, for what could be more fitting?",
+          "author": "Marcus Aurelius",
+          "tags": ["fate", "acceptance", "philosophy"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "Sometimes even to live is an act of courage.",
+          "author": "Seneca",
+          "tags": ["courage", "life", "resilience"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "We suffer more in imagination than in reality.",
+          "author": "Seneca",
+          "tags": ["imagination", "suffering", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "It is not because things are difficult that we do not dare; it is because we do not dare that things are difficult.",
+          "author": "Seneca",
+          "tags": ["courage", "difficulty", "action"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "It is not the man who has too little, but the man who craves more, that is poor.",
+          "author": "Seneca",
+          "tags": ["wealth", "simplicity", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "He suffers more than necessary, who suffers before it is necessary.",
+          "author": "Seneca",
+          "tags": ["suffering", "time", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "There is no easy way from the earth to the stars.",
+          "author": "Seneca",
+          "tags": ["work", "purpose", "inspiration"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Hercules on Oeta",
+            "language_original": "Latin",
+            "year": "~54 CE",
+            "source": "Hercules Oetaeus"
+          }
+        },
+        {
+          "text": "It is a rough road that leads to the heights of greatness.",
+          "author": "Seneca",
+          "tags": ["difficulty", "success", "inspiration"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Difficulties strengthen the mind, as labor does the body.",
+          "author": "Seneca",
+          "tags": ["difficulty", "growth", "strength"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "As long as you live, keep learning how to live.",
+          "author": "Seneca",
+          "tags": ["learning", "life", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "Luck is what happens when preparation meets opportunity.",
+          "author": "Seneca",
+          "tags": ["luck", "preparation", "success"],
+          "category": "success",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "As is a tale, so is life: not how long it is, but how good it is, is what matters.",
+          "author": "Seneca",
+          "tags": ["life", "quality", "philosophy"],
+          "category": "life",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "The whole future lies in uncertainty: live immediately.",
+          "author": "Seneca",
+          "tags": ["present", "future", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "If one does not know to which port one is sailing, no wind is favorable.",
+          "author": "Seneca",
+          "tags": ["purpose", "direction", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "It is not that we are given a short life, but we make it short. And we are not ill-supplied, but wasteful of it.",
+          "author": "Seneca",
+          "tags": ["life", "time", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "On the Shortness of Life",
+            "language_original": "Latin",
+            "year": "~49 CE",
+            "source": "De Brevitate Vitae"
+          }
+        },
+        {
+          "text": "Two elements must therefore be rooted out once for all, – the fear of future suffering, and the recollection of past suffering; since the latter no longer concerns me, and the former concerns me not yet.",
+          "author": "Seneca",
+          "tags": ["fear", "past", "future"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Letters to Lucilius",
+            "language_original": "Latin",
+            "year": "~65 CE",
+            "source": "Epistulae Morales ad Lucilium"
+          }
+        },
+        {
+          "text": "If you want to improve, be content to be thought foolish and stupid.",
+          "author": "Epictetus",
+          "tags": ["growth", "society", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Enchiridion",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "There is only one way to happiness and that is to cease worrying about things which are beyond the power of our will.",
+          "author": "Epictetus",
+          "tags": ["happiness", "control", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Enchiridion",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "Circumstances don't make the man, they only reveal him to himself.",
+          "author": "Epictetus",
+          "tags": ["character", "challenges", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "It's not what happens to you, but how you react to it that matters.",
+          "author": "Epictetus",
+          "tags": ["reaction", "control", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Enchiridion",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "We have two ears and one mouth so that we can listen twice as much as we speak.",
+          "author": "Epictetus",
+          "tags": ["communication", "wisdom", "relationships"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "No man is free who is not master of himself.",
+          "author": "Epictetus",
+          "tags": ["freedom", "discipline", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Man is not worried by real problems so much as by his imagined anxieties about real problems.",
+          "author": "Epictetus",
+          "tags": ["anxiety", "imagination", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Don't explain your philosophy. Embody it.",
+          "author": "Epictetus",
+          "tags": ["action", "philosophy", "wisdom"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Wealth consists not in having great possessions, but in having few wants.",
+          "author": "Epictetus",
+          "tags": ["wealth", "simplicity", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "The key is to keep company only with people who uplift you, whose presence calls forth your best.",
+          "author": "Epictetus",
+          "tags": ["relationships", "growth", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "He who laughs at himself never runs out of things to laugh at.",
+          "author": "Epictetus",
+          "tags": ["humor", "self-deprecation", "wisdom"],
+          "category": "life",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "When you are offended at any man's fault, turn to yourself and study your own failings. Then you will forget your anger.",
+          "author": "Epictetus",
+          "tags": ["anger", "self-reflection", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Enchiridion",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "People are not disturbed by things, but by the views they take of them.",
+          "author": "Epictetus",
+          "tags": ["perception", "wisdom", "philosophy"],
+          "category": "philosophy",
+          "metadata": {
+            "origin": "Enchiridion",
+            "language_original": "Greek",
+            "year": "~135 CE",
+            "source": "Enchiridion"
+          }
+        },
+        {
+          "text": "To accuse others for one's own misfortunes is a sign of want of education. To accuse oneself shows that one's education has begun. To accuse neither oneself nor others shows that one's education is complete.",
+          "author": "Epictetus",
+          "tags": ["responsibility", "growth", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "It is impossible for a man to learn what he thinks he already knows.",
+          "author": "Epictetus",
+          "tags": ["learning", "humility", "wisdom"],
+          "category": "wisdom",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "No man has the right to be an amateur in the matter of physical training. It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.",
+          "author": "Socrates",
+          "tags": ["body", "discipline", "growth"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Plato's Dialogues",
+            "language_original": "Greek",
+            "year": "~399 BCE",
+            "source": "Plato's Dialogues"
+          }
+        },
+        {
+          "text": "If it is endurable, then endure it. Stop complaining.",
+          "author": "Marcus Aurelius",
+          "tags": ["resilience", "action", "discipline"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Meditations",
+            "language_original": "Greek",
+            "year": "~170 CE",
+            "source": "Meditations"
+          }
+        },
+        {
+          "text": "The greater the difficulty, the more glory in surmounting it.",
+          "author": "Epictetus",
+          "tags": ["difficulty", "success", "inspiration"],
+          "category": "motivational",
+          "metadata": {
+            "origin": "Discourses",
+            "language_original": "Greek",
+            "year": "~108 CE",
+            "source": "Discourses"
+          }
+        },
+        {
+          "text": "Discipline is the bridge between goals and accomplishment.",
+          "author": "Jim Rohn",
+          "tags": ["discipline", "goals", "success"],
+          "category": "success",
+          "metadata": {
+            "origin": "Motivational Speech",
+            "language_original": "English",
+            "year": "1980s",
+            "source": "Jim Rohn International"
+          }
+        },
+        {
+          "text": "Everything in life is a mind game! Whenever we get swept under by life's dramas, large and small, we are forgetting that no matter how bad the pain gets, no matter how harrowing the torture, all bad things end.",
+          "author": "David Goggins",
+          "tags": ["mindset", "resilience", "inspiration"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Book 'Can't Hurt Me'",
+            "language_original": "English",
+            "year": "2018",
+            "source": "Can't Hurt Me"
+          }
+        },
+        {
+          "text": "The only way to do great work is to love what you do.",
+          "author": "Steve Jobs",
+          "tags": ["love", "work", "success"],
+          "category": "inspirational",
+          "metadata": {
+            "origin": "Stanford Commencement Speech",
+            "language_original": "English",
+            "year": 2005,
+            "source": "Stanford University Speech"
+          }
+        },
+        {
+          "text": "Be yourself; everyone else is already taken.",
+          "author": "Oscar Wilde",
+          "tags": ["individuality", "life", "wisdom"],
+          "category": "life",
+          "metadata": {
+            "origin": "Aphorisms",
+            "language_original": "English",
+            "year": "~1890",
+            "source": "Oscar Wilde's Wit"
+          }
+        }
+      ]
+    },
+    "categories": {
+      "ru": [
+        {"id": "inspirational", "name": "Вдохновляющие"},
+        {"id": "motivational", "name": "Мотивирующие"},
+        {"id": "love", "name": "Любовь"},
+        {"id": "life", "name": "Жизнь"},
+        {"id": "success", "name": "Успех"},
+        {"id": "wisdom", "name": "Мудрость"},
+        {"id": "philosophy", "name": "Философия"}
+      ],
+      "en": [
+        {"id": "inspirational", "name": "Inspirational"},
+        {"id": "motivational", "name": "Motivational"},
+        {"id": "love", "name": "Love"},
+        {"id": "life", "name": "Life"},
+        {"id": "success", "name": "Success"},
+        {"id": "wisdom", "name": "Wisdom"},
+        {"id": "philosophy", "name": "Philosophy"}
+      ]
+    }
+  }

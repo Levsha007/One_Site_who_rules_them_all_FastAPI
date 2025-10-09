@@ -107,6 +107,9 @@ async def read_parallax(request: Request):
 async def read_witcher(request: Request):
     return templates.TemplateResponse("witcher.html", {"request": request})
 
+@app.get("/color-generator", response_class=HTMLResponse)
+async def read_color_generator(request: Request):
+    return templates.TemplateResponse("color-generator.html", {"request": request})
 # ==================== API ДЛЯ ГАЛЕРЕЙ ====================
 
 @app.get("/api/galleries")

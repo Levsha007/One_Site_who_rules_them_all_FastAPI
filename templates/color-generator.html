@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/color-palette.png') }}" type="image/x-icon">
+  <title>Генератор цветов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/color-generator.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span class="current-gallery-title">Генератор цветов</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="page-container">
+    <div class="page-content">
+      
+      <!-- Главный цвет -->
+      <div class="color-display">
+        <div class="color-preview" id="color-preview"></div>
+        <div class="color-info">
+          <h2 id="color-hex">#3498db</h2>
+          <p id="color-rgb">RGB(52, 152, 219)</p>
+          <p id="color-hsl">HSL(204, 70%, 53%)</p>
+        </div>
+      </div>
+
+      <!-- Палитра -->
+      <div class="color-palette" id="color-palette">
+        <div class="palette-header">
+          <h3>Цветовая палитра</h3>
+          <button id="generate-palette" class="generate-btn">🎨 Новая палитра</button>
+        </div>
+        <div class="palette-colors" id="palette-colors">
+          <!-- Colors will be generated here -->
+        </div>
+      </div>
+
+      <!-- Управление -->
+      <div class="color-controls">
+        <div class="control-group">
+          <label for="hue-range">Оттенок:</label>
+          <input type="range" id="hue-range" min="0" max="360" value="204" class="slider">
+          <span id="hue-value">204°</span>
+        </div>
+        
+        <div class="control-group">
+          <label for="saturation-range">Насыщенность:</label>
+          <input type="range" id="saturation-range" min="0" max="100" value="70" class="slider">
+          <span id="saturation-value">70%</span>
+        </div>
+        
+        <div class="control-group">
+          <label for="lightness-range">Яркость:</label>
+          <input type="range" id="lightness-range" min="0" max="100" value="53" class="slider">
+          <span id="lightness-value">53%</span>
+        </div>
+
+        <div class="control-buttons">
+          <button id="random-color" class="action-btn">🎲 Случайный цвет</button>
+          <button id="copy-hex" class="action-btn">📋 Копировать HEX</button>
+          <button id="save-color" class="action-btn">💾 Сохранить цвет</button>
+        </div>
+      </div>
+
+      <!-- Сохранённые цвета -->
+      <div class="saved-colors">
+        <h3>Сохранённые цвета</h3>
+        <div class="saved-colors-grid" id="saved-colors-grid">
+          <!-- Saved colors will appear here -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="site-footer">
+    &copy; 2025 Генератор цветов. Все права защищены.
+  </footer>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/color-generator.js') }}"></script>
+</body>
+</html>

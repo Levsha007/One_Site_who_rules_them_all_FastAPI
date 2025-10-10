@@ -133,3 +133,7 @@ dmypy.json
 # Virtual environments (на всякий случай, хотя вы не используете)
 venv/
 env/
+
+.env
+.env.*
+*.env

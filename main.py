@@ -12,6 +12,10 @@ import httpx
 from typing import List, Optional
 import uuid
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения
+load_dotenv()
 
 # Инициализация FastAPI
 app = FastAPI(title="My Gallery", version="1.0.0")
@@ -31,6 +35,8 @@ for directory in [DATA_DIR, UPLOADS_DIR, UPLOADS_DIR / "temp"]:
 GALLERIES_FILE = DATA_DIR / "galleries.json"
 BOOKMARKS_FILE = DATA_DIR / "bookmarks.json"
 CATEGORIES_FILE = DATA_DIR / "categories.json"
+QUOTES_FILE = DATA_DIR / "quotes.json"
+CITIES_FILE = DATA_DIR / "cities.json"
 
 # Инициализация JSON файлов если их нет (аналог инициализации в server.js)
 def init_data_files():
@@ -46,6 +52,61 @@ def init_data_files():
     if not CATEGORIES_FILE.exists():
         default_categories = ["Работа", "Образование", "Игры", "Новости", "Развлечения", "Социальные сети", "Спорт", "Технологии"]
         CATEGORIES_FILE.write_text(json.dumps(default_categories, ensure_ascii=False), encoding='utf-8')
+    
+    # Цитаты
+    if not QUOTES_FILE.exists():
+        default_quotes = [
+            {"text": "Жизнь - это то, что происходит с тобой, пока ты строишь другие планы.", "author": "Джон Леннон"},
+            {"text": "Единственный способ делать великие дела - это любить то, что ты делаешь.", "author": "Стив Джобс"}
+        ]
+        QUOTES_FILE.write_text(json.dumps(default_quotes, ensure_ascii=False, indent=2), encoding='utf-8')
+    
+    # Города для автоподстановки
+    if not CITIES_FILE.exists():
+        # Создаем базовый файл с популярными городами
+        basic_cities = {
+            "cities": [
+                {"name": "Москва", "country": "Россия", "lat": 55.7558, "lon": 37.6173},
+                {"name": "Санкт-Петербург", "country": "Россия", "lat": 59.9343, "lon": 30.3351},
+                {"name": "Новосибирск", "country": "Россия", "lat": 55.0084, "lon": 82.9357},
+                {"name": "Екатеринбург", "country": "Россия", "lat": 56.8389, "lon": 60.6057},
+                {"name": "Казань", "country": "Россия", "lat": 55.8304, "lon": 49.0661},
+                {"name": "Нижний Новгород", "country": "Россия", "lat": 56.2965, "lon": 43.9361},
+                {"name": "Челябинск", "country": "Россия", "lat": 55.1644, "lon": 61.4368},
+                {"name": "Самара", "country": "Россия", "lat": 53.2415, "lon": 50.2212},
+                {"name": "Омск", "country": "Россия", "lat": 54.9885, "lon": 73.3242},
+                {"name": "Ростов-на-Дону", "country": "Россия", "lat": 47.2357, "lon": 39.7015},
+                {"name": "Уфа", "country": "Россия", "lat": 54.7388, "lon": 55.9721},
+                {"name": "Красноярск", "country": "Россия", "lat": 56.0153, "lon": 92.8932},
+                {"name": "Воронеж", "country": "Россия", "lat": 51.6755, "lon": 39.2089},
+                {"name": "Пермь", "country": "Россия", "lat": 58.0105, "lon": 56.2502},
+                {"name": "Волгоград", "country": "Россия", "lat": 48.708, "lon": 44.5133},
+                {"name": "Киев", "country": "Украина", "lat": 50.4501, "lon": 30.5234},
+                {"name": "Минск", "country": "Беларусь", "lat": 53.9045, "lon": 27.5615},
+                {"name": "Астана", "country": "Казахстан", "lat": 51.1694, "lon": 71.4491},
+                {"name": "Алматы", "country": "Казахстан", "lat": 43.2383, "lon": 76.9455},
+                {"name": "Лондон", "country": "Великобритания", "lat": 51.5074, "lon": -0.1278},
+                {"name": "Париж", "country": "Франция", "lat": 48.8566, "lon": 2.3522},
+                {"name": "Берлин", "country": "Германия", "lat": 52.52, "lon": 13.405},
+                {"name": "Мадрид", "country": "Испания", "lat": 40.4168, "lon": -3.7038},
+                {"name": "Рим", "country": "Италия", "lat": 41.9028, "lon": 12.4964},
+                {"name": "Прага", "country": "Чехия", "lat": 50.0755, "lon": 14.4378},
+                {"name": "Вена", "country": "Австрия", "lat": 48.2082, "lon": 16.3738},
+                {"name": "Амстердам", "country": "Нидерланды", "lat": 52.3676, "lon": 4.9041},
+                {"name": "Брюссель", "country": "Бельгия", "lat": 50.8503, "lon": 4.3517},
+                {"name": "Стамбул", "country": "Турция", "lat": 41.0082, "lon": 28.9784},
+                {"name": "Дубай", "country": "ОАЭ", "lat": 25.2048, "lon": 55.2708},
+                {"name": "Токио", "country": "Япония", "lat": 35.6762, "lon": 139.6503},
+                {"name": "Пекин", "country": "Китай", "lat": 39.9042, "lon": 116.4074},
+                {"name": "Сеул", "country": "Корея", "lat": 37.5665, "lon": 126.978},
+                {"name": "Нью-Йорк", "country": "США", "lat": 40.7128, "lon": -74.006},
+                {"name": "Лос-Анджелес", "country": "США", "lat": 34.0522, "lon": -118.2437},
+                {"name": "Чикаго", "country": "США", "lat": 41.8781, "lon": -87.6298},
+                {"name": "Торонто", "country": "Канада", "lat": 43.6532, "lon": -79.3832},
+                {"name": "Сидней", "country": "Австралия", "lat": -33.8688, "lon": 151.2093}
+            ]
+        }
+        CITIES_FILE.write_text(json.dumps(basic_cities, ensure_ascii=False, indent=2), encoding='utf-8')
 
 init_data_files()
 
@@ -58,6 +119,12 @@ def load_bookmarks():
 
 def load_categories():
     return read_json(CATEGORIES_FILE)
+
+def load_quotes():
+    return read_json(QUOTES_FILE)
+
+def load_cities():
+    return read_json(CITIES_FILE)
 
 # Монтируем статические файлы (аналог app.use(express.static('public')))
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -118,14 +185,96 @@ async def read_quotes(request: Request):
 @app.get("/grow", response_class=HTMLResponse)
 async def read_grow(request: Request):
     return templates.TemplateResponse("grow.html", {"request": request})
+
+@app.get("/weather", response_class=HTMLResponse)
+async def read_weather(request: Request):
+    return templates.TemplateResponse("weather.html", {"request": request})
+
 # ==================== API ДЛЯ ЦИТАТ ====================
 
 @app.get("/api/quotes")
 async def get_quotes():
     """Получить все цитаты из JSON файла"""
-    quotes_file = DATA_DIR / "quotes.json"
-    return read_json(quotes_file)
+    return load_quotes()
 
+# ==================== API ДЛЯ ПОГОДЫ ====================
+
+@app.get("/api/weather")
+async def get_weather(city: str = None, lat: float = None, lon: float = None):
+    """Получить текущую погоду"""
+    api_key = os.getenv('OPENWEATHER_API_KEY')
+    
+    if not api_key:
+        raise HTTPException(status_code=500, detail="API ключ не настроен")
+    
+    if not city and (lat is None or lon is None):
+        raise HTTPException(status_code=400, detail="Укажите город или координаты")
+    
+    # Формируем URL для API
+    if city:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
+    else:
+        url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url)
+            weather_data = response.json()
+            
+            # Проверяем на ошибки от OpenWeatherMap
+            if weather_data.get('cod') != 200:
+                raise HTTPException(status_code=404, detail=weather_data.get('message', 'Город не найден'))
+                
+            return weather_data
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
+
+@app.get("/api/weather/forecast")
+async def get_weather_forecast(lat: float, lon: float):
+    """Получить прогноз погоды на 5 дней"""
+    api_key = os.getenv('OPENWEATHER_API_KEY')
+    
+    if not api_key:
+        raise HTTPException(status_code=500, detail="API ключ не настроен")
+    
+    url = f"http://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url)
+            forecast_data = response.json()
+            
+            # Проверяем на ошибки от OpenWeatherMap
+            if forecast_data.get('cod') != '200':
+                raise HTTPException(status_code=404, detail=forecast_data.get('message', 'Прогноз не найден'))
+                
+            return forecast_data
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
+
+@app.get("/api/weather-api-key")
+async def get_weather_api_key():
+    """Получить статус API ключа (без самого ключа)"""
+    api_key = os.getenv('OPENWEATHER_API_KEY')
+    return {"hasKey": bool(api_key), "apiKey": "configured" if api_key else None}
+
+@app.get("/api/cities")
+async def get_cities(search: str = None):
+    """Получить города для автоподстановки"""
+    cities_data = load_cities()
+    cities = cities_data.get('cities', [])
+    
+    if search:
+        search_lower = search.lower()
+        cities = [city for city in cities 
+                 if search_lower in city['name'].lower() 
+                 or search_lower in city['country'].lower()]
+    
+    return cities[:20]  # Ограничиваем количество результатов
 
 # ==================== API ДЛЯ ГАЛЕРЕЙ ====================
 
@@ -364,4 +513,7 @@ async def get_categories():
 if __name__ == "__main__":
     import uvicorn
     print("✅ Сервер запущен: http://localhost:3000")  # Аналог console.log
+    print("🌤️  Погодный модуль: /weather")
+    print("🔑 API ключ погоды:", "Настроен" if os.getenv('OPENWEATHER_API_KEY') else "Не настроен")
+    print("🏙️  База городов:", f"{len(load_cities().get('cities', []))} городов")
     uvicorn.run(app, host="0.0.0.0", port=3000)

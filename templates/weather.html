@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/weather.png') }}" type="image/x-icon">
+  <title>Прогноз Погоды</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/weather-style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span class="current-gallery-title">🌤️ Прогноз Погоды</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="page-container">
+    <div class="page-content">
+      
+      <!-- Поиск города -->
+      <div class="search-container">
+        <div class="search-bar">
+          <div class="autocomplete-container">
+            <input type="text" id="city-input" placeholder="Введите название города или страны..." autocomplete="off" />
+            <!-- Автоподстановка будет добавлена через JS -->
+          </div>
+          <button id="search-btn">🔍 Поиск</button>
+          <button id="location-btn">📍 Мое местоположение</button>
+        </div>
+      </div>
+
+      <!-- Текущая погода -->
+      <div class="weather-card current-weather" id="current-weather" style="display: none;">
+        <div class="weather-header">
+          <h2 id="city-name">Город</h2>
+          <div class="date" id="current-date"></div>
+        </div>
+        <div class="weather-body">
+          <div class="temperature-section">
+            <div class="temp-main" id="current-temp">0°</div>
+            <div class="temp-feels">Ощущается как <span id="feels-like">0°</span></div>
+          </div>
+          <div class="weather-icon">
+            <img id="weather-icon" src="" alt="Погода" />
+            <div class="weather-desc" id="weather-description">Описание</div>
+          </div>
+        </div>
+        <div class="weather-details">
+          <div class="detail-item">
+            <span class="detail-label">💨 Ветер</span>
+            <span class="detail-value" id="wind-speed">0 м/с</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">💧 Влажность</span>
+            <span class="detail-value" id="humidity">0%</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">📊 Давление</span>
+            <span class="detail-value" id="pressure">0 hPa</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">👁️ Видимость</span>
+            <span class="detail-value" id="visibility">0 км</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Прогноз на 5 дней -->
+      <div class="forecast-section" id="forecast-section" style="display: none;">
+        <h3>📅 Прогноз на 5 дней</h3>
+        <div class="forecast-container" id="forecast-container">
+          <!-- Прогноз будет загружен здесь -->
+        </div>
+      </div>
+
+      <!-- Сообщение об ошибке -->
+      <div class="error-message" id="error-message" style="display: none;">
+        ❌ Не удалось загрузить данные о погоде. Проверьте название города или подключение к интернету.
+      </div>
+
+      <!-- Загрузка -->
+      <div class="loading" id="loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div>Загрузка данных о погоде...</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2025 Погодный Сервис. Данные предоставлены OpenWeatherMap.
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/weather-app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller - Bro Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            overflow-x: auto;
+        }
+
+        #conteiner {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            min-width: min-content;
+            width: fit-content;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button {
+            font-size: 1.5rem;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .chaos-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .chaos-btn:hover {
+            background: linear-gradient(45deg, #ff5252, #d63031);
+        }
+
+        .stop-btn {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }
+
+        .stop-btn:hover {
+            background: linear-gradient(45deg, #e67e22, #d35400);
+        }
+
+        input {
+            font-size: 2rem;
+            width: 120px;
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            background: white;
+        }
+
+        #diceImages {
+            margin: 25px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 100%;
+        }
+
+        #diceImages img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            border-radius: 8px;
+        }
+
+        #diceImages img:hover {
+            transform: scale(1.2);
+        }
+
+        #diceResault {
+            margin: 20px 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: left;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .distribution-bar {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            gap: 10px;
+        }
+
+        .distribution-label {
+            min-width: 30px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .distribution-bar-inner {
+            flex: 1;
+            height: 25px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .distribution-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            #conteiner {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            button {
+                font-size: 1.2rem;
+                padding: 10px 20px;
+            }
+            
+            input {
+                font-size: 1.5rem;
+                width: 100px;
+            }
+            
+            #diceImages img {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+            }
+            
+            #diceImages img {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="conteiner">
+        <h1>🎲 Dice Roller</h1>
+        
+        <div class="controls">
+            <button class="chaos-btn" onclick="Mugen_rollDice()">🌀 Хаос! (200 кубиков)</button>
+            <button class="stop-btn" onclick="stop_chaos()">🛑 Остановить вакханалию</button>
+        </div>
+        
+        <div class="controls">
+            <label>Количество кубиков:</label>
+            <input type="number" id="numOfDice" value="1" min="1" max="200">
+            <button onclick="rollDice()">🎯 Бросить кубики</button>
+        </div>
+        
+        <div id="diceImages"></div>
+        <div id="diceResault"></div>
+        
+        <div class="stats-grid" id="statsContainer"></div>
+        <div class="chart-container" id="chartContainer"></div>
+    </div>
+
+    <script>
+        let timerId = null;
+        let rollHistory = [];
+        let totalRolls = 0;
+
+        function rollDice() {
+            const numOfDice = parseInt(document.getElementById("numOfDice").value);
+            const diceResault = document.getElementById("diceResault");
+            const diceImages = document.getElementById("diceImages");
+            const values = [];
+            const images = [];
+
+            // Ограничиваем максимальное количество для производительности
+            const safeNumOfDice = Math.min(numOfDice, 10000);
+            
+            for (let i = 0; i < safeNumOfDice; i++) {
+                const value = Math.floor(Math.random() * 6) + 1;
+                values.push(value);
+                // Используем реальные изображения кубиков
+                images.push(`<img src="{{ url_for('static', path='assets/dice/') }}${value}.png" alt="Dice ${value}">`);
+            }
+
+            // Сохраняем историю бросков для статистики
+            values.forEach(value => {
+                rollHistory.push(value);
+            });
+            totalRolls += values.length;
+
+            // Обновляем отображение
+            diceResault.innerHTML = `
+                <strong>Результаты (${values.length} кубиков):</strong><br>
+                ${values.join(", ")}<br><br>
+                <strong>Сумма:</strong> ${values.reduce((a, b) => a + b, 0)}<br>
+                <strong>Среднее значение:</strong> ${(values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)}
+            `;
+            
+            diceImages.innerHTML = images.join('');
+            
+            // Обновляем статистику
+            updateStatistics();
+        }
+
+        function Mugen_rollDice() {
+            const numOfDiceInput = document.getElementById("numOfDice");
+            numOfDiceInput.value = 200;
+            if (timerId !== null) {
+                clearInterval(timerId);
+            }
+            timerId = setInterval(rollDice, 50);
+        }
+
+        function stop_chaos() {
+            if (timerId !== null) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+            // Не сбрасываем количество кубиков, только останавливаем
+        }
+
+        function updateStatistics() {
+            if (rollHistory.length === 0) return;
+
+            const statsContainer = document.getElementById("statsContainer");
+            const chartContainer = document.getElementById("chartContainer");
+            
+            // Основная статистика
+            const sum = rollHistory.reduce((a, b) => a + b, 0);
+            const average = sum / rollHistory.length;
+            const maxRoll = Math.max(...rollHistory);
+            const minRoll = Math.min(...rollHistory);
+            
+            // Распределение значений
+            const distribution = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+            rollHistory.forEach(roll => {
+                distribution[roll]++;
+            });
+            
+            // Находим максимальное значение для нормализации графика
+            const maxCount = Math.max(...Object.values(distribution));
+            
+            // Обновляем статистику
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalRolls}</div>
+                    <div class="stat-label">Всего бросков</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${average.toFixed(2)}</div>
+                    <div class="stat-label">Среднее значение</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${sum}</div>
+                    <div class="stat-label">Общая сумма</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${minRoll}-${maxRoll}</div>
+                    <div class="stat-label">Диапазон</div>
+                </div>
+            `;
+            
+            // Строим график распределения
+            let chartHTML = `<h3>📊 Распределение значений (${rollHistory.length} бросков)</h3>`;
+            for (let i = 1; i <= 6; i++) {
+                const count = distribution[i];
+                const percentage = ((count / rollHistory.length) * 100).toFixed(1);
+                const barWidth = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                
+                chartHTML += `
+                    <div class="distribution-bar">
+                        <div class="distribution-label">${i}</div>
+                        <div class="distribution-bar-inner">
+                            <div class="distribution-bar-fill" style="width: ${barWidth}%">
+                                ${count > 0 ? count : ''}
+                            </div>
+                        </div>
+                        <div style="min-width: 50px; text-align: right; font-weight: bold; color: #2c3e50;">
+                            ${percentage}%
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chartContainer.innerHTML = chartHTML;
+        }
+
+        // Автоматический бросок при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            rollDice();
+        });
+
+        // Обработка изменения количества кубиков
+        document.getElementById('numOfDice').addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (value > 10000) {
+                this.value = 10000;
+            } else if (value < 1) {
+                this.value = 1;
+            }
+        });
+    </script>
+</body>
+</html>

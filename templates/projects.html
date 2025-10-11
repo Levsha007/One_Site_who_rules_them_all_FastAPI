@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/bro-code.png') }}" type="image/x-icon">
+  <title>Проекты Bro Code - Мой Сайт</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/projects.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-panel">
+    <button class="home-btn" onclick="window.location.href='/'">🏠 Главная</button>
+    <h1 class="current-gallery-title">Проекты Bro Code</h1>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+  </div>
+
+  <div class="desktop-container">
+    <!-- Рабочий стол с проектами -->
+    <div class="projects-desktop">
+      <!-- Tic Tac Toe -->
+      <div class="desktop-shortcut" data-project="tic-tac-toe">
+        <div class="shortcut-icon">⭕</div>
+        <div class="shortcut-name">Крестики-Нолики</div>
+      </div>
+
+      <!-- Stopwatch -->
+      <div class="desktop-shortcut" data-project="stopwatch">
+        <div class="shortcut-icon">⏱️</div>
+        <div class="shortcut-name">Секундомер</div>
+      </div>
+
+      <!-- Digital Clock -->
+      <div class="desktop-shortcut" data-project="clock">
+        <div class="shortcut-icon">🕒</div>
+        <div class="shortcut-name">Цифровые Часы</div>
+      </div>
+
+      <!-- После существующих ярлыков добавляем: -->
+      <div class="desktop-shortcut" data-project="interest-calculator">
+        <div class="shortcut-icon">💰</div>
+        <div class="shortcut-name">Калькулятор процентов</div>
+      </div>
+
+      <div class="desktop-shortcut" data-project="dice-roller">
+        <div class="shortcut-icon">🎲</div>
+        <div class="shortcut-name">Бросок кубиков</div>
+      </div>
+
+      <div class="desktop-shortcut" data-project="password-generator">
+        <div class="shortcut-icon">🔐</div>
+        <div class="shortcut-name">Генератор паролей</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно для проектов -->
+  <div id="project-modal" class="project-modal">
+    <div class="project-modal-content">
+      <button class="close-project-btn">&times;</button>
+      <div id="project-frame-container"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2025 Мой Сайт. Все права защищены.
+  </footer>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/projects.js') }}"></script>
+</body>
+</html>

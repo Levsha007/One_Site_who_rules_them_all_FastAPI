@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock - Bro Code</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url("{{ url_for('static', path='assets/city.jpg') }}");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+        }
+
+        #clock-container{
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #clock{
+            font-weight: bold;
+            text-align: center;
+            font-family: monospace;
+            font-size: 8rem;
+            color: antiquewhite;
+            backdrop-filter: blur(4px);
+            width: 100%;
+            background-color: hsla(0, 0%, 100%, 0.1);
+            padding: 1%;
+        }
+    </style>
+</head>
+<body>
+    <div id="clock-container">
+        <div id="clock">00:00:00 AM</div>
+    </div>
+
+    <script>
+        function updateClock(){
+            const now = new Date();
+            let hours = now.getHours();
+            const meridiem = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12 || 12;
+            hours = hours.toString().padStart(2, 0);
+            const minutes = now.getMinutes().toString().padStart(2, 0);
+            const seconds = now.getSeconds().toString().padStart(2, 0);
+            const timeString = `${hours}:${minutes}:${seconds} ${meridiem}`;
+            document.getElementById("clock").textContent = timeString;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

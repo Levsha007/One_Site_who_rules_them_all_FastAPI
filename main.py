@@ -246,6 +246,35 @@ async def read_grow(request: Request):
 async def read_weather(request: Request):
     return templates.TemplateResponse("weather.html", {"request": request})
 
+# ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
+
+@app.get("/projects", response_class=HTMLResponse)
+async def read_projects(request: Request):
+    return templates.TemplateResponse("projects.html", {"request": request})
+
+@app.get("/projects/tic-tac-toe", response_class=HTMLResponse)
+async def read_tic_tac_toe(request: Request):
+    return templates.TemplateResponse("projects/tic-tac-toe.html", {"request": request})
+
+@app.get("/projects/stopwatch", response_class=HTMLResponse)
+async def read_stopwatch(request: Request):
+    return templates.TemplateResponse("projects/stopwatch.html", {"request": request})
+
+@app.get("/projects/clock", response_class=HTMLResponse)
+async def read_clock(request: Request):
+    return templates.TemplateResponse("projects/clock.html", {"request": request})
+
+@app.get("/projects/interest-calculator", response_class=HTMLResponse)
+async def read_interest_calculator(request: Request):
+    return templates.TemplateResponse("projects/interest-calculator.html", {"request": request})
+
+@app.get("/projects/dice-roller", response_class=HTMLResponse)
+async def read_dice_roller(request: Request):
+    return templates.TemplateResponse("projects/dice-roller.html", {"request": request})
+
+@app.get("/projects/password-generator", response_class=HTMLResponse)
+async def read_password_generator(request: Request):
+    return templates.TemplateResponse("projects/password-generator.html", {"request": request})
 # ==================== API ДЛЯ ЦИТАТ ====================
 
 @app.get("/api/quotes")

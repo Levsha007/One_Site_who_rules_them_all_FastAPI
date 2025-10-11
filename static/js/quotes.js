@@ -63,7 +63,7 @@ class QuotesGenerator {
     async loadQuotesData() {
         try {
             // Загружаем цитаты из PostgreSQL API
-            const response = await fetch('/quotes');
+            const response = await fetch('/api/quotes');
             this.allQuotes = await response.json();
             
             // Собираем уникальных авторов и категории

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch - Bro Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "Dancing Script", cursive;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 20px;
+        }
+        
+        #myH1 {
+            font-size: 6rem;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            border: 8px solid white;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 90%;
+            width: auto;
+        }
+        
+        #display {
+            font-size: 5rem;
+            font-family: monospace;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: rgba(255,255,255,0.8);
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        #controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        #controls button {
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            font-family: "Dancing Script", cursive;
+        }
+        
+        #startBtn {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+        }
+        
+        #startBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(86, 171, 47, 0.4);
+        }
+        
+        #stopBtn {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        }
+        
+        #stopBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(255, 65, 108, 0.4);
+        }
+        
+        #resetBtn {
+            background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        }
+        
+        #resetBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(33, 147, 176, 0.4);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            #myH1 {
+                font-size: 4rem;
+            }
+            
+            #display {
+                font-size: 3rem;
+                min-width: 300px;
+                padding: 15px;
+            }
+            
+            #container {
+                padding: 30px 20px;
+            }
+            
+            #controls button {
+                font-size: 1.2rem;
+                padding: 12px 20px;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #myH1 {
+                font-size: 3rem;
+            }
+            
+            #display {
+                font-size: 2.5rem;
+                min-width: 250px;
+            }
+            
+            #controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #controls button {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="myH1">Stopwatch</h1>
+    <div id="container">
+        <div id="display">00:00:00:00</div>
+        <div id="controls">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn">Stop</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById("display");
+        const startBtn = document.getElementById("startBtn");
+        const stopBtn = document.getElementById("stopBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        
+        let timer = null;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let isRunning = false;
+
+        startBtn.addEventListener("click", start);
+        stopBtn.addEventListener("click", stop);
+        resetBtn.addEventListener("click", reset);
+
+        function start(){
+            if(!isRunning){
+                startTime = Date.now() - elapsedTime;
+                timer = setInterval(update, 10);
+                isRunning = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }
+        }
+
+        function stop(){
+            if(isRunning){
+                clearInterval(timer);
+                elapsedTime = Date.now() - startTime;
+                isRunning = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function reset(){
+            clearInterval(timer);
+            startTime = 0;
+            elapsedTime = 0;
+            isRunning = false;
+            display.textContent = "00:00:00:00";
+            startBtn.disabled = false;
+            stopBtn.disabled = false;
+        }
+
+        function update(){
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+
+            let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+            let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+            let seconds = Math.floor(elapsedTime / 1000 % 60);
+            let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+
+            hours = String(hours).padStart(2, "0");
+            minutes = String(minutes).padStart(2, "0");
+            seconds = String(seconds).padStart(2, "0");
+            milliseconds = String(milliseconds).padStart(2, "0");
+
+            display.textContent = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+        }
+    </script>
+</body>
+</html>

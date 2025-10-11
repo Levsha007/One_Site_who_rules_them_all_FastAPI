@@ -7,9 +7,9 @@
     <link rel="icon" href="{{ url_for('static', path='assets/witcher_parallax.png') }}" type="image/x-icon">
     <title>Мир Ведьмака</title>
 
-    <!-- Кнопка возврата на главную -->
+    <!-- Кнопка возврата в галерею -->
     <style>
-        .home-btn {
+        .back-btn {
             position: fixed;
             top: 20px;
             left: 20px;
@@ -17,16 +17,17 @@
             background: rgba(0, 0, 0, 0.3);
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 16px;
+            padding: 10px 20px;
+            border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
             font-weight: bold;
             text-decoration: none;
             backdrop-filter: blur(8px);
             transition: all 0.3s ease;
+            font-family: Arial, sans-serif;
         }
-        .home-btn:hover {
+        .back-btn:hover {
             background: rgba(0, 0, 0, 0.5);
             transform: scale(1.05);
         }
@@ -42,8 +43,8 @@
     <script src="{{ url_for('static', path='js/witcher.js') }}" defer></script>
 </head>
 <body>
-    <!-- Кнопка возврата на главную -->
-    <a href="/" class="home-btn">&larr; Главная</a>
+    <!-- Кнопка возврата в галерею параллаксов -->
+    <button class="back-btn" onclick="window.location.href='/parallax'">← Назад</button>
 
     <div class="swiper slider">
         <div class="swiper-wrapper slider__wrapper">

@@ -222,14 +222,6 @@ async def read_favorites(request: Request):
 async def read_github(request: Request):
     return templates.TemplateResponse("github.html", {"request": request})
 
-@app.get("/parallax", response_class=HTMLResponse)
-async def read_parallax(request: Request):
-    return templates.TemplateResponse("parallax.html", {"request": request})
-
-@app.get("/witcher", response_class=HTMLResponse)
-async def read_witcher(request: Request):
-    return templates.TemplateResponse("witcher.html", {"request": request})
-
 @app.get("/color-generator", response_class=HTMLResponse)
 async def read_color_generator(request: Request):
     return templates.TemplateResponse("color-generator.html", {"request": request})
@@ -238,19 +230,32 @@ async def read_color_generator(request: Request):
 async def read_quotes(request: Request):
     return templates.TemplateResponse("quotes.html", {"request": request})
 
-@app.get("/grow", response_class=HTMLResponse)
-async def read_grow(request: Request):
-    return templates.TemplateResponse("grow.html", {"request": request})
-
 @app.get("/weather", response_class=HTMLResponse)
 async def read_weather(request: Request):
     return templates.TemplateResponse("weather.html", {"request": request})
+
+# Заменяем существующие роуты параллаксов
+@app.get("/parallax", response_class=HTMLResponse)
+async def read_parallax_gallery(request: Request):
+    return templates.TemplateResponse("parallax/parallax-gallery.html", {"request": request})
+
+@app.get("/parallax/forest", response_class=HTMLResponse)
+async def read_parallax_forest(request: Request):
+    return templates.TemplateResponse("parallax/parallax-forest.html", {"request": request})
+
+@app.get("/parallax/witcher", response_class=HTMLResponse)
+async def read_parallax_witcher(request: Request):
+    return templates.TemplateResponse("parallax/witcher.html", {"request": request})
+
+@app.get("/parallax/grow", response_class=HTMLResponse)
+async def read_parallax_grow(request: Request):
+    return templates.TemplateResponse("parallax/grow.html", {"request": request})
 
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)
 async def read_projects(request: Request):
-    return templates.TemplateResponse("projects.html", {"request": request})
+    return templates.TemplateResponse("projects/projects.html", {"request": request})
 
 @app.get("/projects/tic-tac-toe", response_class=HTMLResponse)
 async def read_tic_tac_toe(request: Request):

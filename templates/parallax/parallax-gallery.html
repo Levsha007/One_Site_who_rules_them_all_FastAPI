@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Параллакс Галерея - Мой Сайт</title>
+  <link rel="icon" href="{{ url_for('static', path='assets/parallax-icon.png') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/parallax-gallery.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn" onclick="window.location.href='/'">&larr; Главная</button>
+    <h1 class="current-gallery-title">Параллакс Галерея</h1>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+  </div>
+
+  <div class="parallax-gallery">
+    <!-- Лесной параллакс -->
+    <a href="/parallax/forest" class="parallax-card" data-parallax="forest">
+      <div class="parallax-preview">
+        <img src="{{ url_for('static', path='assets/parallax/forest-preview.png') }}" alt="Параллакс Лес">
+      </div>
+      <div class="parallax-info">
+        <h3>Параллакс-Лес</h3>
+        <p>Погрузитесь в атмосферу волшебного леса с многослойным параллакс-эффектом</p>
+      </div>
+    </a>
+
+    <!-- Ведьмак параллакс -->
+    <a href="/parallax/witcher" class="parallax-card" data-parallax="witcher">
+      <div class="parallax-preview">
+        <img src="{{ url_for('static', path='assets/parallax/witcher-preview.png') }}" alt="Мир Ведьмака">
+      </div>
+      <div class="parallax-info">
+        <h3>Мир Ведьмака</h3>
+        <p>Отправьтесь в путешествие по вселенной Ведьмака с параллакс-слайдером</p>
+      </div>
+    </a>
+
+    <!-- Grow природа -->
+    <a href="/parallax/grow" class="parallax-card" data-parallax="grow">
+      <div class="parallax-preview">
+        <img src="{{ url_for('static', path='assets/parallax/grow-preview.png') }}" alt="Grow Природа">
+      </div>
+      <div class="parallax-info">
+        <h3>Grow - Природа</h3>
+        <p>Уникальный параллакс-слайдер с анимированными текстами и плавными переходами</p>
+      </div>
+    </a>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2025 Мой Сайт. Все права защищены.
+  </footer>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+</body>
+</html>

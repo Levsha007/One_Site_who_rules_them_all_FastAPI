@@ -1,4 +1,4 @@
-// static/js/gallery-page.js — галерея для FastAPI с 3D эффектами
+// static/js/gallery-page.js — галерея для FastAPI + PostgreSQL с 3D эффектами
 
 // Проверяем что мы на правильной странице
 if (!document.getElementById('gallery-grid')) {
@@ -285,7 +285,7 @@ increaseBtn?.addEventListener('click', () => {
 // ========== Загрузка галерей ==========
 async function loadGalleries(filter = 'all') {
   try {
-    const allGalleries = await apiFetch('/galleries');
+    const allGalleries = await apiFetch('/galleries');  // Правильный путь
 
     // Select для загрузки
     const select = document.querySelector('select[name="gallery"]');
@@ -319,7 +319,11 @@ async function loadGalleries(filter = 'all') {
       const allImages = [];
       allGalleries.forEach(g => {
         (g.images || []).forEach(img => {
-          allImages.push(Object.assign({}, img, { gallery: g.name }));
+          allImages.push(Object.assign({}, img, { 
+            gallery: g.name,
+            name: '', // PostgreSQL не хранит имена изображений
+            isExternal: img.file_path && img.file_path.startsWith('http') // Определяем по пути
+          }));
         });
       });
       const shuffled = allImages.sort(() => 0.5 - Math.random());
@@ -329,15 +333,25 @@ async function loadGalleries(filter = 'all') {
       const allImages = [];
       allGalleries.forEach(g => {
         (g.images || []).forEach(img => {
-          if (favorites.has(img.path)) {
-            allImages.push(Object.assign({}, img, { gallery: g.name }));
+          if (favorites.has(img.file_path)) {
+            allImages.push(Object.assign({}, img, { 
+              gallery: g.name,
+              name: '',
+              isExternal: img.file_path && img.file_path.startsWith('http')
+            }));
           }
         });
       });
       images = allImages;
     } else {
       const g = allGalleries.find(x => x.name === filter);
-      (g?.images || []).forEach(img => images.push(Object.assign({}, img, { gallery: g.name })));
+      (g?.images || []).forEach(img => {
+        images.push(Object.assign({}, img, { 
+          gallery: g.name,
+          name: '',
+          isExternal: img.file_path && img.file_path.startsWith('http')
+        }));
+      });
     }
 
     const overrides = readOverrides();
@@ -350,25 +364,24 @@ async function loadGalleries(filter = 'all') {
 
     const fragment = document.createDocumentFragment();
     visibleImages.forEach((img, index) => {
-      const displayName = overrides[img.path] || img.name || '';
-      const isFavorite = favorites.has(img.path);
+      const displayName = overrides[img.file_path] || img.name || '';
+      const isFavorite = favorites.has(img.file_path);
       const item = document.createElement('div');
       item.className = 'grid-item';
       const isExternal = img.isExternal ? 'external' : '';
       item.innerHTML = `
-        <img src="${escapeHtml(img.path || '')}" 
+        <img src="${escapeHtml(img.file_path || '')}" 
              alt="${escapeHtml(displayName)}" 
              title="${escapeHtml(displayName)}" 
              data-name="${escapeHtml(displayName)}" 
              data-original-name="${escapeHtml(img.name || '')}" 
              data-gallery="${escapeHtml(img.gallery || '')}" 
-             data-path="${escapeHtml(img.path || '')}"
+             data-path="${escapeHtml(img.file_path || '')}"
              data-index="${start + index}"
              class="${isExternal}"
              loading="lazy">
         <button class="favorite-heart ${isFavorite ? 'favorited' : ''}" aria-label="Добавить в избранное">❤️</button>
         <button class="delete-btn" aria-label="Удалить">✕</button>
-        <button class="rename-btn" aria-label="Переименовать">✏️</button>
         <div class="img-overlay">${escapeHtml(displayName)}</div>
         <div class="index-badge">${start + index + 1}</div>
       `;
@@ -483,7 +496,7 @@ document.getElementById('prev-page-top')?.addEventListener('click', () => {
 
 document.getElementById('next-page-top')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  apiFetch('/galleries')
+  apiFetch('/galleries')  // Правильный путь
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -508,7 +521,7 @@ document.getElementById('prev-page-bottom')?.addEventListener('click', () => {
 
 document.getElementById('next-page-bottom')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  apiFetch('/galleries')
+  apiFetch('/galleries')  // Правильный путь
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -548,7 +561,7 @@ document.getElementById('upload-form')?.addEventListener('submit', async (e) => 
   if (loadingEl) loadingEl.style.display = 'inline';
   
   try {
-    const response = await fetch('/api/upload', {
+    const response = await fetch('/api/upload', {  // Правильный путь
       method: 'POST',
       body: fd
     });
@@ -585,7 +598,7 @@ document.getElementById('create-gallery-form')?.addEventListener('submit', async
   }
   
   try {
-    const data = await apiPost('/create-gallery', { name: String(name).trim() });
+    const data = await apiPost('/galleries', { name: String(name).trim() });  // Правильный путь
     if (data.success) {
       showToast(`Папка "${data.name}" создана`);
       e.target.reset();
@@ -619,60 +632,6 @@ document.addEventListener('click', async (e) => {
     writeFavorites(favorites);
   }
   
-  if (e.target.classList.contains('rename-btn')) {
-    const parent = e.target.closest('.grid-item');
-    if (!parent) return;
-    if (parent.querySelector('.rename-input')) return;
-    const img = parent.querySelector('img');
-    const current = img.dataset.name || img.dataset.originalName || '';
-    const wrap = document.createElement('div');
-    wrap.className = 'rename-input';
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = current;
-    const save = document.createElement('button');
-    save.type = 'button';
-    save.textContent = '✓';
-    const cancel = document.createElement('button');
-    cancel.type = 'button';
-    cancel.textContent = '✖';
-    wrap.append(input, save, cancel);
-    parent.appendChild(wrap);
-    input.focus();
-    input.select();
-    
-    cancel.addEventListener('click', () => wrap.remove());
-    input.addEventListener('keydown', ev => {
-      if (ev.key === 'Enter') save.click();
-      if (ev.key === 'Escape') wrap.remove();
-    });
-    
-    save.addEventListener('click', async () => {
-      const newName = input.value.trim();
-      if (!newName) {
-        showToast('Имя не может быть пустым');
-        return;
-      }
-      
-      try {
-        await apiPost('/rename', {
-          gallery: img.dataset.gallery,
-          oldPath: img.dataset.path,
-          newName
-        });
-        applyNameToElement(img, newName);
-        showToast('Имя сохранено на сервере');
-        wrap.remove();
-      } catch (err) {
-        console.warn('Rename error:', err);
-        saveLocalOverride(img.dataset.path, newName);
-        applyNameToElement(img, newName);
-        showToast('Сетевая ошибка — имя сохранено локально');
-        wrap.remove();
-      }
-    });
-  }
-  
   if (e.target.classList.contains('delete-btn')) {
     const parent = e.target.closest('.grid-item');
     const img = parent.querySelector('img');
@@ -682,8 +641,8 @@ document.addEventListener('click', async (e) => {
     if (!confirm('Удалить это изображение?')) return;
     
     try {
-      await apiPost('/delete-image', { gallery, path });
-      
+      await apiPost('/delete-image', { gallery, path });  // Правильный путь
+  
       // Удаляем 3D эффект перед удалением элемента
       if (active3DEffects.has(img)) {
         active3DEffects.get(img).destroy();
@@ -894,7 +853,7 @@ document.addEventListener('paste', async (e) => {
         if (loadingEl) loadingEl.style.display = 'inline';
         
         try {
-          const response = await fetch('/api/upload', {
+          const response = await fetch('/api/upload', {  // Правильный путь
             method: 'POST',
             body: formData
           });
@@ -972,3 +931,14 @@ window.addEventListener('popstate', () => {
 window.addEventListener('beforeunload', () => {
   destroy3DEffects();
 });
+
+// Escape HTML функция
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

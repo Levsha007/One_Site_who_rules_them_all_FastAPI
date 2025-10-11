@@ -1,9 +1,8 @@
-// static/js/bookmarks-page.js — только закладки для FastAPI
+// static/js/bookmarks-page.js — закладки для FastAPI + PostgreSQL
 
 // Проверяем что мы на правильной странице
 if (!document.getElementById('bookmarks-grid')) {
   console.log('[Bookmarks] Страница не загружена.');
-  // Убрали return - он не нужен здесь
 }
 
 // === Режимы отображения ===
@@ -45,7 +44,17 @@ let searchTimeout = null;
 async function loadBookmarks() {
   try {
     bookmarks = await apiFetch('/bookmarks');
-    applySort();
+    
+    // Преобразуем данные из PostgreSQL формата
+    const formattedBookmarks = bookmarks.map(bookmark => ({
+      id: bookmark.id,
+      title: bookmark.title,
+      url: bookmark.url,
+      category: bookmark.category,
+      createdAt: bookmark.created_at
+    }));
+    
+    applySort(formattedBookmarks);
   } catch (err) {
     console.error(err);
     showToast('Ошибка загрузки закладок. Проверь сервер.');
@@ -53,10 +62,10 @@ async function loadBookmarks() {
 }
 
 // === Сортировка ===
-function applySort() {
+function applySort(bookmarksToSort = bookmarks) {
   const sortSelect = document.getElementById('sort-select');
   const sortValue = sortSelect ? sortSelect.value : 'name-asc';
-  let sortedBookmarks = [...bookmarks];
+  let sortedBookmarks = [...bookmarksToSort];
   
   if (sortValue === 'name-asc') {
     sortedBookmarks.sort((a, b) => a.title.localeCompare(b.title));
@@ -72,14 +81,27 @@ function applySort() {
 }
 
 // === Отрисовка ===
-function renderBookmarks(bookmarks) {
+function renderBookmarks(bookmarksToRender) {
   const grid = document.getElementById('bookmarks-grid');
   if (!grid) return;
   
   grid.innerHTML = '';
-  bookmarks.forEach(bookmark => {
+  
+  if (bookmarksToRender.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <h3>Нет закладок</h3>
+        <p>Добавьте первую закладку с помощью кнопки "+"</p>
+      </div>
+    `;
+    return;
+  }
+  
+  bookmarksToRender.forEach(bookmark => {
     const card = document.createElement('div');
     card.className = 'bookmark-card';
+    
+    // Возвращаем оригинальную структуру HTML
     card.innerHTML = `
       <div class="card-header">
         <img src="https://www.google.com/s2/favicons?domain=${escapeHtml(bookmark.url)}" alt="${escapeHtml(bookmark.title)}" class="site-icon">
@@ -185,8 +207,14 @@ document.getElementById('add-bookmark-form')?.addEventListener('submit', async (
   const url = formData.get('url');
   const category = formData.get('category');
   
+  // Валидация URL
+  let validUrl = url;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    validUrl = 'https://' + url;
+  }
+  
   try {
-    await apiPost('/bookmarks', { title, url, category });
+    await apiPost('/bookmarks', { title, url: validUrl, category });
     showToast('Закладка добавлена');
     await loadBookmarks();
     

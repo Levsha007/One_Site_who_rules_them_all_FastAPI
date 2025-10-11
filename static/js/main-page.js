@@ -99,14 +99,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('beforeunload', () => {
         stopMatrix();
     });
-
-    // === Тема (совместимость с app.js) ===
-    // Эта часть теперь дублирует функциональность из app.js
-    // Можно удалить, так как тема управляется через app.js
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.setAttribute('data-theme', 'light');
-    } else {
-        document.body.removeAttribute('data-theme');
-    }
 });

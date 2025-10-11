@@ -1,4 +1,5 @@
-// Weather App для FastAPI
+// static/js/weather.js - Погодное приложение для FastAPI + PostgreSQL
+
 class WeatherApp {
     constructor() {
         this.apiKey = null;
@@ -20,11 +21,10 @@ class WeatherApp {
             const response = await fetch('/api/weather-api-key');
             const data = await response.json();
             
-            if (data.apiKey) {
-                this.apiKey = data.apiKey;
-                console.log('API ключ загружен');
+            if (data.hasKey) {
+                console.log('API ключ настроен на сервере');
             } else {
-                throw new Error('API ключ не получен');
+                throw new Error('API ключ не настроен на сервере');
             }
         } catch (error) {
             console.error('Ошибка загрузки API ключа:', error);
@@ -34,25 +34,27 @@ class WeatherApp {
 
     setupEventListeners() {
         // Поиск по городу
-        document.getElementById('search-btn').addEventListener('click', () => {
+        document.getElementById('search-btn')?.addEventListener('click', () => {
             this.searchWeather();
         });
 
         // Поиск по Enter
-        document.getElementById('city-input').addEventListener('keypress', (e) => {
+        document.getElementById('city-input')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.searchWeather();
             }
         });
 
         // Геолокация
-        document.getElementById('location-btn').addEventListener('click', () => {
+        document.getElementById('location-btn')?.addEventListener('click', () => {
             this.getWeatherByLocation();
         });
     }
 
     setupAutocomplete() {
         const cityInput = document.getElementById('city-input');
+        if (!cityInput) return;
+
         const autocompleteContainer = document.createElement('div');
         autocompleteContainer.className = 'autocomplete-container';
         
@@ -120,8 +122,8 @@ class WeatherApp {
             item.className = 'autocomplete-item';
             item.innerHTML = `
                 <div>
-                    <div class="city-name">${city.name}</div>
-                    <div class="country-name">${city.country}</div>
+                    <div class="city-name">${this.escapeHtml(city.name)}</div>
+                    <div class="country-name">${this.escapeHtml(city.country)}</div>
                 </div>
             `;
             
@@ -152,7 +154,7 @@ class WeatherApp {
 
     async searchWeather() {
         const cityInput = document.getElementById('city-input');
-        const city = cityInput.value.trim();
+        const city = cityInput?.value.trim();
         
         if (!city) {
             this.showError('Пожалуйста, введите название города');
@@ -207,11 +209,6 @@ class WeatherApp {
     }
 
     async getWeatherData(city) {
-        if (!this.apiKey) {
-            this.showError('API ключ не загружен');
-            return;
-        }
-
         this.showLoading();
         this.hideError();
 
@@ -225,7 +222,7 @@ class WeatherApp {
 
             const data = await response.json();
             
-            if (data.cod !== 200) {
+            if (data.cod && data.cod !== 200) {
                 throw new Error(data.message || 'Город не найден');
             }
 
@@ -242,10 +239,8 @@ class WeatherApp {
     }
 
     async getWeatherDataByCoords(lat, lon) {
-        if (!this.apiKey) {
-            this.showError('API ключ не загружен');
-            return;
-        }
+        this.showLoading();
+        this.hideAutocomplete();
 
         try {
             const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
@@ -257,7 +252,7 @@ class WeatherApp {
 
             const data = await response.json();
             
-            if (data.cod !== 200) {
+            if (data.cod && data.cod !== 200) {
                 throw new Error(data.message || 'Данные не найдены');
             }
 
@@ -276,30 +271,61 @@ class WeatherApp {
 
     displayWeatherData(data) {
         this.displayCurrentWeather(data);
-        this.getForecast(data.coord.lat, data.coord.lon);
+        if (data.coord) {
+            this.getForecast(data.coord.lat, data.coord.lon);
+        }
     }
 
     displayCurrentWeather(data) {
         // Обновляем основную информацию
-        document.getElementById('city-name').textContent = `${data.name}, ${data.sys.country}`;
-        document.getElementById('current-date').textContent = this.formatDate(new Date());
-        document.getElementById('current-temp').textContent = `${Math.round(data.main.temp)}°`;
-        document.getElementById('feels-like').textContent = `${Math.round(data.main.feels_like)}°`;
-        document.getElementById('weather-description').textContent = data.weather[0].description;
+        const cityNameElement = document.getElementById('city-name');
+        const currentDateElement = document.getElementById('current-date');
+        const currentTempElement = document.getElementById('current-temp');
+        const feelsLikeElement = document.getElementById('feels-like');
+        const weatherDescElement = document.getElementById('weather-description');
+        const weatherIconElement = document.getElementById('weather-icon');
+
+        if (cityNameElement) {
+            cityNameElement.textContent = `${data.name}${data.sys?.country ? `, ${data.sys.country}` : ''}`;
+        }
+        if (currentDateElement) {
+            currentDateElement.textContent = this.formatDate(new Date());
+        }
+        if (currentTempElement) {
+            currentTempElement.textContent = `${Math.round(data.main.temp)}°`;
+        }
+        if (feelsLikeElement) {
+            feelsLikeElement.textContent = `${Math.round(data.main.feels_like)}°`;
+        }
+        if (weatherDescElement) {
+            weatherDescElement.textContent = data.weather[0].description;
+        }
         
         // Устанавливаем иконку
-        const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-        document.getElementById('weather-icon').src = iconUrl;
-        document.getElementById('weather-icon').alt = data.weather[0].description;
+        if (weatherIconElement) {
+            const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+            weatherIconElement.src = iconUrl;
+            weatherIconElement.alt = data.weather[0].description;
+        }
 
         // Обновляем детали
-        document.getElementById('wind-speed').textContent = `${data.wind.speed} м/с`;
-        document.getElementById('humidity').textContent = `${data.main.humidity}%`;
-        document.getElementById('pressure').textContent = `${data.main.pressure} hPa`;
-        document.getElementById('visibility').textContent = `${(data.visibility / 1000).toFixed(1)} км`;
+        const windSpeedElement = document.getElementById('wind-speed');
+        const humidityElement = document.getElementById('humidity');
+        const pressureElement = document.getElementById('pressure');
+        const visibilityElement = document.getElementById('visibility');
+
+        if (windSpeedElement) windSpeedElement.textContent = `${data.wind?.speed || 0} м/с`;
+        if (humidityElement) humidityElement.textContent = `${data.main.humidity}%`;
+        if (pressureElement) pressureElement.textContent = `${data.main.pressure} hPa`;
+        if (visibilityElement) {
+            visibilityElement.textContent = data.visibility ? `${(data.visibility / 1000).toFixed(1)} км` : 'N/A';
+        }
 
         // Показываем карточку
-        document.getElementById('current-weather').style.display = 'block';
+        const currentWeatherElement = document.getElementById('current-weather');
+        if (currentWeatherElement) {
+            currentWeatherElement.style.display = 'block';
+        }
     }
 
     async getForecast(lat, lon) {
@@ -313,7 +339,7 @@ class WeatherApp {
 
             const data = await response.json();
             
-            if (data.cod !== '200') {
+            if (data.cod && data.cod !== '200') {
                 throw new Error(data.message || 'Прогноз не найден');
             }
 
@@ -327,10 +353,17 @@ class WeatherApp {
 
     displayForecast(data) {
         const forecastContainer = document.getElementById('forecast-container');
+        if (!forecastContainer) return;
+
         forecastContainer.innerHTML = '';
 
         // Берем прогноз на 5 дней (каждые 24 часа)
-        const dailyForecasts = data.list.filter((item, index) => index % 8 === 0).slice(0, 5);
+        const dailyForecasts = data.list ? data.list.filter((item, index) => index % 8 === 0).slice(0, 5) : [];
+
+        if (dailyForecasts.length === 0) {
+            forecastContainer.innerHTML = '<div class="no-forecast">Прогноз недоступен</div>';
+            return;
+        }
 
         dailyForecasts.forEach(forecast => {
             const date = new Date(forecast.dt * 1000);
@@ -341,22 +374,25 @@ class WeatherApp {
                 <div class="forecast-date">${this.formatDay(date)}</div>
                 <div class="forecast-icon">
                     <img src="https://openweathermap.org/img/wn/${forecast.weather[0].icon}.png" 
-                         alt="${forecast.weather[0].description}">
+                         alt="${this.escapeHtml(forecast.weather[0].description)}">
                 </div>
                 <div class="forecast-temp">
                     ${Math.round(forecast.main.temp)}°
                 </div>
-                <div class="forecast-desc">${forecast.weather[0].description}</div>
+                <div class="forecast-desc">${this.escapeHtml(forecast.weather[0].description)}</div>
                 <div class="forecast-details">
                     <span>💧 ${forecast.main.humidity}%</span>
-                    <span>💨 ${forecast.wind.speed} м/с</span>
+                    <span>💨 ${forecast.wind?.speed || 0} м/с</span>
                 </div>
             `;
 
             forecastContainer.appendChild(dayElement);
         });
 
-        document.getElementById('forecast-section').style.display = 'block';
+        const forecastSection = document.getElementById('forecast-section');
+        if (forecastSection) {
+            forecastSection.style.display = 'block';
+        }
     }
 
     formatDate(date) {
@@ -381,27 +417,64 @@ class WeatherApp {
     }
 
     showLoading() {
-        document.getElementById('loading').style.display = 'block';
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'block';
+        }
         this.hideError();
-        document.getElementById('current-weather').style.display = 'none';
-        document.getElementById('forecast-section').style.display = 'none';
+        
+        const currentWeatherElement = document.getElementById('current-weather');
+        if (currentWeatherElement) {
+            currentWeatherElement.style.display = 'none';
+        }
+        
+        const forecastSection = document.getElementById('forecast-section');
+        if (forecastSection) {
+            forecastSection.style.display = 'none';
+        }
     }
 
     hideLoading() {
-        document.getElementById('loading').style.display = 'none';
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+        }
     }
 
     showError(message) {
         const errorElement = document.getElementById('error-message');
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
         this.hideLoading();
-        document.getElementById('current-weather').style.display = 'none';
-        document.getElementById('forecast-section').style.display = 'none';
+        
+        const currentWeatherElement = document.getElementById('current-weather');
+        if (currentWeatherElement) {
+            currentWeatherElement.style.display = 'none';
+        }
+        
+        const forecastSection = document.getElementById('forecast-section');
+        if (forecastSection) {
+            forecastSection.style.display = 'none';
+        }
     }
 
     hideError() {
-        document.getElementById('error-message').style.display = 'none';
+        const errorElement = document.getElementById('error-message');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+    }
+
+    escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 }
 

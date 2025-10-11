@@ -1,11 +1,11 @@
-// static/js/quotes.js - Генератор случайных цитат (локальная версия)
+// static/js/quotes.js - Генератор случайных цитат для PostgreSQL
 
 class QuotesGenerator {
     constructor() {
         this.currentQuote = null;
-        this.allQuotes = { ru: [], en: [] };
-        this.categories = { ru: [], en: [] };
-        this.authors = { ru: new Set(), en: new Set() };
+        this.allQuotes = [];
+        this.categories = [];
+        this.authors = new Set();
         
         this.quoteHistory = this.loadFromStorage('quoteHistory') || [];
         this.favoriteQuotes = this.loadFromStorage('favoriteQuotes') || [];
@@ -62,14 +62,12 @@ class QuotesGenerator {
 
     async loadQuotesData() {
         try {
-            const response = await fetch('/api/quotes');
-            const data = await response.json();
+            // Загружаем цитаты из PostgreSQL API
+            const response = await fetch('/quotes');
+            this.allQuotes = await response.json();
             
-            this.allQuotes = data.quotes;
-            this.categories = data.categories;
-            
-            // Собираем уникальных авторов
-            this.collectAuthors();
+            // Собираем уникальных авторов и категории
+            this.collectAuthorsAndCategories();
             
             // Заполняем селекторы
             this.populateCategorySelect();
@@ -86,15 +84,17 @@ class QuotesGenerator {
         }
     }
 
-    collectAuthors() {
-        this.authors = { ru: new Set(), en: new Set() };
+    collectAuthorsAndCategories() {
+        this.authors = new Set();
+        this.categories = new Set();
         
-        ['ru', 'en'].forEach(lang => {
-            this.allQuotes[lang].forEach(quote => {
-                if (quote.author && quote.author.trim()) {
-                    this.authors[lang].add(quote.author);
-                }
-            });
+        this.allQuotes.forEach(quote => {
+            if (quote.author && quote.author.trim()) {
+                this.authors.add(quote.author);
+            }
+            if (quote.category_id && quote.category_id.trim()) {
+                this.categories.add(quote.category_id);
+            }
         });
     }
 
@@ -102,19 +102,41 @@ class QuotesGenerator {
         const language = this.languageSelect.value;
         this.categorySelect.innerHTML = '<option value="">Все категории</option>';
         
-        this.categories[language].forEach(category => {
+        // Преобразуем Set в массив и сортируем
+        const sortedCategories = Array.from(this.categories).sort();
+        
+        sortedCategories.forEach(category => {
             const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
+            option.value = category;
+            
+            // Преобразуем ID категории в читаемое название
+            const displayName = this.getCategoryDisplayName(category, language);
+            option.textContent = displayName;
+            
             this.categorySelect.appendChild(option);
         });
+    }
+
+    getCategoryDisplayName(categoryId, language) {
+        // Простое преобразование ID категории в читаемое название
+        const categoryMap = {
+            'inspirational': { ru: 'Вдохновляющие', en: 'Inspirational' },
+            'motivational': { ru: 'Мотивирующие', en: 'Motivational' },
+            'love': { ru: 'Любовь', en: 'Love' },
+            'life': { ru: 'Жизнь', en: 'Life' },
+            'success': { ru: 'Успех', en: 'Success' },
+            'wisdom': { ru: 'Мудрость', en: 'Wisdom' },
+            'philosophy': { ru: 'Философия', en: 'Philosophy' }
+        };
+        
+        return categoryMap[categoryId]?.[language] || categoryId;
     }
 
     populateAuthorSelect() {
         const language = this.languageSelect.value;
         this.authorSelect.innerHTML = '<option value="">Все авторы</option>';
         
-        const sortedAuthors = Array.from(this.authors[language]).sort();
+        const sortedAuthors = Array.from(this.authors).sort();
         sortedAuthors.forEach(author => {
             const option = document.createElement('option');
             option.value = author;
@@ -134,11 +156,12 @@ class QuotesGenerator {
         const category = this.categorySelect.value;
         const author = this.authorSelect.value;
         
-        let filteredQuotes = this.allQuotes[language];
+        // Фильтруем цитаты по языку и выбранным фильтрам
+        let filteredQuotes = this.allQuotes.filter(quote => quote.language === language);
         
         // Фильтруем по категории
         if (category) {
-            filteredQuotes = filteredQuotes.filter(quote => quote.category === category);
+            filteredQuotes = filteredQuotes.filter(quote => quote.category_id === category);
         }
         
         // Фильтруем по автору
@@ -153,10 +176,7 @@ class QuotesGenerator {
         
         // Выбираем случайную цитату
         const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-        this.currentQuote = {
-            ...filteredQuotes[randomIndex],
-            language: language
-        };
+        this.currentQuote = filteredQuotes[randomIndex];
         
         this.displayQuote();
         this.addToHistory();
@@ -174,7 +194,7 @@ class QuotesGenerator {
         if (!this.currentQuote) return;
         
         this.quoteText.textContent = this.currentQuote.text;
-        this.quoteAuthor.textContent = `— ${this.currentQuote.author}`;
+        this.quoteAuthor.textContent = this.currentQuote.author ? `— ${this.currentQuote.author}` : '';
         
         // Отображаем теги
         this.quoteTags.innerHTML = '';
@@ -189,17 +209,14 @@ class QuotesGenerator {
         
         // Отображаем метаданные
         this.quoteMetadata.innerHTML = '';
-        if (this.currentQuote.metadata) {
-            const meta = this.currentQuote.metadata;
-            const metaParts = [];
-            
-            if (meta.origin) metaParts.push(meta.origin);
-            if (meta.year) metaParts.push(meta.year);
-            if (meta.source) metaParts.push(meta.source);
-            
-            if (metaParts.length > 0) {
-                this.quoteMetadata.textContent = metaParts.join(' • ');
-            }
+        const metaParts = [];
+        
+        if (this.currentQuote.origin) metaParts.push(this.currentQuote.origin);
+        if (this.currentQuote.year) metaParts.push(this.currentQuote.year);
+        if (this.currentQuote.source) metaParts.push(this.currentQuote.source);
+        
+        if (metaParts.length > 0) {
+            this.quoteMetadata.textContent = metaParts.join(' • ');
         }
         
         // Анимация появления
@@ -263,7 +280,9 @@ class QuotesGenerator {
     async copyQuote() {
         if (!this.currentQuote) return;
         
-        const textToCopy = `"${this.currentQuote.text}" — ${this.currentQuote.author}`;
+        const textToCopy = this.currentQuote.author 
+            ? `"${this.currentQuote.text}" — ${this.currentQuote.author}`
+            : `"${this.currentQuote.text}"`;
         
         try {
             await navigator.clipboard.writeText(textToCopy);
@@ -288,7 +307,11 @@ class QuotesGenerator {
             speechSynthesis.cancel();
             
             const utterance = new SpeechSynthesisUtterance();
-            utterance.text = `${this.currentQuote.text} Автор: ${this.currentQuote.author}`;
+            const quoteText = this.currentQuote.author 
+                ? `${this.currentQuote.text} Автор: ${this.currentQuote.author}`
+                : this.currentQuote.text;
+                
+            utterance.text = quoteText;
             utterance.lang = this.currentQuote.language === 'ru' ? 'ru-RU' : 'en-US';
             utterance.rate = 0.8;
             utterance.pitch = 1;
@@ -365,10 +388,11 @@ class QuotesGenerator {
         
         element.innerHTML = `
             <div class="${type}-text">"${quote.text}"</div>
-            <div class="${type}-author">— ${quote.author}</div>
+            <div class="${type}-author">${quote.author ? `— ${quote.author}` : ''}</div>
             <div class="${type}-meta">
                 <span>${timeAgo}</span>
                 ${quote.language === 'ru' ? '🇷🇺' : '🇺🇸'}
+                ${quote.category_id ? `<span class="category-badge">${this.getCategoryDisplayName(quote.category_id, quote.language)}</span>` : ''}
             </div>
             ${type === 'favorite' ? `
                 <div class="favorite-actions">
@@ -384,7 +408,9 @@ class QuotesGenerator {
             
             copyBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const textToCopy = `"${quote.text}" — ${quote.author}`;
+                const textToCopy = quote.author 
+                    ? `"${quote.text}" — ${quote.author}`
+                    : `"${quote.text}"`;
                 navigator.clipboard.writeText(textToCopy);
                 showToast('Цитата скопирована!');
             });

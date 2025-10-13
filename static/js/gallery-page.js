@@ -285,7 +285,7 @@ increaseBtn?.addEventListener('click', () => {
 // ========== Загрузка галерей ==========
 async function loadGalleries(filter = 'all') {
   try {
-    const allGalleries = await apiFetch('/galleries');  // Правильный путь
+    const allGalleries = await apiFetch('/galleries');
 
     // Select для загрузки
     const select = document.querySelector('select[name="gallery"]');
@@ -321,8 +321,8 @@ async function loadGalleries(filter = 'all') {
         (g.images || []).forEach(img => {
           allImages.push(Object.assign({}, img, { 
             gallery: g.name,
-            name: '', // PostgreSQL не хранит имена изображений
-            isExternal: img.file_path && img.file_path.startsWith('http') // Определяем по пути
+            name: img.name || '', // Теперь используем имя из БД
+            isExternal: img.file_path && img.file_path.startsWith('http')
           }));
         });
       });
@@ -336,7 +336,7 @@ async function loadGalleries(filter = 'all') {
           if (favorites.has(img.file_path)) {
             allImages.push(Object.assign({}, img, { 
               gallery: g.name,
-              name: '',
+              name: img.name || '',
               isExternal: img.file_path && img.file_path.startsWith('http')
             }));
           }
@@ -348,7 +348,7 @@ async function loadGalleries(filter = 'all') {
       (g?.images || []).forEach(img => {
         images.push(Object.assign({}, img, { 
           gallery: g.name,
-          name: '',
+          name: img.name || '',
           isExternal: img.file_path && img.file_path.startsWith('http')
         }));
       });
@@ -364,7 +364,8 @@ async function loadGalleries(filter = 'all') {
 
     const fragment = document.createDocumentFragment();
     visibleImages.forEach((img, index) => {
-      const displayName = overrides[img.file_path] || img.name || '';
+      // Используем имя из БД, если оно есть, иначе из локального хранилища
+      const displayName = img.name || overrides[img.file_path] || '';
       const isFavorite = favorites.has(img.file_path);
       const item = document.createElement('div');
       item.className = 'grid-item';
@@ -382,6 +383,7 @@ async function loadGalleries(filter = 'all') {
              loading="lazy">
         <button class="favorite-heart ${isFavorite ? 'favorited' : ''}" aria-label="Добавить в избранное">❤️</button>
         <button class="delete-btn" aria-label="Удалить">✕</button>
+        <button class="rename-btn" aria-label="Переименовать">✏️</button>
         <div class="img-overlay">${escapeHtml(displayName)}</div>
         <div class="index-badge">${start + index + 1}</div>
       `;
@@ -496,7 +498,7 @@ document.getElementById('prev-page-top')?.addEventListener('click', () => {
 
 document.getElementById('next-page-top')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  apiFetch('/galleries')  // Правильный путь
+  apiFetch('/galleries')
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -521,7 +523,7 @@ document.getElementById('prev-page-bottom')?.addEventListener('click', () => {
 
 document.getElementById('next-page-bottom')?.addEventListener('click', () => {
   const gallery = localStorage.getItem('currentGallery') || 'all';
-  apiFetch('/galleries')  // Правильный путь
+  apiFetch('/galleries')
     .then(allGalleries => {
       const totalImages = allGalleries.reduce((acc, g) => acc + (g.images?.length || 0), 0);
       const totalPages = Math.ceil(totalImages / itemsPerPage);
@@ -561,7 +563,7 @@ document.getElementById('upload-form')?.addEventListener('submit', async (e) => 
   if (loadingEl) loadingEl.style.display = 'inline';
   
   try {
-    const response = await fetch('/api/upload', {  // Правильный путь
+    const response = await fetch('/api/upload', {
       method: 'POST',
       body: fd
     });
@@ -598,7 +600,7 @@ document.getElementById('create-gallery-form')?.addEventListener('submit', async
   }
   
   try {
-    const data = await apiPost('/galleries', { name: String(name).trim() });  // Правильный путь
+    const data = await apiPost('/galleries', { name: String(name).trim() });
     if (data.success) {
       showToast(`Папка "${data.name}" создана`);
       e.target.reset();
@@ -632,6 +634,66 @@ document.addEventListener('click', async (e) => {
     writeFavorites(favorites);
   }
   
+  if (e.target.classList.contains('rename-btn')) {
+    const parent = e.target.closest('.grid-item');
+    if (!parent) return;
+    if (parent.querySelector('.rename-input')) return;
+    const img = parent.querySelector('img');
+    const current = img.dataset.name || img.dataset.originalName || '';
+    const wrap = document.createElement('div');
+    wrap.className = 'rename-input';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current;
+    const save = document.createElement('button');
+    save.type = 'button';
+    save.textContent = '✓';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.textContent = '✖';
+    wrap.append(input, save, cancel);
+    parent.appendChild(wrap);
+    input.focus();
+    input.select();
+    
+    cancel.addEventListener('click', () => wrap.remove());
+    input.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') save.click();
+      if (ev.key === 'Escape') wrap.remove();
+    });
+    
+    save.addEventListener('click', async () => {
+      const newName = input.value.trim();
+      if (!newName) {
+        showToast('Имя не может быть пустым');
+        return;
+      }
+      
+      try {
+        // Сохраняем имя в БД
+        await apiPost('/rename-image', {
+          gallery: img.dataset.gallery,
+          path: img.dataset.path,
+          name: newName
+        });
+        
+        applyNameToElement(img, newName);
+        showToast('Имя сохранено в базе данных');
+        wrap.remove();
+        
+        // Обновляем локальное хранилище для обратной совместимости
+        saveLocalOverride(img.dataset.path, newName);
+      } catch (err) {
+        console.warn('Rename error:', err);
+        // Fallback: сохраняем локально
+        saveLocalOverride(img.dataset.path, newName);
+        applyNameToElement(img, newName);
+        showToast('Сетевая ошибка — имя сохранено локально');
+        wrap.remove();
+      }
+    });
+  }
+  
   if (e.target.classList.contains('delete-btn')) {
     const parent = e.target.closest('.grid-item');
     const img = parent.querySelector('img');
@@ -641,7 +703,7 @@ document.addEventListener('click', async (e) => {
     if (!confirm('Удалить это изображение?')) return;
     
     try {
-      await apiPost('/delete-image', { gallery, path });  // Правильный путь
+      await apiPost('/delete-image', { gallery, path });
   
       // Удаляем 3D эффект перед удалением элемента
       if (active3DEffects.has(img)) {
@@ -853,7 +915,7 @@ document.addEventListener('paste', async (e) => {
         if (loadingEl) loadingEl.style.display = 'inline';
         
         try {
-          const response = await fetch('/api/upload', {  // Правильный путь
+          const response = await fetch('/api/upload', {
             method: 'POST',
             body: formData
           });

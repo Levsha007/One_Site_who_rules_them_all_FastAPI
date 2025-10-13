@@ -106,6 +106,7 @@ def init_database():
                     id SERIAL PRIMARY KEY,
                     gallery_id INTEGER REFERENCES galleries(id),
                     file_path TEXT NOT NULL,
+                    name VARCHAR(500) DEFAULT '', -- ДОБАВЛЕНО: поле для имени изображения
                     width INTEGER,
                     height INTEGER,
                     created_at TIMESTAMP DEFAULT NOW()
@@ -280,6 +281,7 @@ async def read_dice_roller(request: Request):
 @app.get("/projects/password-generator", response_class=HTMLResponse)
 async def read_password_generator(request: Request):
     return templates.TemplateResponse("projects/password-generator.html", {"request": request})
+
 # ==================== API ДЛЯ ЦИТАТ ====================
 
 @app.get("/api/quotes")
@@ -408,10 +410,10 @@ async def get_galleries():
         # Для каждой галереи получаем изображения, отсортированные по ID в порядке убывания
         for gallery in galleries:
             cursor.execute("""
-                SELECT file_path, width, height 
+                SELECT file_path, name, width, height 
                 FROM gallery_images 
                 WHERE gallery_id = %s
-                ORDER BY id DESC  -- ← ДОБАВЛЕНО: сортировка по убыванию ID
+                ORDER BY id DESC
             """, (gallery['id'],))
             gallery['images'] = cursor.fetchall()
         
@@ -492,11 +494,12 @@ async def upload_images(
             for url in url_list:
                 if url.startswith(('http://', 'https://')):
                     cursor.execute("""
-                        INSERT INTO gallery_images (gallery_id, file_path, width, height)
-                        VALUES (%s, %s, %s, %s)
-                    """, (gallery_id, url, 300, 300))
+                        INSERT INTO gallery_images (gallery_id, file_path, name, width, height)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (gallery_id, url, '', 300, 300))
                     new_images.append({
                         "file_path": url,
+                        "name": '',
                         "width": 300,
                         "height": 300
                     })
@@ -521,12 +524,13 @@ async def upload_images(
                 
                 db_file_path = f"/static/uploads/{gallery}/{unique_filename}"
                 cursor.execute("""
-                    INSERT INTO gallery_images (gallery_id, file_path, width, height)
-                    VALUES (%s, %s, %s, %s)
-                """, (gallery_id, db_file_path, width, height))
+                    INSERT INTO gallery_images (gallery_id, file_path, name, width, height)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (gallery_id, db_file_path, '', width, height))
                 
                 new_images.append({
                     "file_path": db_file_path,
+                    "name": '',
                     "width": width,
                     "height": height
                 })
@@ -572,6 +576,46 @@ async def delete_image(request: Request):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка удаления: {e}")
+    finally:
+        conn.close()
+
+@app.post("/api/rename-image")
+async def rename_image(request: Request):
+    """Переименовать изображение в БД"""
+    data = await request.json()
+    gallery_name = data.get('gallery')
+    image_path = data.get('path')
+    new_name = data.get('name')
+    
+    if not all([gallery_name, image_path, new_name]):
+        raise HTTPException(status_code=400, detail="Не все параметры указаны")
+    
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Ошибка подключения к БД")
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Обновляем имя изображения в БД
+        cursor.execute("""
+            UPDATE gallery_images 
+            SET name = %s 
+            WHERE file_path = %s 
+            AND gallery_id IN (SELECT id FROM galleries WHERE name = %s)
+        """, (new_name, image_path, gallery_name))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Изображение не найдено")
+        
+        conn.commit()
+        return {"success": True, "name": new_name}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Ошибка переименования: {e}")
     finally:
         conn.close()
 

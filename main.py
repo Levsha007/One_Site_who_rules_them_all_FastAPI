@@ -252,6 +252,9 @@ async def read_parallax_witcher(request: Request):
 async def read_parallax_grow(request: Request):
     return templates.TemplateResponse("parallax/grow.html", {"request": request})
 
+@app.get("/codepen-clone", response_class=HTMLResponse)
+async def read_parallax_grow(request: Request):
+    return templates.TemplateResponse("codepen-clone.html", {"request": request})
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)

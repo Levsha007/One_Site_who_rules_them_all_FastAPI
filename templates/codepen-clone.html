@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/codepen-clone.png') }}" type="image/x-icon">
+  <title>CodePen Clone</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/codepen-clone.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <div class="pen-info">
+      <input type="text" id="pen-title" value="Мой Pen" placeholder="Название Pen">
+      <button id="new-pen" class="btn-primary">
+        <i class="fas fa-plus"></i> Новый Pen
+      </button>
+      <button id="save-pen" class="btn-primary">
+        <i class="fas fa-save"></i> Сохранить
+      </button>
+      <button id="show-collection" class="btn-secondary">
+        <i class="fas fa-heart"></i> Мои Pens
+      </button>
+    </div>
+    <div class="panel-actions">
+      <button id="clear-html" class="btn-secondary" title="Очистить HTML">
+        <i class="fab fa-html5"></i> Очистить
+      </button>
+      <button id="clear-css" class="btn-secondary" title="Очистить CSS">
+        <i class="fab fa-css3-alt"></i> Очистить
+      </button>
+      <button id="clear-js" class="btn-secondary" title="Очистить JS">
+        <i class="fab fa-js"></i> Очистить
+      </button>
+      <button id="clear-all" class="btn-secondary" title="Очистить всё">
+        <i class="fas fa-trash"></i> Очистить всё
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+    </div>
+  </div>
+
+  <div class="editor-container">
+    <!-- Панель редакторов кода -->
+    <div class="code-panels">
+      <div class="code-panel html-panel">
+        <div class="panel-header">
+          <h3><i class="fab fa-html5"></i> HTML</h3>
+          <div class="panel-actions">
+            <button class="btn-reset" data-type="html">
+              <i class="fas fa-redo"></i> Сброс
+            </button>
+          </div>
+        </div>
+        <textarea id="html-editor" class="code-editor" spellcheck="false">&lt;div class="container"&gt;
+  &lt;h1 class="row skew-title"&gt;  
+    &lt;span&gt;S&lt;/span&gt;&lt;span&gt;K&lt;/span&gt;&lt;span&gt;E&lt;/span&gt;&lt;span&gt;W&lt;/span&gt;&lt;span&gt;E&lt;/span&gt;&lt;span class="last"&gt;D&lt;/span&gt;
+    &amp;nbsp; 
+    &lt;span&gt;T&lt;/span&gt;&lt;span&gt;E&lt;/span&gt;&lt;span&gt;X&lt;/span&gt;&lt;span class="last"&gt;T&lt;/span&gt;
+    &amp;nbsp;
+    &lt;span class="alt"&gt;C&lt;/span&gt;&lt;span class="alt"&gt;S&lt;/span&gt;&lt;span class="alt"&gt;S&lt;/span&gt;&lt;span class="alt last"&gt;3&lt;/span&gt;
+  &lt;/h1&gt;
+  &lt;p class="row row--intro"&gt;Add some depth to page titles with CSS3 'SkewY' transform and optional JS hover.&lt;/p&gt;
+&lt;/div&gt;</textarea>
+      </div>
+
+      <div class="code-panel css-panel">
+        <div class="panel-header">
+          <h3><i class="fab fa-css3-alt"></i> CSS</h3>
+          <div class="panel-actions">
+            <button class="btn-reset" data-type="css">
+              <i class="fas fa-redo"></i> Сброс
+            </button>
+          </div>
+        </div>
+        <textarea id="css-editor" class="code-editor" spellcheck="false">body {
+  margin-top: 180px;
+  background-color: #112;
+  background-color: #0a1526;
+  font-family: Roboto, 'helvetica neue', Helvetica, Arial, sans-serif;
+}
+
+.container {
+  width: 800px;
+  margin: auto;
+}
+
+.row {
+  position: relative;
+  height: 50px;
+  z-index: 1;
+  clear: both;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.row--intro {
+  padding-top: 20px;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 300;
+  color: #fff;
+  opacity: 0.4;
+}
+
+.row--intro span {
+  font-size: 11px;
+}
+
+.skew-title {
+  font-size: 25px;
+}
+
+.skew-title span {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 50px;
+  margin: auto;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  font-family: 'roboto condensed';
+  font-weight: 700;
+  font-size: 35.7px;
+  line-height: 50px;
+  transform: skewY(-15deg);
+  transform-origin: 0 100%;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.skew-title span:after,
+.skew-title span:before {
+  display: block;
+  top: 0;
+  left: 0;
+  width: 40px;
+  height: 50px;
+  position: absolute;
+  background: #104c7a;
+  content: ' ';
+  z-index: -1;
+  transition: all 0.2s;
+}
+
+.skew-title span:before {
+  background: rgba(0,0,0,0.1);
+  transform: skewY(15deg);
+  transform-origin: 0 0;
+}
+
+.skew-title span:nth-child(even) {
+  background-color: #0d3d61;
+  transform: skewY(15deg);
+  transform-origin: 100% 100%;
+  color: #d9d9d9;
+}
+
+.skew-title span:nth-child(even):after {
+  background-color: #0d3d61;
+}
+
+.skew-title span:nth-child(even):before {
+  transform-origin: 100% 0;
+  transform: skewY(-15deg);
+}
+
+.skew-title span.flat {
+  transform: skewY(0);
+  color: #fff;
+}
+
+.skew-title span.flat:before {
+  transform: skewY(0);
+}
+
+.skew-title span.flat:nth-child(even):after {
+  background-color: #104c7a;
+}
+
+.skew-title span.alt:after {
+  background-color: #c82672;
+}
+
+.skew-title span.alt:nth-child(even):after {
+  background-color: #a61e5d;
+}
+
+.skew-title span.alt.flat:nth-child(even):after {
+  background-color: #c82672;
+}</textarea>
+      </div>
+
+      <div class="code-panel js-panel">
+        <div class="panel-header">
+          <h3><i class="fab fa-js"></i> JavaScript</h3>
+          <div class="panel-actions">
+            <button class="btn-reset" data-type="js">
+              <i class="fas fa-redo"></i> Сброс
+            </button>
+          </div>
+        </div>
+        <textarea id="js-editor" class="code-editor" spellcheck="false">// We must use JS as we need to select previous
+// elements which can't be done with CSS.
+
+document.querySelectorAll('.skew-title span').forEach(span => {
+  span.addEventListener('mouseenter', function() {
+    this.classList.add('flat');
+    const n = Array.from(this.parentNode.children).indexOf(this) + 1;
+    
+    if (n % 2 === 0) {
+      this.previousElementSibling?.classList.add('flat');
+    } else {
+      if (!this.classList.contains('last')) {
+        this.nextElementSibling?.classList.add('flat');
+      }
+    }
+  });
+});
+
+document.querySelector('.skew-title').addEventListener('mouseleave', function() {
+  this.querySelectorAll('.flat').forEach(el => {
+    el.classList.remove('flat');
+  });
+});</textarea>
+      </div>
+    </div>
+
+    <!-- Ресайзер -->
+    <div id="resizer" class="resizer">
+      <div class="resizer-handle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div id="width-readout" class="width-readout">100%</div>
+    </div>
+
+    <!-- Панель превью -->
+    <div class="preview-panel">
+      <div class="panel-header">
+        <h3><i class="fas fa-eye"></i> Preview</h3>
+        <div class="panel-actions">
+          <button id="refresh-preview" class="btn-secondary" title="Обновить превью">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+          <button id="fullscreen-preview" class="btn-secondary" title="Полный экран">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+      <div class="preview-content">
+        <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно коллекции -->
+  <div id="collection-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-heart"></i> Мои Pens</h3>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="collection-grid" id="pens-grid">
+          <!-- Pens будут добавляться здесь -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary close-modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Уведомления -->
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', path='js/codepen-clone.js') }}"></script>
+</body>
+</html>

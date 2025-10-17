@@ -255,6 +255,10 @@ async def read_parallax_grow(request: Request):
 @app.get("/codepen-clone", response_class=HTMLResponse)
 async def read_parallax_grow(request: Request):
     return templates.TemplateResponse("codepen-clone.html", {"request": request})
+
+@app.get("/spectrum", response_class=HTMLResponse)
+async def read_spectrum(request: Request):
+    return templates.TemplateResponse("spectrum-analyzer.html", {"request": request})
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)

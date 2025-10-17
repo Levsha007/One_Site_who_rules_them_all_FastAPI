@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудио Визуализатор</title>
+    <link rel="icon" href="{{ url_for('static', path='assets/spectrum-icon.png') }}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/spectrum-analyzer.css') }}">
+</head>
+<body>
+    <div class="page-container spectrum-page">
+        <!-- Минималистичная верхняя панель -->
+        <div class="spectrum-top-panel">
+            <button id="home-btn" class="home-btn" onclick="window.location.href='/'">&larr; Главная</button>
+            <div class="spectrum-title">Спектральный Визуализатор</div>
+            <div class="spectrum-controls">
+                <button class="spectrum-control-btn" id="settingsBtn">⚙️ Настройки</button>
+                <button class="spectrum-control-btn" id="cleanModeBtn">🧹 Чистый режим</button>
+            </div>
+        </div>
+
+        <!-- Основной контент - только canvas -->
+        <div class="spectrum-main">
+            <canvas id="spectrumCanvas"></canvas>
+            <div class="spectrum-overlay">
+                <div class="spectrum-status" id="statusIndicator">
+                    <div class="status-dot"></div>
+                    <span class="status-text">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка выхода из чистого режима -->
+        <div class="clean-mode-exit" id="cleanModeExit">
+            <button class="exit-btn" title="Выйти из чистого режима">
+                ← Выйти
+            </button>
+        </div>
+
+        <!-- Боковая панель настроек -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="panel-header">
+                <h2>Настройки Визуализатора</h2>
+                <button class="close-panel-btn" id="closePanel">&times;</button>
+            </div>
+            
+            <div class="panel-content">
+                <!-- Основные настройки -->
+                <div class="settings-category">
+                    <div class="category-header">
+                        <h3>📊 Основные настройки</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="category-content">
+                        <div class="setting-group">
+                            <label>Тип визуализации:</label>
+                            <select id="visualizationType" class="setting-select">
+                                <option value="bars">📊 Прямолинейные столбцы</option>
+                                <option value="circleBars">⭕ Круг из столбцов</option>
+                                <option value="wave">🌊 Волна</option>
+                                <option value="spectrum">🌈 Спектр</option>
+                                <option value="particles">✨ Частицы</option>
+                                <option value="mountain">🏔️ Горы</option>
+                                <option value="liquid">💧 Жидкость</option>
+                                <option value="neon">💡 Неон</option>
+                                <option value="grid">🔲 Сетка</option>
+                                <option value="spiral">🌀 Спираль</option>
+                                <option value="spiralBars">🌀 Спираль-столбцы</option>
+                                <option value="mirrorBars">🪞 Зеркальные столбцы</option>
+                                <option value="mirrorWave">🪞 Зеркальная волна</option>
+                                <option value="mirrorSpectrum">🪞 Зеркальный спектр</option>
+                                <option value="circle">⭕ Круг</option>
+                                <option value="radar">📡 Радар</option>
+                            </select>
+                            <div class="setting-description">Выберите тип визуализации звукового спектра</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Количество столбцов: <span id="barsCountValue">128</span></label>
+                            <input type="range" id="barsCountSlider" min="32" max="256" value="128" class="setting-slider">
+                            <div class="setting-description">Количество отображаемых столбцов в спектре</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Чувствительность: <span id="sensitivityValue">100%</span></label>
+                            <input type="range" id="sensitivitySlider" min="10" max="300" value="100" class="setting-slider">
+                            <div class="setting-description">Усиление реакции на тихие звуки</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Скорость анимации: <span id="speedValue">5</span></label>
+                            <input type="range" id="speedSlider" min="1" max="10" value="5" class="setting-slider">
+                            <div class="setting-description">Скорость обновления визуализации (FPS)</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Сглаживание: <span id="smoothValue">0.7</span></label>
+                            <input type="range" id="smoothSlider" min="1" max="10" value="7" class="setting-slider">
+                            <div class="setting-description">Плавность переходов между кадрами (0.1-1.0)</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <button class="reset-btn" id="resetBasicSettings">🔄 Сбросить основные настройки</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Настройки цвета -->
+                <div class="settings-category">
+                    <div class="category-header">
+                        <h3>🎨 Цветовые схемы</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="category-content">
+                        <div class="color-schemes">
+                            <div class="color-scheme-grid">
+                                <button class="color-scheme-btn active" data-scheme="red">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #c0392b, #e74c3c)"></div>
+                                    <span>Красный</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="blue">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #2980b9, #3498db)"></div>
+                                    <span>Синий</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="green">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #27ae60, #2ecc71)"></div>
+                                    <span>Зеленый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="purple">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #8e44ad, #9b59b6)"></div>
+                                    <span>Фиолетовый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="orange">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #d35400, #e67e22)"></div>
+                                    <span>Оранжевый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="cyan">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #00bcd4, #00e5ff)"></div>
+                                    <span>Бирюзовый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="pink">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #e91e63, #f06292)"></div>
+                                    <span>Розовый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="yellow">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #f1c40f, #f39c12)"></div>
+                                    <span>Желтый</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="rainbow">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff)"></div>
+                                    <span>Радуга</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="fire">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #ff0000, #ff4000, #ff8000, #ffbf00, #ffff00)"></div>
+                                    <span>Огонь</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="ice">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #00ffff, #00bfff, #0080ff, #0040ff, #0000ff)"></div>
+                                    <span>Лёд</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="forest">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #006400, #008000, #228b22, #32cd32, #00ff00)"></div>
+                                    <span>Лес</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="ocean">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #000080, #0000ff, #0080ff, #00ffff, #00bfff)"></div>
+                                    <span>Океан</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="sunset">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #ff4500, #ff6347, #ff7f50, #ff8c00, #ffa500)"></div>
+                                    <span>Закат</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="neon">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff0000, #00ff00)"></div>
+                                    <span>Неон</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="pastel">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #ffb6c1, #87ceeb, #98fb98, #dda0dd, #f0e68c)"></div>
+                                    <span>Пастель</span>
+                                </button>
+                                <button class="color-scheme-btn" data-scheme="monochrome">
+                                    <div class="color-preview" style="background: linear-gradient(45deg, #333333, #666666, #999999, #cccccc, #ffffff)"></div>
+                                    <span>Монохром</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Пользовательские цвета:</label>
+                            <div class="custom-colors">
+                                <input type="color" id="color1" value="#c0392b" title="Цвет 1">
+                                <input type="color" id="color2" value="#e74c3c" title="Цвет 2">
+                                <input type="color" id="color3" value="#d35400" title="Цвет 3">
+                                <button class="apply-colors-btn" id="applyCustomColors">Применить</button>
+                            </div>
+                            <div class="setting-description">Настройте свои собственные цвета</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <button class="reset-btn" id="resetColorSettings">🔄 Сбросить цвета</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Дополнительные настройки -->
+                <div class="settings-category">
+                    <div class="category-header">
+                        <h3>⚡ Дополнительно</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="category-content">
+                        <div class="setting-group">
+                            <label>Интенсивность свечения: <span id="glowValue">10</span></label>
+                            <input type="range" id="glowSlider" min="0" max="20" value="10" class="setting-slider">
+                            <div class="setting-description">Сила свечения элементов</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Толщина линий: <span id="lineWidthValue">3</span></label>
+                            <input type="range" id="lineWidthSlider" min="1" max="10" value="3" class="setting-slider">
+                            <div class="setting-description">Толщина линий в волнах и контурах</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Размер частиц: <span id="particleSizeValue">3</span></label>
+                            <input type="range" id="particleSizeSlider" min="1" max="10" value="3" class="setting-slider">
+                            <div class="setting-description">Размер частиц в соответствующих режимах</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Количество частиц: <span id="particleCountValue">200</span></label>
+                            <input type="range" id="particleCountSlider" min="50" max="500" value="200" class="setting-slider">
+                            <div class="setting-description">Количество частиц в режиме "Частицы"</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Радиус круга: <span id="circleRadiusValue">60%</span></label>
+                            <input type="range" id="circleRadiusSlider" min="20" max="80" value="60" class="setting-slider">
+                            <div class="setting-description">Размер круговых визуализаций</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <button class="reset-btn" id="resetAdvancedSettings">🔄 Сбросить доп. настройки</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Управление -->
+                <div class="settings-category">
+                    <div class="category-header">
+                        <h3>🎛️ Управление</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="category-content">
+                        <div class="control-buttons">
+                            <button class="control-btn primary" id="startBtn">🎤 Начать запись</button>
+                            <button class="control-btn secondary" id="stopBtn" disabled>⏹️ Стоп</button>
+                            <button class="control-btn warning" id="resetAllSettings">🗑️ Сбросить ВСЕ настройки</button>
+                        </div>
+                        <div class="setting-description">Управление записью и сброс настроек</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Оверлей для закрытия панели -->
+        <div class="panel-overlay" id="panelOverlay"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="{{ url_for('static', path='js/app.js') }}"></script>
+    <script src="{{ url_for('static', path='js/spectrum-analyzer.js') }}"></script>
+</body>
+</html>

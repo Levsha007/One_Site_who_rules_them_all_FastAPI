@@ -1,9 +1,12 @@
-// static/js/weather.js - Погодное приложение для FastAPI + PostgreSQL
+// static/js/weather-app.js - Погодное приложение с картой
 
 class WeatherApp {
     constructor() {
         this.apiKey = null;
         this.currentCity = '';
+        this.currentCoords = null;
+        this.map = null;
+        this.marker = null;
         this.autocompleteTimeout = null;
         this.init();
     }
@@ -11,13 +14,13 @@ class WeatherApp {
     async init() {
         await this.loadApiKey();
         this.setupEventListeners();
+        this.initMap();
         this.loadLastCity();
         this.setupAutocomplete();
     }
 
     async loadApiKey() {
         try {
-            // Загружаем API ключ с сервера
             const response = await fetch('/api/weather-api-key');
             const data = await response.json();
             
@@ -49,6 +52,126 @@ class WeatherApp {
         document.getElementById('location-btn')?.addEventListener('click', () => {
             this.getWeatherByLocation();
         });
+
+        // Переключение карты
+        document.getElementById('map-toggle-btn')?.addEventListener('click', () => {
+            this.toggleMap();
+        });
+
+        // Закрытие карты
+        document.getElementById('close-map-btn')?.addEventListener('click', () => {
+            this.hideMap();
+        });
+    }
+
+    initMap() {
+        // Инициализация карты (скрыта по умолчанию)
+        this.map = L.map('map', {
+            worldCopyJump: false // Отключаем автоматическое перескакивание
+        }).setView([55.7558, 37.6173], 3); // Начальный вид - весь мир
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18,
+            noWrap: true // Предотвращаем заворачивание тайлов
+        }).addTo(this.map);
+
+        // Обработчик клика по карте
+        this.map.on('click', (e) => {
+            this.handleMapClick(e.latlng);
+        });
+
+        // Ограничиваем область карты разумными пределами
+        this.map.setMaxBounds([[-90, -180], [90, 180]]);
+
+        // Создаем кастомную иконку
+        this.createCustomIcon();
+    }
+
+    createCustomIcon() {
+        this.customIcon = L.divIcon({
+            className: 'weather-marker',
+            html: '<div style="background: var(--accent); border: 3px solid white; border-radius: 50%; width: 20px; height: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+    }
+
+    createMarker(coords) {
+        // Нормализуем координаты
+        const normalizedCoords = this.normalizeCoordinates(coords);
+        
+        // Удаляем старый маркер если есть
+        if (this.marker) {
+            this.map.removeLayer(this.marker);
+        }
+
+        // Создаем новый маркер с кастомной иконкой
+        this.marker = L.marker(normalizedCoords, { 
+            icon: this.customIcon,
+            draggable: false
+        }).addTo(this.map);
+
+        // Центрируем карту на нормализованных координатах
+        this.map.setView(normalizedCoords, this.map.getZoom());
+    }
+
+    normalizeCoordinates(coords) {
+        let lat = coords.lat;
+        let lng = coords.lng;
+        
+        // Нормализуем широту в пределах [-90, 90]
+        lat = Math.max(-90, Math.min(90, lat));
+        
+        // Нормализуем долготу в пределах [-180, 180]
+        while (lng < -180) lng += 360;
+        while (lng > 180) lng -= 360;
+        
+        return L.latLng(lat, lng);
+    }
+
+    handleMapClick(latlng) {
+        // Нормализуем координаты перед использованием
+        const normalizedLatLng = this.normalizeCoordinates(latlng);
+        
+        this.currentCoords = normalizedLatLng;
+        this.createMarker(normalizedLatLng);
+        
+        // Получаем погоду для выбранных координат
+        this.getWeatherDataByCoords(normalizedLatLng.lat, normalizedLatLng.lng);
+        
+        // Показываем уведомление
+        this.showToast('Получаем погоду для выбранного местоположения...');
+    }
+
+    toggleMap() {
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer.style.display === 'none') {
+            this.showMap();
+        } else {
+            this.hideMap();
+        }
+    }
+
+    showMap() {
+        const mapContainer = document.getElementById('map-container');
+        mapContainer.style.display = 'block';
+        
+        // Обновляем размер карты после показа
+        setTimeout(() => {
+            this.map.invalidateSize();
+            // Возвращаемся к разумному виду если карта слишком далеко
+            const currentCenter = this.map.getCenter();
+            const normalizedCenter = this.normalizeCoordinates(currentCenter);
+            if (Math.abs(currentCenter.lng - normalizedCenter.lng) > 1) {
+                this.map.setView(normalizedCenter, this.map.getZoom());
+            }
+        }, 100);
+    }
+
+    hideMap() {
+        const mapContainer = document.getElementById('map-container');
+        mapContainer.style.display = 'none';
     }
 
     setupAutocomplete() {
@@ -58,29 +181,24 @@ class WeatherApp {
         const autocompleteContainer = document.createElement('div');
         autocompleteContainer.className = 'autocomplete-container';
         
-        // Обертываем input в контейнер
         cityInput.parentNode.insertBefore(autocompleteContainer, cityInput);
         autocompleteContainer.appendChild(cityInput);
         
-        // Создаем контейнер для результатов
         this.autocompleteResults = document.createElement('div');
         this.autocompleteResults.className = 'autocomplete-results';
         this.autocompleteResults.style.display = 'none';
         autocompleteContainer.appendChild(this.autocompleteResults);
 
-        // Обработчик ввода
         cityInput.addEventListener('input', (e) => {
             this.handleAutocomplete(e.target.value);
         });
 
-        // Закрытие автоподстановки при клике вне
         document.addEventListener('click', (e) => {
             if (!autocompleteContainer.contains(e.target)) {
                 this.hideAutocomplete();
             }
         });
 
-        // Закрытие при нажатии Escape
         cityInput.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hideAutocomplete();
@@ -130,6 +248,7 @@ class WeatherApp {
             item.addEventListener('click', () => {
                 document.getElementById('city-input').value = city.name;
                 this.hideAutocomplete();
+                this.centerMapOnCity(city.lat, city.lon, city.name);
                 this.getWeatherData(city.name);
             });
             
@@ -137,6 +256,13 @@ class WeatherApp {
         });
         
         this.autocompleteResults.style.display = 'block';
+    }
+
+    centerMapOnCity(lat, lon, cityName) {
+        const coords = this.normalizeCoordinates({ lat: parseFloat(lat), lng: parseFloat(lon) });
+        this.map.setView(coords, 10);
+        this.createMarker(coords);
+        this.showMap();
     }
 
     hideAutocomplete() {
@@ -177,6 +303,7 @@ class WeatherApp {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
+                this.centerMapOnCity(latitude, longitude, 'Ваше местоположение');
                 await this.getWeatherDataByCoords(latitude, longitude);
             },
             (error) => {
@@ -230,6 +357,10 @@ class WeatherApp {
             this.currentCity = city;
             localStorage.setItem('lastWeatherCity', city);
 
+            if (data.coord) {
+                this.centerMapOnCity(data.coord.lat, data.coord.lon, data.name);
+            }
+
         } catch (error) {
             console.error('Weather API error:', error);
             this.showError(error.message || 'Не удалось получить данные о погоде');
@@ -243,7 +374,10 @@ class WeatherApp {
         this.hideAutocomplete();
 
         try {
-            const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+            // Нормализуем координаты перед отправкой
+            const normalizedCoords = this.normalizeCoordinates({ lat, lng: lon });
+            
+            const response = await fetch(`/api/weather?lat=${normalizedCoords.lat}&lon=${normalizedCoords.lng}`);
             
             if (!response.ok) {
                 const errorData = await response.json();
@@ -277,7 +411,6 @@ class WeatherApp {
     }
 
     displayCurrentWeather(data) {
-        // Обновляем основную информацию
         const cityNameElement = document.getElementById('city-name');
         const currentDateElement = document.getElementById('current-date');
         const currentTempElement = document.getElementById('current-temp');
@@ -301,14 +434,12 @@ class WeatherApp {
             weatherDescElement.textContent = data.weather[0].description;
         }
         
-        // Устанавливаем иконку
         if (weatherIconElement) {
             const iconUrl = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
             weatherIconElement.src = iconUrl;
             weatherIconElement.alt = data.weather[0].description;
         }
 
-        // Обновляем детали
         const windSpeedElement = document.getElementById('wind-speed');
         const humidityElement = document.getElementById('humidity');
         const pressureElement = document.getElementById('pressure');
@@ -318,23 +449,22 @@ class WeatherApp {
         if (humidityElement) humidityElement.textContent = `${data.main.humidity}%`;
         if (pressureElement) pressureElement.textContent = `${data.main.pressure} hPa`;
         if (visibilityElement) {
-            visibilityElement.textContent = data.visibility ? `${(data.visibility / 1000).toFixed(1)} км` : 'N/A';
+            const visibilityKm = (data.visibility / 1000).toFixed(1);
+            visibilityElement.textContent = `${visibilityKm} км`;
         }
 
-        // Показываем карточку
-        const currentWeatherElement = document.getElementById('current-weather');
-        if (currentWeatherElement) {
-            currentWeatherElement.style.display = 'block';
-        }
+        document.getElementById('current-weather').style.display = 'block';
     }
 
     async getForecast(lat, lon) {
         try {
-            const response = await fetch(`/api/weather/forecast?lat=${lat}&lon=${lon}`);
+            // Нормализуем координаты для прогноза
+            const normalizedCoords = this.normalizeCoordinates({ lat, lng: lon });
+            
+            const response = await fetch(`/api/forecast?lat=${normalizedCoords.lat}&lon=${normalizedCoords.lng}`);
             
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
@@ -347,7 +477,7 @@ class WeatherApp {
 
         } catch (error) {
             console.error('Forecast API error:', error);
-            this.showError('Не удалось загрузить прогноз');
+            this.showToast('Не удалось загрузить прогноз');
         }
     }
 
@@ -357,7 +487,6 @@ class WeatherApp {
 
         forecastContainer.innerHTML = '';
 
-        // Берем прогноз на 5 дней (каждые 24 часа)
         const dailyForecasts = data.list ? data.list.filter((item, index) => index % 8 === 0).slice(0, 5) : [];
 
         if (dailyForecasts.length === 0) {
@@ -389,10 +518,7 @@ class WeatherApp {
             forecastContainer.appendChild(dayElement);
         });
 
-        const forecastSection = document.getElementById('forecast-section');
-        if (forecastSection) {
-            forecastSection.style.display = 'block';
-        }
+        document.getElementById('forecast-section').style.display = 'block';
     }
 
     formatDate(date) {
@@ -408,12 +534,17 @@ class WeatherApp {
     }
 
     formatDay(date) {
-        const options = { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric'
-        };
-        return date.toLocaleDateString('ru-RU', options);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        if (date.toDateString() === today.toDateString()) {
+            return 'Сегодня';
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+            return 'Завтра';
+        } else {
+            return date.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
+        }
     }
 
     showLoading() {
@@ -467,9 +598,21 @@ class WeatherApp {
         }
     }
 
-    escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe
+    showToast(message, duration = 3000) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        
+        toast.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, duration);
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        return text
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -478,7 +621,7 @@ class WeatherApp {
     }
 }
 
-// Инициализация при загрузке страницы
+// Инициализация приложения при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-    new WeatherApp();
+    window.weatherApp = new WeatherApp();
 });

@@ -1,206 +1,328 @@
 :root {
-    --bg: #1a1a1a;
-    --card-bg: #2d2d2d;
-    --text: #f0e6d2;
-    --accent: #c0392b;
-    --shadow: rgba(0,0,0,0.3);
-    --weather-blue: #3498db;
-    --weather-green: #2ecc71;
-    --weather-orange: #e67e22;
-  }
-  
-  body[data-theme="light"] {
-    --bg: #f7f7f7;
-    --card-bg: #fff;
-    --text: #333;
-    --accent: #a01f1f;
-    --shadow: rgba(0,0,0,0.1);
-    --weather-blue: #2980b9;
-    --weather-green: #27ae60;
-    --weather-orange: #d35400;
-  }
-  
-  /* Общие стили как в основном style.css */
-  body {
-    font-family: 'Brush Script MT', cursive;
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    transition: background 0.4s, color 0.4s;
-    position: relative;
-    min-height: 100vh;
-    padding: 0 20px;
-  }
-  
-  .top-panel {
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(8px);
-  }
-  
-  /* Контейнер поиска */
-  .search-container {
-    margin: 20px 0;
-  }
-  
-  .search-bar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  
-  #city-input {
-    flex: 1;
-    min-width: 250px;
-    padding: 12px 16px;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 16px;
-    background: var(--card-bg);
-    color: var(--text);
-    font-size: 16px;
-    font-family: 'Brush Script MT', cursive;
-  }
-  
-  #city-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px rgba(192,57,43,0.3);
-  }
-  
-  #search-btn, #location-btn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 16px;
-    background: var(--weather-blue);
-    color: white;
-    font-family: 'Brush Script MT', cursive;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-  }
-  
-  #location-btn {
-    background: var(--weather-green);
-  }
-  
-  #search-btn:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-  }
-  
-  #location-btn:hover {
-    background: #27ae60;
-    transform: translateY(-2px);
-  }
-  
-  /* Карточка текущей погоды */
-  .current-weather {
-    background: linear-gradient(135deg, var(--weather-blue), var(--weather-green));
-    color: white;
-    border-radius: 20px;
-    padding: 24px;
-    margin: 20px 0;
-    box-shadow: 0 8px 32px rgba(52, 152, 219, 0.3);
-  }
-  
-  .weather-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  
-  .weather-header h2 {
-    margin: 0;
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-  }
-  
-  .date {
-    font-size: 14px;
-    opacity: 0.9;
-  }
-  
-  .weather-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .temperature-section {
-    text-align: center;
-  }
-  
-  .temp-main {
-    font-size: 64px;
-    font-weight: bold;
-    line-height: 1;
-  }
-  
-  .temp-feels {
-    font-size: 14px;
-    opacity: 0.9;
-    margin-top: 8px;
-  }
-  
-  .weather-icon {
-    text-align: center;
-  }
-  
-  .weather-icon img {
-    width: 80px;
-    height: 80px;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-  }
-  
-  .weather-desc {
-    font-size: 16px;
-    margin-top: 8px;
-    text-transform: capitalize;
-  }
-  
-  .weather-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-  }
-  
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-  }
-  
-  .detail-label {
-    font-size: 14px;
-    opacity: 0.9;
-  }
-  
-  .detail-value {
-    font-weight: bold;
-    font-size: 16px;
-  }
-  
-/* Секция прогноза - УЛУЧШЕННАЯ ВЕРСИЯ */
+  --bg: #1a1a1a;
+  --card-bg: #2d2d2d;
+  --text: #f0e6d2;
+  --accent: #c0392b;
+  --shadow: rgba(0,0,0,0.3);
+  --weather-blue: #3498db;
+  --weather-green: #2ecc71;
+  --weather-orange: #e67e22;
+}
+
+body[data-theme="light"] {
+  --bg: #f7f7f7;
+  --card-bg: #fff;
+  --text: #333;
+  --accent: #a01f1f;
+  --shadow: rgba(0,0,0,0.1);
+  --weather-blue: #2980b9;
+  --weather-green: #27ae60;
+  --weather-orange: #d35400;
+}
+
+/* Общие стили как в основном style.css */
+body {
+  font-family: 'Brush Script MT', cursive;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.4s, color 0.4s;
+  position: relative;
+  min-height: 100vh;
+  padding: 0 20px;
+}
+
+.top-panel {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+}
+
+/* Контейнер поиска */
+.search-container {
+  margin: 20px 0;
+}
+
+.search-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#city-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 16px;
+  font-family: 'Brush Script MT', cursive;
+}
+
+#city-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(192,57,43,0.3);
+}
+
+#search-btn, #location-btn, #map-toggle-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 16px;
+  background: var(--weather-blue);
+  color: white;
+  font-family: 'Brush Script MT', cursive;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+#location-btn {
+  background: var(--weather-green);
+}
+
+#map-toggle-btn {
+  background: var(--weather-orange);
+}
+
+#search-btn:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+#location-btn:hover {
+  background: #27ae60;
+  transform: translateY(-2px);
+}
+
+#map-toggle-btn:hover {
+  background: #d35400;
+  transform: translateY(-2px);
+}
+
+/* Контейнер карты */
+.map-container {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 0;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px var(--shadow);
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.map-header h3 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.close-map-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: var(--text);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.close-map-btn:hover {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+  border-radius: 0 0 20px 20px;
+}
+
+.map-instruction {
+  text-align: center;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  font-size: 14px;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+/* Стили для Leaflet в темной теме */
+:root {
+  --map-tile-filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+.leaflet-container {
+  background: #1a1a1a;
+}
+
+.leaflet-layer {
+  filter: var(--map-tile-filter);
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--card-bg);
+  color: var(--text);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--accent);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 12px;
+}
+
+.leaflet-popup-tip {
+  background: var(--card-bg);
+}
+
+/* Для светлой темы */
+body[data-theme="light"] .leaflet-container {
+  background: #f7f7f7;
+}
+
+body[data-theme="light"] .leaflet-layer {
+  filter: none;
+}
+
+/* Кастомный маркер */
+.weather-marker {
+  background: var(--accent);
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Карточка текущей погоды */
+.current-weather {
+  background: linear-gradient(135deg, var(--weather-blue), var(--weather-green));
+  color: white;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.3);
+}
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.weather-header h2 {
+  margin: 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+}
+
+.date {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.weather-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.temperature-section {
+  text-align: center;
+}
+
+.temp-main {
+  font-size: 64px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.temp-feels {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 8px;
+}
+
+.weather-icon {
+  text-align: center;
+}
+
+.weather-icon img {
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.weather-desc {
+  font-size: 16px;
+  margin-top: 8px;
+  text-transform: capitalize;
+}
+
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.detail-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.detail-value {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Секция прогноза */
 .forecast-section {
   margin: 40px 0;
   background: var(--card-bg);
@@ -355,24 +477,64 @@
   color: var(--accent);
 }
 
-/* Адаптивность для прогноза */
+/* Сообщения */
+.error-message {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
-  .forecast-container {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-  }
-  
-  .forecast-day {
-    padding: 16px;
-  }
-  
-  .forecast-temp {
-    font-size: 20px;
-  }
-  
-  .forecast-details {
+  .weather-body {
     flex-direction: column;
-    gap: 6px;
+    text-align: center;
+  }
+  
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  #city-input {
+    min-width: auto;
+  }
+  
+  .temp-main {
+    font-size: 48px;
+  }
+  
+  .forecast-container {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  #map {
+    height: 300px;
   }
 }
 
@@ -380,65 +542,21 @@
   .forecast-container {
     grid-template-columns: 1fr;
   }
+  
+  .map-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
 }
-  /* Сообщения */
-  .error-message {
-    background: rgba(231, 76, 60, 0.1);
-    border: 1px solid #e74c3c;
-    color: #e74c3c;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    margin: 20px 0;
-  }
-  
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--text);
-  }
-  
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255,255,255,0.3);
-    border-top: 4px solid var(--accent);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 16px;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Адаптивность */
-  @media (max-width: 768px) {
-    .weather-body {
-      flex-direction: column;
-      text-align: center;
-    }
-    
-    .search-bar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    #city-input {
-      min-width: auto;
-    }
-    
-    .temp-main {
-      font-size: 48px;
-    }
-    
-    .forecast-container {
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-  }
-  
-  /* Общие компоненты (как в основном style.css) */
-  .home-btn, .theme-toggle, .site-footer, .toast {
-    /* Стили наследуются из основного style.css */
-  }
+
+/* Добавьте в weather-style.css */
+.weather-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-marker-icon {
+  background: transparent !important;
+  border: none !important;
+}

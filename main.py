@@ -9,12 +9,21 @@ import aiofiles
 import shutil
 from pathlib import Path
 import httpx
+import requests
 from typing import List, Optional
 import uuid
 from datetime import datetime
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import logging
+import math
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -31,6 +40,12 @@ UPLOADS_DIR = STATIC_DIR / "uploads"
 # Создаём необходимые папки
 for directory in [UPLOADS_DIR, UPLOADS_DIR / "temp"]:
     directory.mkdir(exist_ok=True)
+
+# API ключи
+OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
+
+# Инициализация геокодера
+geolocator = Nominatim(user_agent="weather_app")
 
 # ==================== БАЗА ДАННЫХ ====================
 
@@ -106,7 +121,7 @@ def init_database():
                     id SERIAL PRIMARY KEY,
                     gallery_id INTEGER REFERENCES galleries(id),
                     file_path TEXT NOT NULL,
-                    name VARCHAR(500) DEFAULT '', -- ДОБАВЛЕНО: поле для имени изображения
+                    name VARCHAR(500) DEFAULT '',
                     width INTEGER,
                     height INTEGER,
                     created_at TIMESTAMP DEFAULT NOW()
@@ -205,6 +220,30 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 # Настраиваем шаблоны
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
+# ==================== УТИЛИТЫ ДЛЯ КООРДИНАТ ====================
+
+def normalize_coordinates(lat: float, lon: float):
+    """Нормализует координаты в пределах стандартных границ"""
+    # Нормализуем широту
+    lat = max(-90.0, min(90.0, lat))
+    
+    # Нормализуем долготу в пределах [-180, 180]
+    lon = lon % 360
+    if lon > 180:
+        lon -= 360
+    elif lon < -180:
+        lon += 360
+    
+    return lat, lon
+
+def validate_coordinates(lat: float, lon: float):
+    """Проверяет валидность координат"""
+    if not (-90 <= lat <= 90):
+        raise HTTPException(status_code=400, detail="Широта должна быть в пределах от -90 до 90")
+    if not (-180 <= lon <= 180):
+        raise HTTPException(status_code=400, detail="Долгота должна быть в пределах от -180 до 180")
+    return True
+
 # ==================== РОУТЫ ДЛЯ СТРАНИЦ ====================
 
 @app.get("/", response_class=HTMLResponse)
@@ -259,6 +298,7 @@ async def read_parallax_grow(request: Request):
 @app.get("/spectrum", response_class=HTMLResponse)
 async def read_spectrum(request: Request):
     return templates.TemplateResponse("spectrum-analyzer.html", {"request": request})
+
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)
@@ -312,91 +352,157 @@ async def get_quotes():
     finally:
         conn.close()
 
-# ==================== API ДЛЯ ПОГОДЫ ====================
+# ==================== API ДЛЯ ПОГОДЫ И ГЕОКОДИНГА ====================
 
 @app.get("/api/weather")
 async def get_weather(city: str = None, lat: float = None, lon: float = None):
     """Получить текущую погоду"""
-    api_key = os.getenv('OPENWEATHER_API_KEY')
-    
-    if not api_key:
-        raise HTTPException(status_code=500, detail="API ключ не настроен")
+    if not OPENWEATHER_API_KEY:
+        raise HTTPException(status_code=500, detail="API ключ OpenWeather не настроен")
     
     if not city and (lat is None or lon is None):
         raise HTTPException(status_code=400, detail="Укажите город или координаты")
     
-    if city:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru"
-    else:
-        url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru"
-    
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(url)
+    try:
+        # Нормализуем координаты если они переданы
+        if lat is not None and lon is not None:
+            validate_coordinates(lat, lon)
+            lat, lon = normalize_coordinates(lat, lon)
+        
+        if city:
+            url = f"http://api.openweathermap.org/data/2.5/weather"
+            params = {
+                'q': city,
+                'appid': OPENWEATHER_API_KEY,
+                'units': 'metric',
+                'lang': 'ru'
+            }
+        else:
+            url = f"http://api.openweathermap.org/data/2.5/weather"
+            params = {
+                'lat': lat,
+                'lon': lon,
+                'appid': OPENWEATHER_API_KEY,
+                'units': 'metric',
+                'lang': 'ru'
+            }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params)
             weather_data = response.json()
             
             if weather_data.get('cod') != 200:
                 raise HTTPException(status_code=404, detail=weather_data.get('message', 'Город не найден'))
                 
             return weather_data
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
+            
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
 
-@app.get("/api/weather/forecast")
+@app.get("/api/forecast")
 async def get_weather_forecast(lat: float, lon: float):
     """Получить прогноз погоды на 5 дней"""
-    api_key = os.getenv('OPENWEATHER_API_KEY')
-    
-    if not api_key:
+    if not OPENWEATHER_API_KEY:
         raise HTTPException(status_code=500, detail="API ключ не настроен")
     
-    url = f"http://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru"
-    
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(url)
+    try:
+        # Нормализуем координаты
+        validate_coordinates(lat, lon)
+        lat, lon = normalize_coordinates(lat, lon)
+        
+        url = f"http://api.openweathermap.org/data/2.5/forecast"
+        params = {
+            'lat': lat,
+            'lon': lon,
+            'appid': OPENWEATHER_API_KEY,
+            'units': 'metric',
+            'lang': 'ru'
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params)
             forecast_data = response.json()
             
             if forecast_data.get('cod') != '200':
                 raise HTTPException(status_code=404, detail=forecast_data.get('message', 'Прогноз не найден'))
                 
             return forecast_data
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
+            
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка подключения к API: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка API: {str(e)}")
 
 @app.get("/api/weather-api-key")
 async def get_weather_api_key():
     """Получить статус API ключа"""
-    api_key = os.getenv('OPENWEATHER_API_KEY')
-    return {"hasKey": bool(api_key), "apiKey": "configured" if api_key else None}
+    return {"hasKey": bool(OPENWEATHER_API_KEY)}
 
 @app.get("/api/cities")
-async def get_cities(search: str = None):
-    """Получить города из БД для автоподстановки"""
-    conn = get_db_connection()
-    if not conn:
-        raise HTTPException(status_code=500, detail="Ошибка подключения к БД")
+async def search_cities(search: str = None):
+    """Поиск городов для автоподстановки"""
+    if not search or len(search) < 2:
+        return []
     
     try:
-        cursor = conn.cursor()
-        if search:
+        # Сначала ищем в базе данных
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
             cursor.execute(
-                "SELECT name, country, lat, lon FROM cities WHERE name ILIKE %s OR country ILIKE %s LIMIT 20",
+                "SELECT name, country, lat, lon FROM cities WHERE name ILIKE %s OR country ILIKE %s LIMIT 10",
                 (f'%{search}%', f'%{search}%')
             )
-        else:
-            cursor.execute("SELECT name, country, lat, lon FROM cities LIMIT 20")
+            db_cities = cursor.fetchall()
+            conn.close()
+            
+            if db_cities:
+                return db_cities
         
-        cities = cursor.fetchall()
-        return cities
+        # Если в БД не нашли, используем геокодинг
+        location = geolocator.geocode(search, exactly_one=False, limit=5)
+        if location:
+            cities = []
+            for loc in location:
+                cities.append({
+                    'name': loc.address.split(',')[0],
+                    'country': loc.address.split(',')[-1].strip(),
+                    'lat': loc.latitude,
+                    'lon': loc.longitude
+                })
+            return cities
+        
+        return []
+        
+    except (GeocoderTimedOut, GeocoderServiceError) as e:
+        logger.error(f"Geocoding error: {str(e)}")
+        return []
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка получения городов: {e}")
-    finally:
-        conn.close()
+        logger.error(f"City search error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Ошибка поиска городов")
+
+@app.get("/api/reverse-geocode")
+async def reverse_geocode(lat: float, lon: float):
+    """Получить название местоположения по координатам"""
+    try:
+        # Нормализуем координаты
+        lat, lon = normalize_coordinates(lat, lon)
+        validate_coordinates(lat, lon)
+        
+        location = geolocator.reverse((lat, lon), language='ru')
+        if location:
+            return {
+                'name': location.address.split(',')[0],
+                'full_address': location.address,
+                'lat': lat,
+                'lon': lon
+            }
+        return {'name': 'Неизвестное местоположение', 'full_address': '', 'lat': lat, 'lon': lon}
+    except Exception as e:
+        logger.error(f"Reverse geocoding error: {str(e)}")
+        return {'name': 'Неизвестное местоположение', 'full_address': '', 'lat': lat, 'lon': lon}
 
 # ==================== API ДЛЯ ГАЛЕРЕЙ ====================
 
@@ -746,5 +852,6 @@ if __name__ == "__main__":
     print("✅ Сервер запущен: http://localhost:3000")
     print("🗄️  База данных: PostgreSQL")
     print("🌤️  Погодный модуль: /weather")
-    print("🔑 API ключ погоды:", "Настроен" if os.getenv('OPENWEATHER_API_KEY') else "Не настроен")
+    print("🗺️  Карта: интегрирована с поиском")
+    print("🔑 API ключ погоды:", "Настроен" if OPENWEATHER_API_KEY else "Не настроен")
     uvicorn.run(app, host="0.0.0.0", port=3000)

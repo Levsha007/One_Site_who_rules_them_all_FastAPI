@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="{{ url_for('static', path='css/weather-style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
@@ -32,6 +33,19 @@
           </div>
           <button id="search-btn">🔍 Поиск</button>
           <button id="location-btn">📍 Мое местоположение</button>
+          <button id="map-toggle-btn">🗺️ Показать карту</button>
+        </div>
+      </div>
+
+      <!-- Карта -->
+      <div class="map-container" id="map-container" style="display: none;">
+        <div class="map-header">
+          <h3>🗺️ Выберите местоположение на карте</h3>
+          <button id="close-map-btn" class="close-map-btn">✕</button>
+        </div>
+        <div id="map"></div>
+        <div class="map-instruction">
+          Кликните на карте для выбора местоположения
         </div>
       </div>
 
@@ -99,6 +113,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="{{ url_for('static', path='js/app.js') }}"></script>
   <script src="{{ url_for('static', path='js/weather-app.js') }}"></script>
 </body>

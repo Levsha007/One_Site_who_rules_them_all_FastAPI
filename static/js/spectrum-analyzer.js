@@ -29,7 +29,6 @@ class SpectrumAnalyzer {
             particleSize: 3,
             particleCount: 200,
             circleRadius: 60,
-            isRunning: false,
             isCleanMode: false
         };
 

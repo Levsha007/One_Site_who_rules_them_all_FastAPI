@@ -1,4 +1,4 @@
-// static/js/spectrum-analyzer.js
+// spectrum-analyzer.js
 class SpectrumAnalyzer {
     constructor() {
         this.canvas = document.getElementById('spectrumCanvas');
@@ -14,22 +14,30 @@ class SpectrumAnalyzer {
         this.particles = [];
         this.lastFrameTime = 0;
         this.frameInterval = 1000 / 60;
+        this.fps = 0;
+        this.frameCount = 0;
+        this.lastFpsUpdate = 0;
         
         // Настройки по умолчанию
         this.defaultSettings = {
-            visualizationType: 'bars',
-            barsCount: 128,
+            visualizationType: 'mirrorWave',
+            barsCount: 100,
             sensitivity: 1.0,
-            speed: 5,
-            smoothness: 0.7,
+            speed: 1,
+            smoothness: 0.6,
             colorScheme: 'red',
             customColors: ['#c0392b', '#e74c3c', '#d35400'],
             glowIntensity: 10,
             lineWidth: 3,
             particleSize: 3,
             particleCount: 200,
-            circleRadius: 60,
-            isCleanMode: false
+            circleRadius: 40,
+            isCleanMode: false,
+            // Новые настройки
+            spiralTurns: 2,
+            spiralScale: 150,
+            noiseThreshold: 0.0,
+            noiseSmoothing: 0.05
         };
 
         this.settings = {...this.defaultSettings};
@@ -60,7 +68,8 @@ class SpectrumAnalyzer {
         this.setupEventListeners();
         this.resizeCanvas();
         this.setupSettingsPanel();
-        this.loadSettings();
+        // Автоматический сброс всех настроек при загрузке
+        this.resetAllSettings();
         // НЕМЕДЛЕННЫЙ запуск при загрузке страницы
         this.start();
     }
@@ -110,7 +119,7 @@ class SpectrumAnalyzer {
             showToast('Пользовательские цвета применены!');
         });
 
-        // Слайдеры настроек - ИСПРАВЛЕННЫЕ
+        // Слайдеры настроек
         document.getElementById('sensitivitySlider').addEventListener('input', (e) => {
             this.settings.sensitivity = parseInt(e.target.value) / 100;
             document.getElementById('sensitivityValue').textContent = e.target.value + '%';
@@ -164,6 +173,31 @@ class SpectrumAnalyzer {
             this.saveSettings();
         });
 
+        // Новые слайдеры
+        document.getElementById('spiralTurnsSlider').addEventListener('input', (e) => {
+            this.settings.spiralTurns = parseInt(e.target.value);
+            document.getElementById('spiralTurnsValue').textContent = e.target.value;
+            this.saveSettings();
+        });
+
+        document.getElementById('spiralScaleSlider').addEventListener('input', (e) => {
+            this.settings.spiralScale = parseInt(e.target.value);
+            document.getElementById('spiralScaleValue').textContent = e.target.value;
+            this.saveSettings();
+        });
+
+        document.getElementById('noiseThresholdSlider').addEventListener('input', (e) => {
+            this.settings.noiseThreshold = parseInt(e.target.value) / 100;
+            document.getElementById('noiseThresholdValue').textContent = this.settings.noiseThreshold.toFixed(2);
+            this.saveSettings();
+        });
+
+        document.getElementById('noiseSmoothingSlider').addEventListener('input', (e) => {
+            this.settings.noiseSmoothing = parseInt(e.target.value) / 100;
+            document.getElementById('noiseSmoothingValue').textContent = this.settings.noiseSmoothing.toFixed(2);
+            this.saveSettings();
+        });
+
         // Кнопки управления
         document.getElementById('startBtn').addEventListener('click', () => this.start());
         document.getElementById('stopBtn').addEventListener('click', () => this.stop());
@@ -172,7 +206,6 @@ class SpectrumAnalyzer {
         document.getElementById('resetBasicSettings').addEventListener('click', () => this.resetBasicSettings());
         document.getElementById('resetColorSettings').addEventListener('click', () => this.resetColorSettings());
         document.getElementById('resetAdvancedSettings').addEventListener('click', () => this.resetAdvancedSettings());
-        document.getElementById('resetAllSettings').addEventListener('click', () => this.resetAllSettings());
 
         // Оверлей для закрытия панели
         document.getElementById('panelOverlay').addEventListener('click', () => this.hideSettingsPanel());
@@ -216,7 +249,7 @@ class SpectrumAnalyzer {
     }
 
     applySettingsToUI() {
-        // Применяем настройки к UI - ИСПРАВЛЕННЫЕ значения
+        // Применяем настройки к UI
         document.getElementById('visualizationType').value = this.settings.visualizationType;
         
         document.getElementById('barsCountSlider').value = this.settings.barsCount;
@@ -245,6 +278,19 @@ class SpectrumAnalyzer {
         
         document.getElementById('circleRadiusSlider').value = this.settings.circleRadius;
         document.getElementById('circleRadiusValue').textContent = this.settings.circleRadius + '%';
+
+        // Новые настройки
+        document.getElementById('spiralTurnsSlider').value = this.settings.spiralTurns;
+        document.getElementById('spiralTurnsValue').textContent = this.settings.spiralTurns;
+
+        document.getElementById('spiralScaleSlider').value = this.settings.spiralScale;
+        document.getElementById('spiralScaleValue').textContent = this.settings.spiralScale;
+
+        document.getElementById('noiseThresholdSlider').value = this.settings.noiseThreshold * 100;
+        document.getElementById('noiseThresholdValue').textContent = this.settings.noiseThreshold.toFixed(2);
+
+        document.getElementById('noiseSmoothingSlider').value = this.settings.noiseSmoothing * 100;
+        document.getElementById('noiseSmoothingValue').textContent = this.settings.noiseSmoothing.toFixed(2);
 
         // Цветовые схемы
         document.querySelectorAll('.color-scheme-btn').forEach(btn => {
@@ -295,6 +341,10 @@ class SpectrumAnalyzer {
         this.settings.particleSize = this.defaultSettings.particleSize;
         this.settings.particleCount = this.defaultSettings.particleCount;
         this.settings.circleRadius = this.defaultSettings.circleRadius;
+        this.settings.spiralTurns = this.defaultSettings.spiralTurns;
+        this.settings.spiralScale = this.defaultSettings.spiralScale;
+        this.settings.noiseThreshold = this.defaultSettings.noiseThreshold;
+        this.settings.noiseSmoothing = this.defaultSettings.noiseSmoothing;
         this.applySettingsToUI();
         this.saveSettings();
         showToast('Дополнительные настройки сброшены');
@@ -305,7 +355,7 @@ class SpectrumAnalyzer {
         this.applySettingsToUI();
         this.saveSettings();
         this.resetParticles();
-        showToast('Все настройки сброшены');
+        // Не показываем toast при автоматическом сбросе
     }
 
     resetParticles() {
@@ -475,6 +525,9 @@ class SpectrumAnalyzer {
                 this.dataArray[i] = Math.max(0, Math.min(255, this.dataArray[i] + change));
             }
         }
+
+        // Подавление шума
+        this.applyNoiseReduction();
         
         // Обновление истории для сглаживания
         this.history.push(new Uint8Array(this.dataArray));
@@ -509,7 +562,61 @@ class SpectrumAnalyzer {
             case 'radar': this.drawRadar(); break;
         }
 
+        // Обновление статистики
+        this.updateStats(currentTime);
+
         this.animationId = requestAnimationFrame((time) => this.animate(time));
+    }
+
+    applyNoiseReduction() {
+        const threshold = this.settings.noiseThreshold * 255;
+        const smoothing = this.settings.noiseSmoothing;
+
+        for (let i = 0; i < this.bufferLength; i++) {
+            // Пороговое значение
+            if (this.dataArray[i] < threshold) {
+                this.dataArray[i] = 0;
+            } else {
+                // Сглаживание с историей
+                if (this.history.length > 1) {
+                    const historicalValue = this.history[this.history.length - 2][i];
+                    this.dataArray[i] = this.dataArray[i] * (1 - smoothing) + historicalValue * smoothing;
+                }
+            }
+        }
+    }
+
+    updateStats(currentTime) {
+        this.frameCount++;
+        if (currentTime - this.lastFpsUpdate >= 1000) {
+            this.fps = Math.round((this.frameCount * 1000) / (currentTime - this.lastFpsUpdate));
+            this.frameCount = 0;
+            this.lastFpsUpdate = currentTime;
+
+            // Обновляем статистику
+            document.getElementById('fps').textContent = this.fps;
+
+            // Уровень звука (средняя амплитуда)
+            let sum = 0;
+            let peak = 0;
+            let activeFrequencies = 0;
+            for (let i = 0; i < this.bufferLength; i++) {
+                sum += this.dataArray[i];
+                peak = Math.max(peak, this.dataArray[i]);
+                if (this.dataArray[i] > this.settings.noiseThreshold * 255) {
+                    activeFrequencies++;
+                }
+            }
+            const average = sum / this.bufferLength;
+            document.getElementById('volumeLevel').textContent = Math.round(average);
+            document.getElementById('peakAmplitude').textContent = Math.round(peak);
+            document.getElementById('averageAmplitude').textContent = Math.round(average);
+            document.getElementById('activeFrequencies').textContent = activeFrequencies;
+
+            // Условная загрузка (на основе FPS)
+            const cpuLoad = Math.max(0, 100 - (this.fps / 60) * 100);
+            document.getElementById('cpuLoad').textContent = Math.round(cpuLoad);
+        }
     }
 
     getColors() {
@@ -766,12 +873,14 @@ class SpectrumAnalyzer {
         this.ctx.lineTo(this.canvas.width, this.canvas.height);
         this.ctx.closePath();
 
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, colors[0]);
-        gradient.addColorStop(1, colors[colors.length - 1] + '40');
+        // Исправленный градиент для гор
+        const gradient = this.ctx.createLinearGradient(0, this.canvas.height, 0, this.canvas.height * 0.4);
+        gradient.addColorStop(0, colors[0] + '80');
+        gradient.addColorStop(1, colors[colors.length - 1]);
 
         this.ctx.fillStyle = gradient;
         this.ctx.fill();
+        
         this.ctx.strokeStyle = colors[0];
         this.ctx.lineWidth = this.settings.lineWidth;
         this.ctx.stroke();
@@ -865,8 +974,8 @@ class SpectrumAnalyzer {
         
         for (let i = 0; i < this.bufferLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity / 256;
-            const angle = (i / this.bufferLength) * Math.PI * 10;
-            const radius = 50 + amplitude * 200;
+            const angle = (i / this.bufferLength) * Math.PI * 2 * this.settings.spiralTurns;
+            const radius = 50 + amplitude * this.settings.spiralScale;
             
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
@@ -900,9 +1009,9 @@ class SpectrumAnalyzer {
         for (let i = 0; i < barCount; i++) {
             const dataIndex = Math.floor(i / barCount * this.bufferLength);
             const amplitude = this.dataArray[dataIndex] * this.settings.sensitivity / 256;
-            const angle = (i / barCount) * Math.PI * 6;
+            const angle = (i / barCount) * Math.PI * 2 * this.settings.spiralTurns;
             const radius = 50 + i * 2;
-            const barHeight = amplitude * 100;
+            const barHeight = amplitude * this.settings.spiralScale;
 
             const x1 = centerX + Math.cos(angle) * radius;
             const y1 = centerY + Math.sin(angle) * radius;

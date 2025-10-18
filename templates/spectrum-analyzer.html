@@ -1,3 +1,4 @@
+<!-- spectrum-analyzer.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -60,9 +61,11 @@
                             <label>Тип визуализации:</label>
                             <select id="visualizationType" class="setting-select">
                                 <option value="bars">📊 Прямолинейные столбцы</option>
+                                <option value="centerBars">🎯 Центральные столбцы</option>
                                 <option value="circleBars">⭕ Круг из столбцов</option>
                                 <option value="wave">🌊 Волна</option>
                                 <option value="spectrum">🌈 Спектр</option>
+                                <option value="centerSpectrum">🎯 Центральный спектр</option>
                                 <option value="particles">✨ Частицы</option>
                                 <option value="mountain">🏔️ Горы</option>
                                 <option value="liquid">💧 Жидкость</option>
@@ -243,8 +246,54 @@
                             <div class="setting-description">Размер круговых визуализаций</div>
                         </div>
 
+                        <!-- Новые настройки для спиралей -->
+                        <div class="setting-group">
+                            <label>Витки спирали: <span id="spiralTurnsValue">6</span></label>
+                            <input type="range" id="spiralTurnsSlider" min="1" max="20" value="6" class="setting-slider">
+                            <div class="setting-description">Количество витков в спиральных визуализациях</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Масштаб спирали: <span id="spiralScaleValue">150</span></label>
+                            <input type="range" id="spiralScaleSlider" min="50" max="500" value="150" class="setting-slider">
+                            <div class="setting-description">Масштаб спиральных визуализаций</div>
+                        </div>
+
+                        <!-- Настройки подавления шума -->
+                        <div class="setting-group">
+                            <label>Порог шума: <span id="noiseThresholdValue">0.1</span></label>
+                            <input type="range" id="noiseThresholdSlider" min="0" max="50" value="10" class="setting-slider">
+                            <div class="setting-description">Порог для отсечения шума (0-0.5)</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label>Сглаживание шума: <span id="noiseSmoothingValue">0.3</span></label>
+                            <input type="range" id="noiseSmoothingSlider" min="0" max="100" value="30" class="setting-slider">
+                            <div class="setting-description">Интенсивность сглаживания шума (0-1)</div>
+                        </div>
+
                         <div class="setting-group">
                             <button class="reset-btn" id="resetAdvancedSettings">🔄 Сбросить доп. настройки</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+                <div class="settings-category">
+                    <div class="category-header">
+                        <h3>📈 Статистика</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="category-content">
+                        <div class="setting-group">
+                            <div id="statsContent" style="color: #fff; font-family: 'Brush Script MT', cursive;">
+                                <p>Частота кадров: <span id="fps">0</span> FPS</p>
+                                <p>Уровень звука: <span id="volumeLevel">0</span></p>
+                                <p>Активные частоты: <span id="activeFrequencies">0</span></p>
+                                <p>Пиковая амплитуда: <span id="peakAmplitude">0</span></p>
+                                <p>Средняя амплитуда: <span id="averageAmplitude">0</span></p>
+                                <p>Загрузка: <span id="cpuLoad">0</span>%</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -259,9 +308,8 @@
                         <div class="control-buttons">
                             <button class="control-btn primary" id="startBtn">🎤 Начать запись</button>
                             <button class="control-btn secondary" id="stopBtn" disabled>⏹️ Стоп</button>
-                            <button class="control-btn warning" id="resetAllSettings">🗑️ Сбросить ВСЕ настройки</button>
                         </div>
-                        <div class="setting-description">Управление записью и сброс настроек</div>
+                        <div class="setting-description">Управление записью</div>
                     </div>
                 </div>
             </div>

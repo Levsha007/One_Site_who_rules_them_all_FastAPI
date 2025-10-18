@@ -299,6 +299,9 @@ async def read_parallax_grow(request: Request):
 async def read_spectrum(request: Request):
     return templates.TemplateResponse("spectrum-analyzer.html", {"request": request})
 
+@app.get("/route", response_class=HTMLResponse)
+async def read_route_planner(request: Request):
+    return templates.TemplateResponse("route.html", {"request": request})
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)

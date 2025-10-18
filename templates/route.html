@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/route.png') }}" type="image/x-icon">
+  <title>Построитель Маршрутов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/routes-style.css') }}">
+</head>
+<body>
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span class="current-gallery-title">🗺️ Построитель Маршрутов</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <div class="page-container">
+    <div class="routes-layout">
+      
+      <div class="routes-sidebar">
+        
+        <div class="route-controls">
+          <h3>📍 Построение маршрута</h3>
+          
+          <div class="search-container">
+            <input type="text" id="route-search" placeholder="Введите адрес или координаты..." />
+            <button id="search-submit-btn">🔍</button>
+          </div>
+          
+          <div class="transport-selector">
+            <label>Тип транспорта для новых сегментов:</label>
+            <select id="transport-mode">
+              <option value="driving">🚗 Автомобиль</option>
+              <option value="walking">🚶 Пешком</option>
+              <option value="cycling">🚴 Велосипед</option>
+              <option value="public">🚌 Общественный транспорт</option>
+            </select>
+          </div>
+          
+          <div class="route-actions">
+            <button id="add-point-btn" class="btn-primary">➕ Добавить точку</button>
+            <button id="clear-route-btn" class="btn-secondary">🗑️ Очистить маршрут</button>
+          </div>
+        </div>
+
+        <div class="route-points-container">
+          <h4>Точки маршрута:</h4>
+          <div id="route-points-list" class="route-points-list">
+            <div class="empty-state">Добавьте точки на карту</div>
+          </div>
+        </div>
+
+        <div class="route-info" id="route-info" style="display: none;">
+          <h4>📊 Информация о маршруте</h4>
+          <div class="info-item">
+            <span>Общее расстояние:</span>
+            <span id="total-distance">-</span>
+          </div>
+          <div class="info-item">
+            <span>Общее время:</span>
+            <span id="total-duration">-</span>
+          </div>
+          <div class="info-item">
+            <span>Количество точек:</span>
+            <span id="points-count">0</span>
+          </div>
+          <div class="transport-segments" id="transport-segments">
+            <!-- Сегменты транспорта будут добавляться здесь -->
+          </div>
+        </div>
+
+        <div class="elevation-profile" id="elevation-profile" style="display: none;">
+          <h4>📈 Профиль высот</h4>
+          <div class="elevation-stats">
+            <div class="elevation-stat">
+              <span>Макс. высота:</span>
+              <span id="max-elevation">-</span>
+            </div>
+            <div class="elevation-stat">
+              <span>Мин. высота:</span>
+              <span id="min-elevation">-</span>
+            </div>
+            <div class="elevation-stat">
+              <span>Набор высоты:</span>
+              <span id="elevation-gain">-</span>
+            </div>
+          </div>
+          <canvas id="elevation-chart" width="300" height="80"></canvas>
+        </div>
+
+        <div class="saved-routes">
+          <h4>💾 Сохраненные маршруты</h4>
+          <div class="saved-routes-list" id="saved-routes-list">
+            <div class="empty-state">Нет сохраненных маршрутов</div>
+          </div>
+          <div class="save-actions">
+            <input type="text" id="route-name-input" placeholder="Название маршрута" />
+            <button id="save-route-btn" class="btn-primary">💾 Сохранить</button>
+            <button id="export-gpx-btn" class="btn-secondary">📥 Экспорт GPX</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="routes-map-container">
+        <div id="routes-map"></div>
+        <div class="map-controls">
+          <button id="fit-bounds-btn" class="map-control-btn" title="Показать весь маршрут">🔍</button>
+          <button id="measure-btn" class="map-control-btn" title="Измерить расстояние">📏</button>
+        </div>
+        <div class="measure-info" id="measure-info" style="display: none;">
+          <span id="measure-distance">0 км</span>
+          <button id="clear-measure-btn" class="btn-danger">✕</button>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="site-footer">
+      &copy; 2025 Построитель Маршрутов. Использует OpenStreetMap и OSRM.
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/routes-app.js') }}"></script>
+</body>
+</html>

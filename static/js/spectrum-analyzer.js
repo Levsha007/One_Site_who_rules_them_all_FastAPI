@@ -20,24 +20,24 @@ class SpectrumAnalyzer {
         
         // Настройки по умолчанию
         this.defaultSettings = {
-            visualizationType: 'mirrorWave',
-            barsCount: 100,
+            visualizationType: 'spiral',
+            barsCount: 128,
             sensitivity: 1.0,
-            speed: 1,
-            smoothness: 0.6,
+            speed: 5,
+            smoothness: 0.7,
             colorScheme: 'red',
             customColors: ['#c0392b', '#e74c3c', '#d35400'],
             glowIntensity: 10,
             lineWidth: 3,
             particleSize: 3,
             particleCount: 200,
-            circleRadius: 40,
+            circleRadius: 60,
             isCleanMode: false,
             // Новые настройки
-            spiralTurns: 2,
-            spiralScale: 150,
-            noiseThreshold: 0.0,
-            noiseSmoothing: 0.05
+            spiralTurns: 3,
+            spiralScale: 450,
+            noiseThreshold: 0.1,
+            noiseSmoothing: 0.3
         };
 
         this.settings = {...this.defaultSettings};
@@ -688,15 +688,37 @@ class SpectrumAnalyzer {
     }
 
     drawCenterSpectrum() {
-        const sliceWidth = this.canvas.width / this.bufferLength;
         const centerY = this.canvas.height / 2;
-        let x = 0;
         const colors = this.getColors();
+        const halfLength = Math.floor(this.bufferLength / 2);
+        const sliceWidth = (this.canvas.width / 2) / halfLength;
 
-        for (let i = 0; i < this.bufferLength; i++) {
+        // Левая половина (от центра к левому краю)
+        for (let i = 0; i < halfLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity;
             const barHeight = amplitude * this.canvas.height / 512;
 
+            const x = (halfLength - i - 1) * sliceWidth;
+            
+            if (this.settings.colorScheme === 'rainbow') {
+                const hue = (i / halfLength) * 360;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+            } else {
+                const colorIndex = Math.floor(i / halfLength * colors.length);
+                this.ctx.fillStyle = colors[colorIndex % colors.length];
+            }
+
+            this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
+            this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
+        }
+
+        // Правая половина (от центра к правому краю)
+        for (let i = halfLength; i < this.bufferLength; i++) {
+            const amplitude = this.dataArray[i] * this.settings.sensitivity;
+            const barHeight = amplitude * this.canvas.height / 512;
+
+            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
+            
             if (this.settings.colorScheme === 'rainbow') {
                 const hue = (i / this.bufferLength) * 360;
                 this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
@@ -707,7 +729,6 @@ class SpectrumAnalyzer {
 
             this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
             this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
-            x += sliceWidth + 1;
         }
     }
 
@@ -785,14 +806,35 @@ class SpectrumAnalyzer {
     }
 
     drawSpectrum() {
-        const sliceWidth = this.canvas.width / this.bufferLength;
-        let x = 0;
         const colors = this.getColors();
+        const halfLength = Math.floor(this.bufferLength / 2);
+        const sliceWidth = (this.canvas.width / 2) / halfLength;
 
-        for (let i = 0; i < this.bufferLength; i++) {
+        // Левая половина (от центра к левому краю)
+        for (let i = 0; i < halfLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity;
             const barHeight = amplitude * this.canvas.height / 256;
 
+            const x = (halfLength - i - 1) * sliceWidth;
+            
+            if (this.settings.colorScheme === 'rainbow') {
+                const hue = (i / halfLength) * 360;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+            } else {
+                const colorIndex = Math.floor(i / halfLength * colors.length);
+                this.ctx.fillStyle = colors[colorIndex % colors.length];
+            }
+
+            this.ctx.fillRect(x, this.canvas.height - barHeight, sliceWidth + 1, barHeight);
+        }
+
+        // Правая половина (от центра к правому краю)
+        for (let i = halfLength; i < this.bufferLength; i++) {
+            const amplitude = this.dataArray[i] * this.settings.sensitivity;
+            const barHeight = amplitude * this.canvas.height / 256;
+
+            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
+            
             if (this.settings.colorScheme === 'rainbow') {
                 const hue = (i / this.bufferLength) * 360;
                 this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
@@ -802,7 +844,6 @@ class SpectrumAnalyzer {
             }
 
             this.ctx.fillRect(x, this.canvas.height - barHeight, sliceWidth + 1, barHeight);
-            x += sliceWidth + 1;
         }
     }
 
@@ -1132,15 +1173,37 @@ class SpectrumAnalyzer {
     }
 
     drawMirrorSpectrum() {
-        const sliceWidth = this.canvas.width / this.bufferLength;
         const centerY = this.canvas.height / 2;
-        let x = 0;
         const colors = this.getColors();
+        const halfLength = Math.floor(this.bufferLength / 2);
+        const sliceWidth = (this.canvas.width / 2) / halfLength;
 
-        for (let i = 0; i < this.bufferLength; i++) {
+        // Левая половина (от центра к левому краю)
+        for (let i = 0; i < halfLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity;
             const barHeight = amplitude * this.canvas.height / 512;
 
+            const x = (halfLength - i - 1) * sliceWidth;
+            
+            if (this.settings.colorScheme === 'rainbow') {
+                const hue = (i / halfLength) * 360;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+            } else {
+                const colorIndex = Math.floor(i / halfLength * colors.length);
+                this.ctx.fillStyle = colors[colorIndex % colors.length];
+            }
+
+            this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
+            this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
+        }
+
+        // Правая половина (от центра к правому краю)
+        for (let i = halfLength; i < this.bufferLength; i++) {
+            const amplitude = this.dataArray[i] * this.settings.sensitivity;
+            const barHeight = amplitude * this.canvas.height / 512;
+
+            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
+            
             if (this.settings.colorScheme === 'rainbow') {
                 const hue = (i / this.bufferLength) * 360;
                 this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
@@ -1151,7 +1214,6 @@ class SpectrumAnalyzer {
 
             this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
             this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
-            x += sliceWidth + 1;
         }
     }
 

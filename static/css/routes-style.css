@@ -1,0 +1,562 @@
+.routes-layout {
+  display: flex;
+  height: calc(100vh - 110px);
+  gap: 0;
+  min-height: 500px;
+}
+
+.routes-sidebar {
+  width: 340px;
+  background: var(--card-bg);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.route-controls {
+  background: var(--bg);
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.route-controls h3 {
+  margin: 0 0 10px 0;
+  color: var(--accent);
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+#route-search {
+  flex: 1;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: 'Brush Script MT', cursive;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+#search-submit-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.transport-selector {
+  margin-bottom: 10px;
+}
+
+.transport-selector label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-weight: bold;
+  font-size: 12px;
+}
+
+#transport-mode {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: 'Brush Script MT', cursive;
+  font-size: 12px;
+}
+
+.route-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+  height: 36px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Brush Script MT', cursive;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #a01f1f;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  padding: 3px 6px;
+  height: auto;
+  font-size: 11px;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.route-points-container {
+  background: var(--bg);
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  flex: 1;
+  min-height: 120px;
+}
+
+.route-points-container h4 {
+  margin: 0 0 8px 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.route-points-list {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.route-point {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: var(--card-bg);
+  border-radius: 6px;
+  margin-bottom: 4px;
+  border-left: 3px solid var(--accent);
+  font-size: 11px;
+}
+
+.point-number {
+  width: 18px;
+  height: 18px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.point-info {
+  flex: 1;
+}
+
+.point-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.point-action-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  font-size: 10px;
+}
+
+.point-action-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.empty-state {
+  text-align: center;
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+  padding: 12px;
+  font-size: 11px;
+}
+
+.route-info, .elevation-profile {
+  background: var(--bg);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.route-info h4, .elevation-profile h4 {
+  margin: 0 0 6px 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.info-item span:first-child {
+  color: rgba(255,255,255,0.7);
+}
+
+.transport-segments {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 6px;
+}
+
+.transport-segment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  font-size: 10px;
+  border-radius: 4px;
+  margin-bottom: 3px;
+  background: rgba(255,255,255,0.05);
+}
+
+.transport-segment-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.elevation-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.elevation-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+
+.elevation-stat span:first-child {
+  color: rgba(255,255,255,0.7);
+}
+
+#elevation-chart {
+  width: 100%;
+  height: 60px;
+  background: var(--card-bg);
+  border-radius: 5px;
+}
+
+.saved-routes {
+  background: var(--bg);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  min-height: 150px;
+}
+
+.saved-routes h4 {
+  margin: 0 0 6px 0;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.saved-routes-list {
+  max-height: 80px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.saved-route-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  background: var(--card-bg);
+  border-radius: 5px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 10px;
+}
+
+.saved-route-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.saved-route-info {
+  flex: 1;
+}
+
+.saved-route-name {
+  font-weight: bold;
+  margin-bottom: 1px;
+}
+
+.saved-route-meta {
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+}
+
+.saved-route-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.save-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#route-name-input {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-family: 'Brush Script MT', cursive;
+  font-size: 11px;
+}
+
+.routes-map-container {
+  flex: 1;
+  position: relative;
+  min-height: 300px;
+}
+
+#routes-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.map-control-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+
+.map-control-btn:hover, .map-control-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+.measure-info {
+  position: absolute;
+  top: 50px;
+  right: 8px;
+  background: var(--card-bg);
+  padding: 5px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  font-size: 11px;
+}
+
+.route-point-marker {
+  background: #dc2626;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.measure-marker {
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+}
+
+.measure-line {
+  stroke: #3b82f6;
+  stroke-width: 2;
+  stroke-dasharray: 4, 4;
+}
+
+.route-segment-driving { 
+  stroke: #3b82f6;
+  stroke-width: 4;
+}
+
+.route-segment-walking { 
+  stroke: #10b981;
+  stroke-width: 3;
+  stroke-dasharray: 5, 5;
+}
+
+.route-segment-cycling { 
+  stroke: #f59e0b;
+  stroke-width: 4;
+}
+
+.route-segment-public { 
+  stroke: #8b5cf6;
+  stroke-width: 4;
+  stroke-dasharray: 8, 4;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .routes-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: 400px;
+  }
+  
+  .routes-sidebar {
+    width: 100%;
+    max-height: 40vh;
+    order: 2;
+  }
+  
+  .routes-map-container {
+    height: 50vh;
+    order: 1;
+  }
+
+  .map-controls {
+    top: 8px;
+    right: 8px;
+    flex-direction: row;
+  }
+
+  .map-control-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .measure-info {
+    top: 50px;
+    right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .routes-sidebar {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .route-controls,
+  .route-points-container,
+  .route-info,
+  .elevation-profile,
+  .saved-routes {
+    padding: 8px;
+  }
+
+  .search-container {
+    flex-direction: column;
+  }
+
+  #search-submit-btn {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .route-actions {
+    flex-direction: row;
+  }
+
+  .btn-primary, .btn-secondary {
+    flex: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.route-point, .saved-route-item, .transport-segment {
+  animation: slideIn 0.3s ease;
+}
+
+.site-footer {
+  padding: 4px 0;
+  font-size: 10px;
+  margin-top: 6px;
+  height: 16px;
+  min-height: 16px;
+  line-height: 1.2;
+}
+
+.page-container {
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+}

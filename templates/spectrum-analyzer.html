@@ -60,12 +60,9 @@
                         <div class="setting-group">
                             <label>Тип визуализации:</label>
                             <select id="visualizationType" class="setting-select">
-                                <option value="bars">📊 Прямолинейные столбцы</option>
-                                <option value="centerBars">🎯 Центральные столбцы</option>
-                                <option value="circleBars">⭕ Круг из столбцов</option>
+                                <option value="bars">📊 Столбцы</option>
                                 <option value="wave">🌊 Волна</option>
-                                <option value="spectrum">🌈 Спектр (центрированный)</option>
-                                <option value="centerSpectrum">🎯 Центральный спектр</option>
+                                <option value="spectrum">🌈 Спектр</option>
                                 <option value="particles">✨ Частицы</option>
                                 <option value="mountain">🏔️ Горы</option>
                                 <option value="liquid">💧 Жидкость</option>
@@ -73,9 +70,10 @@
                                 <option value="grid">🔲 Сетка</option>
                                 <option value="spiral">🌀 Спираль</option>
                                 <option value="spiralBars">🌀 Спираль-столбцы</option>
-                                <option value="mirrorBars">🪞 Зеркальные столбцы</option>
-                                <option value="mirrorWave">🪞 Зеркальная волна</option>
-                                <option value="mirrorSpectrum">🪞 Зеркальный спектр</option>
+                                <option value="mirrorBars">📊 Зеркальные столбцы</option>
+                                <option value="mirrorWave">🌊 Зеркальная волна</option>
+                                <option value="mirrorSpectrum">🌈 Зеркальный спектр</option>
+                                <option value="circleBars">⭕ Круг из столбцов</option>
                                 <option value="circle">⭕ Круг</option>
                                 <option value="radar">📡 Радар</option>
                             </select>
@@ -98,12 +96,6 @@
                             <label>Скорость анимации: <span id="speedValue">5</span></label>
                             <input type="range" id="speedSlider" min="1" max="10" value="5" class="setting-slider">
                             <div class="setting-description">Скорость обновления визуализации (FPS)</div>
-                        </div>
-
-                        <div class="setting-group">
-                            <label>Сглаживание: <span id="smoothValue">0.7</span></label>
-                            <input type="range" id="smoothSlider" min="1" max="10" value="7" class="setting-slider">
-                            <div class="setting-description">Плавность переходов между кадрами (0.1-1.0)</div>
                         </div>
 
                         <div class="setting-group">
@@ -293,6 +285,15 @@
                                 <p>Пиковая амплитуда: <span id="peakAmplitude">0</span></p>
                                 <p>Средняя амплитуда: <span id="averageAmplitude">0</span></p>
                                 <p>Загрузка: <span id="cpuLoad">0</span>%</p>
+                                <hr style="border-color: rgba(255,255,255,0.2); margin: 8px 0;">
+                                <p>Бас-диапазон: <span id="bassRange">0</span></p>
+                                <p>Средние частоты: <span id="midRange">0</span></p>
+                                <p>Высокие частоты: <span id="highRange">0</span></p>
+                                <p>Доминирующая частота: <span id="dominantFreq">0</span> Гц</p>
+                                <p>Октава: <span id="octave">0</span></p>
+                                <p>Музыкальная нота: <span id="musicalNote">-</span></p>
+                                <p>Энергия спектра: <span id="spectralEnergy">0</span></p>
+                                <p>Баланс L/R: <span id="balance">50/50</span></p>
                             </div>
                         </div>
                     </div>

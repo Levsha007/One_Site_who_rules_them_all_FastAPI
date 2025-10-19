@@ -22,22 +22,21 @@ class SpectrumAnalyzer {
         this.defaultSettings = {
             visualizationType: 'spiral',
             barsCount: 128,
-            sensitivity: 1.0,
-            speed: 5,
-            smoothness: 0.7,
+            sensitivity: 2.0,
+            speed: 2,
             colorScheme: 'red',
             customColors: ['#c0392b', '#e74c3c', '#d35400'],
             glowIntensity: 10,
             lineWidth: 3,
             particleSize: 3,
             particleCount: 200,
-            circleRadius: 60,
+            circleRadius: 38,
             isCleanMode: false,
             // Новые настройки
             spiralTurns: 3,
-            spiralScale: 450,
-            noiseThreshold: 0.1,
-            noiseSmoothing: 0.3
+            spiralScale: 400,
+            noiseThreshold: 0.0,
+            noiseSmoothing: 0.5
         };
 
         this.settings = {...this.defaultSettings};
@@ -61,6 +60,9 @@ class SpectrumAnalyzer {
             monochrome: ['#333333', '#666666', '#999999', '#cccccc', '#ffffff']
         };
 
+        // Музыкальные ноты для анализа
+        this.musicalNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        
         this.init();
     }
 
@@ -130,15 +132,6 @@ class SpectrumAnalyzer {
             this.settings.speed = parseInt(e.target.value);
             document.getElementById('speedValue').textContent = e.target.value;
             this.updateFrameRate();
-            this.saveSettings();
-        });
-
-        document.getElementById('smoothSlider').addEventListener('input', (e) => {
-            this.settings.smoothness = parseInt(e.target.value) / 10;
-            document.getElementById('smoothValue').textContent = this.settings.smoothness.toFixed(1);
-            if (this.analyser) {
-                this.analyser.smoothingTimeConstant = this.settings.smoothness;
-            }
             this.saveSettings();
         });
 
@@ -261,9 +254,6 @@ class SpectrumAnalyzer {
         document.getElementById('speedSlider').value = this.settings.speed;
         document.getElementById('speedValue').textContent = this.settings.speed;
         
-        document.getElementById('smoothSlider').value = this.settings.smoothness * 10;
-        document.getElementById('smoothValue').textContent = this.settings.smoothness.toFixed(1);
-        
         document.getElementById('glowSlider').value = this.settings.glowIntensity;
         document.getElementById('glowValue').textContent = this.settings.glowIntensity;
         
@@ -320,7 +310,6 @@ class SpectrumAnalyzer {
         this.settings.barsCount = this.defaultSettings.barsCount;
         this.settings.sensitivity = this.defaultSettings.sensitivity;
         this.settings.speed = this.defaultSettings.speed;
-        this.settings.smoothness = this.defaultSettings.smoothness;
         this.applySettingsToUI();
         this.saveSettings();
         showToast('Основные настройки сброшены');
@@ -421,7 +410,7 @@ class SpectrumAnalyzer {
             
             // Применяем настройки сглаживания сразу
             this.analyser.fftSize = 4096;
-            this.analyser.smoothingTimeConstant = this.settings.smoothness;
+            this.analyser.smoothingTimeConstant = 0.3;
             this.bufferLength = this.analyser.frequencyBinCount;
             this.dataArray = new Uint8Array(this.bufferLength);
             this.history = Array.from({ length: this.historyLength }, () => new Uint8Array(this.bufferLength));
@@ -543,11 +532,9 @@ class SpectrumAnalyzer {
         // Визуализация
         switch (this.settings.visualizationType) {
             case 'bars': this.drawBars(); break;
-            case 'centerBars': this.drawCenterBars(); break;
             case 'circleBars': this.drawCircleBars(); break;
             case 'wave': this.drawWave(); break;
             case 'spectrum': this.drawSpectrum(); break;
-            case 'centerSpectrum': this.drawCenterSpectrum(); break;
             case 'particles': this.drawParticles(); break;
             case 'mountain': this.drawMountain(); break;
             case 'liquid': this.drawLiquid(); break;
@@ -593,30 +580,96 @@ class SpectrumAnalyzer {
             this.frameCount = 0;
             this.lastFpsUpdate = currentTime;
 
-            // Обновляем статистику
-            document.getElementById('fps').textContent = this.fps;
-
-            // Уровень звука (средняя амплитуда)
+            // Базовые метрики
             let sum = 0;
             let peak = 0;
             let activeFrequencies = 0;
+            let spectralEnergy = 0;
+
+            // Диапазоны частот
+            const bassRange = [0, Math.floor(this.bufferLength * 0.1)]; // 0-10%
+            const midRange = [Math.floor(this.bufferLength * 0.1), Math.floor(this.bufferLength * 0.5)]; // 10-50%
+            const highRange = [Math.floor(this.bufferLength * 0.5), this.bufferLength - 1]; // 50-100%
+
+            let bassSum = 0, midSum = 0, highSum = 0;
+            let dominantFreqIndex = 0;
+            let maxAmplitude = 0;
+
             for (let i = 0; i < this.bufferLength; i++) {
-                sum += this.dataArray[i];
-                peak = Math.max(peak, this.dataArray[i]);
-                if (this.dataArray[i] > this.settings.noiseThreshold * 255) {
+                const amplitude = this.dataArray[i];
+                sum += amplitude;
+                spectralEnergy += amplitude * amplitude;
+                
+                if (amplitude > peak) {
+                    peak = amplitude;
+                }
+                
+                if (amplitude > this.settings.noiseThreshold * 255) {
                     activeFrequencies++;
                 }
+
+                // Находим доминирующую частоту
+                if (amplitude > maxAmplitude) {
+                    maxAmplitude = amplitude;
+                    dominantFreqIndex = i;
+                }
+
+                // Суммируем по диапазонам
+                if (i >= bassRange[0] && i <= bassRange[1]) {
+                    bassSum += amplitude;
+                } else if (i >= midRange[0] && i <= midRange[1]) {
+                    midSum += amplitude;
+                } else if (i >= highRange[0] && i <= highRange[1]) {
+                    highSum += amplitude;
+                }
             }
+
             const average = sum / this.bufferLength;
+            const bassLevel = bassSum / (bassRange[1] - bassRange[0] + 1);
+            const midLevel = midSum / (midRange[1] - midRange[0] + 1);
+            const highLevel = highSum / (highRange[1] - highRange[0] + 1);
+
+            // Вычисляем доминирующую частоту
+            const sampleRate = this.audioContext ? this.audioContext.sampleRate : 44100;
+            const dominantFrequency = dominantFreqIndex * sampleRate / (this.bufferLength * 2);
+
+            // Определяем ноту и октаву
+            const noteInfo = this.frequencyToNote(dominantFrequency);
+
+            // Обновляем DOM
+            document.getElementById('fps').textContent = this.fps;
             document.getElementById('volumeLevel').textContent = Math.round(average);
             document.getElementById('peakAmplitude').textContent = Math.round(peak);
             document.getElementById('averageAmplitude').textContent = Math.round(average);
             document.getElementById('activeFrequencies').textContent = activeFrequencies;
+            document.getElementById('spectralEnergy').textContent = Math.round(spectralEnergy / 1000);
+
+            // Новые метрики
+            document.getElementById('bassRange').textContent = Math.round(bassLevel);
+            document.getElementById('midRange').textContent = Math.round(midLevel);
+            document.getElementById('highRange').textContent = Math.round(highLevel);
+            document.getElementById('dominantFreq').textContent = Math.round(dominantFrequency);
+            document.getElementById('octave').textContent = noteInfo.octave;
+            document.getElementById('musicalNote').textContent = noteInfo.note;
 
             // Условная загрузка (на основе FPS)
             const cpuLoad = Math.max(0, 100 - (this.fps / 60) * 100);
             document.getElementById('cpuLoad').textContent = Math.round(cpuLoad);
         }
+    }
+
+    frequencyToNote(frequency) {
+        if (frequency === 0) return { note: '-', octave: 0 };
+        
+        const A4 = 440;
+        const noteNumber = 12 * Math.log2(frequency / A4) + 69;
+        const noteIndex = Math.round(noteNumber) % 12;
+        const octave = Math.floor(noteNumber / 12) - 1;
+        
+        return {
+            note: this.musicalNotes[noteIndex],
+            octave: octave
+        };
     }
 
     getColors() {
@@ -655,80 +708,6 @@ class SpectrumAnalyzer {
                 this.ctx.fillRect(x, y, barWidth - 1, barHeight);
                 this.ctx.shadowBlur = 0;
             }
-        }
-    }
-
-    drawCenterBars() {
-        const barCount = this.settings.barsCount;
-        const barWidth = this.canvas.width / barCount;
-        const centerY = this.canvas.height / 2;
-        const colors = this.getColors();
-
-        for (let i = 0; i < barCount; i++) {
-            const dataIndex = Math.floor(i / barCount * this.bufferLength);
-            const amplitude = this.dataArray[dataIndex] * this.settings.sensitivity / 256;
-            const barHeight = amplitude * this.canvas.height * 0.4;
-
-            const x = i * barWidth;
-            const colorIndex = Math.floor(i / barCount * colors.length);
-            const color = colors[colorIndex % colors.length];
-
-            this.ctx.fillStyle = color;
-            this.ctx.fillRect(x, centerY - barHeight, barWidth - 1, barHeight);
-            this.ctx.fillRect(x, centerY, barWidth - 1, barHeight);
-
-            if (this.settings.glowIntensity > 0) {
-                this.ctx.shadowColor = color;
-                this.ctx.shadowBlur = this.settings.glowIntensity;
-                this.ctx.fillRect(x, centerY - barHeight, barWidth - 1, barHeight);
-                this.ctx.fillRect(x, centerY, barWidth - 1, barHeight);
-                this.ctx.shadowBlur = 0;
-            }
-        }
-    }
-
-    drawCenterSpectrum() {
-        const centerY = this.canvas.height / 2;
-        const colors = this.getColors();
-        const halfLength = Math.floor(this.bufferLength / 2);
-        const sliceWidth = (this.canvas.width / 2) / halfLength;
-
-        // Левая половина (от центра к левому краю)
-        for (let i = 0; i < halfLength; i++) {
-            const amplitude = this.dataArray[i] * this.settings.sensitivity;
-            const barHeight = amplitude * this.canvas.height / 512;
-
-            const x = (halfLength - i - 1) * sliceWidth;
-            
-            if (this.settings.colorScheme === 'rainbow') {
-                const hue = (i / halfLength) * 360;
-                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            } else {
-                const colorIndex = Math.floor(i / halfLength * colors.length);
-                this.ctx.fillStyle = colors[colorIndex % colors.length];
-            }
-
-            this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
-            this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
-        }
-
-        // Правая половина (от центра к правому краю)
-        for (let i = halfLength; i < this.bufferLength; i++) {
-            const amplitude = this.dataArray[i] * this.settings.sensitivity;
-            const barHeight = amplitude * this.canvas.height / 512;
-
-            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
-            
-            if (this.settings.colorScheme === 'rainbow') {
-                const hue = (i / this.bufferLength) * 360;
-                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            } else {
-                const colorIndex = Math.floor(i / this.bufferLength * colors.length);
-                this.ctx.fillStyle = colors[colorIndex % colors.length];
-            }
-
-            this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
-            this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
         }
     }
 
@@ -806,35 +785,14 @@ class SpectrumAnalyzer {
     }
 
     drawSpectrum() {
+        const sliceWidth = this.canvas.width / this.bufferLength;
+        let x = 0;
         const colors = this.getColors();
-        const halfLength = Math.floor(this.bufferLength / 2);
-        const sliceWidth = (this.canvas.width / 2) / halfLength;
 
-        // Левая половина (от центра к левому краю)
-        for (let i = 0; i < halfLength; i++) {
+        for (let i = 0; i < this.bufferLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity;
             const barHeight = amplitude * this.canvas.height / 256;
 
-            const x = (halfLength - i - 1) * sliceWidth;
-            
-            if (this.settings.colorScheme === 'rainbow') {
-                const hue = (i / halfLength) * 360;
-                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            } else {
-                const colorIndex = Math.floor(i / halfLength * colors.length);
-                this.ctx.fillStyle = colors[colorIndex % colors.length];
-            }
-
-            this.ctx.fillRect(x, this.canvas.height - barHeight, sliceWidth + 1, barHeight);
-        }
-
-        // Правая половина (от центра к правому краю)
-        for (let i = halfLength; i < this.bufferLength; i++) {
-            const amplitude = this.dataArray[i] * this.settings.sensitivity;
-            const barHeight = amplitude * this.canvas.height / 256;
-
-            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
-            
             if (this.settings.colorScheme === 'rainbow') {
                 const hue = (i / this.bufferLength) * 360;
                 this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
@@ -844,6 +802,7 @@ class SpectrumAnalyzer {
             }
 
             this.ctx.fillRect(x, this.canvas.height - barHeight, sliceWidth + 1, barHeight);
+            x += sliceWidth + 1;
         }
     }
 
@@ -1173,37 +1132,15 @@ class SpectrumAnalyzer {
     }
 
     drawMirrorSpectrum() {
+        const sliceWidth = this.canvas.width / this.bufferLength;
         const centerY = this.canvas.height / 2;
+        let x = 0;
         const colors = this.getColors();
-        const halfLength = Math.floor(this.bufferLength / 2);
-        const sliceWidth = (this.canvas.width / 2) / halfLength;
 
-        // Левая половина (от центра к левому краю)
-        for (let i = 0; i < halfLength; i++) {
+        for (let i = 0; i < this.bufferLength; i++) {
             const amplitude = this.dataArray[i] * this.settings.sensitivity;
             const barHeight = amplitude * this.canvas.height / 512;
 
-            const x = (halfLength - i - 1) * sliceWidth;
-            
-            if (this.settings.colorScheme === 'rainbow') {
-                const hue = (i / halfLength) * 360;
-                this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-            } else {
-                const colorIndex = Math.floor(i / halfLength * colors.length);
-                this.ctx.fillStyle = colors[colorIndex % colors.length];
-            }
-
-            this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
-            this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
-        }
-
-        // Правая половина (от центра к правому краю)
-        for (let i = halfLength; i < this.bufferLength; i++) {
-            const amplitude = this.dataArray[i] * this.settings.sensitivity;
-            const barHeight = amplitude * this.canvas.height / 512;
-
-            const x = (i - halfLength) * sliceWidth + this.canvas.width / 2;
-            
             if (this.settings.colorScheme === 'rainbow') {
                 const hue = (i / this.bufferLength) * 360;
                 this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
@@ -1214,6 +1151,7 @@ class SpectrumAnalyzer {
 
             this.ctx.fillRect(x, centerY - barHeight, sliceWidth + 1, barHeight);
             this.ctx.fillRect(x, centerY, sliceWidth + 1, barHeight);
+            x += sliceWidth + 1;
         }
     }
 

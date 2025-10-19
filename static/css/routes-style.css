@@ -1,3 +1,4 @@
+/* routes-style.css */
 .routes-layout {
   display: flex;
   height: calc(100vh - 110px);
@@ -94,6 +95,12 @@
   gap: 5px;
 }
 
+.file-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .btn-primary, .btn-secondary, .btn-danger {
   height: 36px;
   padding: 0 10px;
@@ -119,6 +126,12 @@
   transform: translateY(-1px);
 }
 
+.btn-primary:disabled {
+  background: rgba(160, 31, 31, 0.5);
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-secondary {
   background: rgba(255,255,255,0.1);
   color: var(--text);
@@ -127,6 +140,12 @@
 
 .btn-secondary:hover {
   background: rgba(255,255,255,0.2);
+}
+
+.btn-secondary:disabled {
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.3);
+  cursor: not-allowed;
 }
 
 .btn-danger {
@@ -401,12 +420,13 @@
 .map-control-btn:hover, .map-control-btn.active {
   background: var(--accent);
   color: white;
+  transform: scale(1.05);
 }
 
 .measure-info {
   position: absolute;
-  top: 50px;
-  right: 8px;
+  top: 44.5px;
+  right: 46px;
   background: var(--card-bg);
   padding: 5px 8px;
   border-radius: 6px;
@@ -463,11 +483,46 @@
   stroke-dasharray: 8, 4;
 }
 
-/* Адаптивность для мобильных устройств */
+/* Стили для меню выбора карты */
+.map-type-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 5px;
+  z-index: 1001;
+  margin-top: 5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: none;
+}
+
+.map-type-option {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: 'Brush Script MT', cursive;
+  font-size: 12px;
+  white-space: nowrap;
+  min-width: 140px;
+}
+
+.map-type-option:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Улучшенная адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .routes-layout {
-    flex-direction: column;
-    height: auto;
+    flex-direction: column-reverse;
+    height: calc(100vh - 60px);
     min-height: 400px;
   }
   
@@ -475,11 +530,17 @@
     width: 100%;
     max-height: 40vh;
     order: 2;
+    padding: 8px;
+    gap: 8px;
+    overflow-y: auto;
+    border-right: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
   }
   
   .routes-map-container {
-    height: 50vh;
+    height: 60vh;
     order: 1;
+    min-height: 300px;
   }
 
   .map-controls {
@@ -494,15 +555,15 @@
   }
 
   .measure-info {
-    top: 50px;
-    right: 8px;
+    top: 44.5px;
+    right: 46px;
   }
-}
 
-@media (max-width: 480px) {
-  .routes-sidebar {
-    padding: 8px;
-    gap: 8px;
+  .map-type-menu {
+    right: 0;
+    left: auto;
+    top: 100%;
+    margin-top: 5px;
   }
 
   .route-controls,
@@ -528,6 +589,120 @@
 
   .btn-primary, .btn-secondary {
     flex: 1;
+  }
+
+  .file-actions {
+    flex-direction: row;
+  }
+
+  .transport-selector label {
+    font-size: 11px;
+  }
+
+  #transport-mode {
+    font-size: 11px;
+  }
+
+  .route-points-container h4,
+  .route-info h4,
+  .elevation-profile h4,
+  .saved-routes h4 {
+    font-size: 12px;
+  }
+
+  .route-point {
+    font-size: 10px;
+    padding: 4px;
+  }
+
+  .point-number {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+
+  .info-item,
+  .elevation-stat {
+    font-size: 9px;
+  }
+
+  .transport-segment {
+    font-size: 9px;
+  }
+
+  .saved-route-item {
+    font-size: 9px;
+  }
+
+  #route-name-input {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .routes-sidebar {
+    max-height: 45vh;
+  }
+  
+  .routes-map-container {
+    height: 55vh;
+  }
+
+  .map-controls {
+    gap: 4px;
+  }
+
+  .map-control-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .route-controls h3 {
+    font-size: 14px;
+  }
+
+  .btn-primary, .btn-secondary {
+    font-size: 11px;
+    height: 32px;
+  }
+
+  .route-points-list {
+    max-height: 80px;
+  }
+
+  .saved-routes-list {
+    max-height: 60px;
+  }
+
+  #elevation-chart {
+    height: 50px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 360px) {
+  .routes-sidebar {
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .route-controls,
+  .route-points-container,
+  .route-info,
+  .elevation-profile,
+  .saved-routes {
+    padding: 6px;
+  }
+
+  .btn-primary, .btn-secondary {
+    font-size: 10px;
+    padding: 0 8px;
+  }
+
+  .map-control-btn {
+    width: 30px;
+    height: 30px;
   }
 }
 
@@ -556,7 +731,7 @@
 }
 
 .page-container {
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 100px);
   display: flex;
   flex-direction: column;
 }

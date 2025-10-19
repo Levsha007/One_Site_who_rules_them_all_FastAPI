@@ -1,3 +1,4 @@
+<!-- route.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -24,6 +25,7 @@
       
       <div class="routes-sidebar">
         
+        <!-- Основные элементы управления -->
         <div class="route-controls">
           <h3>📍 Построение маршрута</h3>
           
@@ -35,15 +37,14 @@
           <div class="transport-selector">
             <label>Тип транспорта для новых сегментов:</label>
             <select id="transport-mode">
-              <option value="driving">🚗 Автомобиль</option>
-              <option value="walking">🚶 Пешком</option>
-              <option value="cycling">🚴 Велосипед</option>
-              <option value="public">🚌 Общественный транспорт</option>
+              <option value="driving">🚗 Автомобиль (85 км/ч)</option>
+              <option value="walking">🚶 Пешком (6.5 км/ч)</option>
+              <option value="cycling">🚴 Велосипед (25 км/ч)</option>
+              <option value="public">🚌 Общественный транспорт (70 км/ч)</option>
             </select>
           </div>
           
           <div class="route-actions">
-            <button id="add-point-btn" class="btn-primary">➕ Добавить точку</button>
             <button id="clear-route-btn" class="btn-secondary">🗑️ Очистить маршрут</button>
           </div>
         </div>
@@ -53,6 +54,18 @@
           <div id="route-points-list" class="route-points-list">
             <div class="empty-state">Добавьте точки на карту</div>
           </div>
+        </div>
+
+        <!-- Управление файлами -->
+        <div class="route-controls">
+          <h3>📁 Управление файлами</h3>
+          
+          <div class="file-actions">
+            <button id="export-gpx-btn" class="btn-primary">📥 Экспорт GPX</button>
+            <button id="import-gpx-btn" class="btn-secondary">📤 Импорт GPX</button>
+            <input type="file" id="gpx-file-input" accept=".gpx" style="display: none;" />
+          </div>
+          
         </div>
 
         <div class="route-info" id="route-info" style="display: none;">
@@ -68,6 +81,10 @@
           <div class="info-item">
             <span>Количество точек:</span>
             <span id="points-count">0</span>
+          </div>
+          <div class="info-item" id="average-speed">
+            <span>Средняя скорость:</span>
+            <span id="average-speed-value">-</span>
           </div>
           <div class="transport-segments" id="transport-segments">
             <!-- Сегменты транспорта будут добавляться здесь -->
@@ -93,6 +110,7 @@
           <canvas id="elevation-chart" width="300" height="80"></canvas>
         </div>
 
+        <!-- Сохраненные маршруты -->
         <div class="saved-routes">
           <h4>💾 Сохраненные маршруты</h4>
           <div class="saved-routes-list" id="saved-routes-list">
@@ -101,7 +119,6 @@
           <div class="save-actions">
             <input type="text" id="route-name-input" placeholder="Название маршрута" />
             <button id="save-route-btn" class="btn-primary">💾 Сохранить</button>
-            <button id="export-gpx-btn" class="btn-secondary">📥 Экспорт GPX</button>
           </div>
         </div>
 
@@ -112,6 +129,13 @@
         <div class="map-controls">
           <button id="fit-bounds-btn" class="map-control-btn" title="Показать весь маршрут">🔍</button>
           <button id="measure-btn" class="map-control-btn" title="Измерить расстояние">📏</button>
+          <button id="map-type-btn" class="map-control-btn" title="Выбрать тип карты">🗺️</button>
+          <div id="map-type-menu" class="map-type-menu">
+            <button class="map-type-option" id="map-type-openstreetmap">🗺️ OpenStreetMap</button>
+            <button class="map-type-option" id="map-type-спутник">🛰️ Спутник</button>
+            <button class="map-type-option" id="map-type-рельеф">⛰️ Рельеф</button>
+            <button class="map-type-option" id="map-type-гибрид">🔀 Гибрид</button>
+          </div>
         </div>
         <div class="measure-info" id="measure-info" style="display: none;">
           <span id="measure-distance">0 км</span>

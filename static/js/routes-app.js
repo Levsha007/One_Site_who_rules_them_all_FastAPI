@@ -1,3 +1,4 @@
+// routes-app.js
 class RoutesApp {
     constructor() {
         this.map = null;
@@ -10,11 +11,21 @@ class RoutesApp {
         this.measureLine = null;
         this.elevationData = [];
         this.routeGeometry = [];
+        
+        // Фиксированные скорости (км/ч)
+        this.transportSpeeds = {
+            driving: 85,
+            walking: 6.5,
+            cycling: 25,
+            public: 70
+        };
+        
         this.init();
     }
 
     async init() {
         await this.loadSavedRoutes();
+        this.loadCurrentRoute();
         this.initMap();
         this.setupEventListeners();
         this.updateSavedRoutesList();
@@ -28,12 +39,33 @@ class RoutesApp {
             maxBoundsViscosity: 1.0
         }).setView([55.7558, 37.6173], 10);
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 18,
-            noWrap: true
-        }).addTo(this.map);
-
+        // Базовый слой OSM
+        this.baseLayers = {
+            "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18,
+                noWrap: true
+            }),
+            "Спутник": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri',
+                maxZoom: 18,
+                noWrap: true
+            }),
+            "Рельеф": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenTopoMap',
+                maxZoom: 17,
+                noWrap: true
+            }),
+            "Гибрид": L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                attribution: '© Google',
+                maxZoom: 20,
+                noWrap: true,
+                subdomains: ['mt0','mt1','mt2','mt3']
+            })
+        };
+        
+        this.baseLayers["OpenStreetMap"].addTo(this.map);
+        
         this.routeLayer = L.layerGroup().addTo(this.map);
         this.pointsLayer = L.layerGroup().addTo(this.map);
         this.measureLayer = L.layerGroup().addTo(this.map);
@@ -82,9 +114,58 @@ class RoutesApp {
             this.exportGPX();
         });
 
+        document.getElementById('import-gpx-btn').addEventListener('click', () => {
+            document.getElementById('gpx-file-input').click();
+        });
+
+        document.getElementById('gpx-file-input').addEventListener('change', (e) => {
+            this.importGPX(e.target.files[0]);
+            // Сбрасываем значение input, чтобы можно было загрузить тот же файл снова
+            e.target.value = '';
+        });
+
+        document.getElementById('map-type-btn').addEventListener('click', () => {
+            this.toggleMapTypeMenu();
+        });
+
+        // Добавляем обработчики для типов карт
+        Object.keys(this.baseLayers).forEach(layerName => {
+            document.getElementById(`map-type-${this.slugify(layerName)}`)?.addEventListener('click', () => {
+                this.switchBaseLayer(layerName);
+                this.hideMapTypeMenu();
+            });
+        });
+
         document.getElementById('transport-mode').addEventListener('change', (e) => {
             this.currentTransport = e.target.value;
         });
+
+        // Закрываем меню при клике вне его
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#map-type-menu') && !e.target.closest('#map-type-btn')) {
+                this.hideMapTypeMenu();
+            }
+        });
+    }
+
+    slugify(text) {
+        return text.toLowerCase().replace(/[^a-z0-9а-я]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+
+    toggleMapTypeMenu() {
+        const menu = document.getElementById('map-type-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    hideMapTypeMenu() {
+        document.getElementById('map-type-menu').style.display = 'none';
+    }
+
+    switchBaseLayer(layerName) {
+        Object.values(this.baseLayers).forEach(layer => {
+            this.map.removeLayer(layer);
+        });
+        this.baseLayers[layerName].addTo(this.map);
     }
 
     async handleSearch() {
@@ -92,7 +173,6 @@ class RoutesApp {
         if (!query) return;
 
         try {
-            // Проверяем, является ли ввод координатами
             const coordMatch = query.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
             if (coordMatch) {
                 const lat = parseFloat(coordMatch[1]);
@@ -105,7 +185,6 @@ class RoutesApp {
                 }
             }
 
-            // Поиск через Nominatim
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
             const results = await response.json();
             
@@ -125,19 +204,6 @@ class RoutesApp {
     }
 
     async addRoutePoint(latlng, name = '') {
-        // Проверяем, не находится ли точка в море
-        try {
-            const response = await fetch(`https://api.onwater.io/api/v1/results/${latlng.lat},${latlng.lng}?access_token=YOUR_API_KEY`);
-            const data = await response.json();
-            if (data.water) {
-                this.showToast('❌ Нельзя добавить точку в море/океане');
-                return;
-            }
-        } catch (error) {
-            // Если сервис недоступен, пропускаем проверку
-            console.log('Water check service unavailable');
-        }
-
         const point = {
             id: Date.now() + Math.random(),
             latlng: latlng,
@@ -145,7 +211,6 @@ class RoutesApp {
             marker: null
         };
 
-        // Создаем маркер как красную точку
         point.marker = L.circleMarker(latlng, {
             radius: 6,
             fillColor: '#dc2626',
@@ -160,39 +225,38 @@ class RoutesApp {
         this.routePoints.push(point);
         this.updatePointsList();
         
-        // Инкрементальное построение маршрута
+        // Если есть предыдущая точка, строим маршрут только до новой точки
         if (this.routePoints.length >= 2) {
-            await this.addRouteSegment(this.routePoints.length - 2, this.routePoints.length - 1);
+            const previousPoint = this.routePoints[this.routePoints.length - 2];
+            await this.buildRouteSegment(previousPoint, point);
         }
         
         this.updateUI();
+        this.saveCurrentRoute();
     }
 
-    async addRouteSegment(startIndex, endIndex) {
-        const start = this.routePoints[startIndex];
-        const end = this.routePoints[endIndex];
-        
+    async buildRouteSegment(startPoint, endPoint) {
         try {
-            const route = await this.getOSRMRoute(start.latlng, end.latlng, this.currentTransport);
+            const route = await this.getOSRMRoute(startPoint.latlng, endPoint.latlng, this.currentTransport);
             if (route && route.geometry) {
                 const segment = {
-                    start: start,
-                    end: end,
+                    start: startPoint,
+                    end: endPoint,
                     transport: this.currentTransport,
                     geometry: route.geometry,
                     distance: route.distance,
-                    duration: route.duration,
+                    duration: this.calculateDuration(route.distance, this.currentTransport),
                     polyline: null
                 };
                 
                 this.routeSegments.push(segment);
                 this.drawRouteSegment(segment);
                 
-                // Обновляем общую геометрию маршрута
                 this.updateRouteGeometry();
                 await this.calculateElevation();
                 this.updateRouteInfo();
                 this.updateTransportSegments();
+                this.saveCurrentRoute();
             } else {
                 this.showToast('❌ Не удалось построить маршрут для выбранного типа транспорта');
             }
@@ -200,6 +264,13 @@ class RoutesApp {
             console.error('Segment calculation error:', error);
             this.showToast('❌ Ошибка построения сегмента маршрута');
         }
+    }
+
+    calculateDuration(distanceMeters, transport) {
+        const speedKmh = this.transportSpeeds[transport];
+        const distanceKm = distanceMeters / 1000;
+        const durationHours = distanceKm / speedKmh;
+        return Math.round(durationHours * 3600);
     }
 
     async getOSRMRoute(start, end, profile) {
@@ -218,7 +289,6 @@ class RoutesApp {
                     duration: route.duration
                 };
             } else {
-                // Если OSRM не может построить маршрут, возвращаем null
                 return null;
             }
         } catch (error) {
@@ -240,7 +310,6 @@ class RoutesApp {
         const color = this.getTransportColor(segment.transport);
         const style = this.getTransportStyle(segment.transport);
         
-        // Удаляем старый сегмент если он существует
         if (segment.polyline) {
             this.routeLayer.removeLayer(segment.polyline);
         }
@@ -255,12 +324,12 @@ class RoutesApp {
             className: `route-segment-${segment.transport}`
         }).addTo(this.routeLayer);
 
-        // Добавляем popup с информацией о сегменте
         segment.polyline.bindPopup(`
             <div class="segment-popup">
                 <strong>Транспорт:</strong> ${this.getTransportName(segment.transport)}<br>
                 <strong>Расстояние:</strong> ${this.formatDistance(segment.distance)}<br>
-                <strong>Время:</strong> ${this.formatDuration(segment.duration)}
+                <strong>Время:</strong> ${this.formatDuration(segment.duration)}<br>
+                <strong>Скорость:</strong> ${this.transportSpeeds[segment.transport]} км/ч
             </div>
         `);
     }
@@ -327,7 +396,6 @@ class RoutesApp {
         const container = document.getElementById('transport-segments');
         container.innerHTML = '';
 
-        // Группируем сегменты по типу транспорта
         const transportGroups = {};
         this.routeSegments.forEach(segment => {
             if (!transportGroups[segment.transport]) {
@@ -342,7 +410,6 @@ class RoutesApp {
             transportGroups[segment.transport].count += 1;
         });
 
-        // Добавляем сегменты в интерфейс
         Object.entries(transportGroups).forEach(([transport, data]) => {
             const segmentElement = document.createElement('div');
             segmentElement.className = 'transport-segment';
@@ -366,14 +433,14 @@ class RoutesApp {
         
         this.routePoints.splice(index, 1);
         
-        // Удаляем связанные сегменты и перестраиваем маршрут
+        // Удаляем сегменты, связанные с удаленной точкой
         this.routeSegments = this.routeSegments.filter(segment => 
             segment.start !== point && segment.end !== point
         );
         
         this.routeLayer.clearLayers();
         
-        // Перерисовываем оставшиеся сегменты
+        // Перестраиваем оставшиеся сегменты
         this.routeSegments.forEach(segment => {
             this.drawRouteSegment(segment);
         });
@@ -391,6 +458,7 @@ class RoutesApp {
         
         this.updatePointsList();
         this.updateUI();
+        this.saveCurrentRoute();
     }
 
     updateMarkersNumbers() {
@@ -408,7 +476,6 @@ class RoutesApp {
         }
 
         try {
-            // Берем только каждую 5-ю точку для оптимизации
             const sampledCoords = [];
             for (let i = 0; i < this.routeGeometry.length; i += 5) {
                 sampledCoords.push(this.routeGeometry[i]);
@@ -453,28 +520,23 @@ class RoutesApp {
         const elevations = this.elevationData.map(point => point.elevation);
         const minElevation = Math.min(...elevations);
         const maxElevation = Math.max(...elevations);
-        const range = Math.max(maxElevation - minElevation, 10); // Минимальный диапазон 10м
+        const range = Math.max(maxElevation - minElevation, 10);
 
-        // Рассчитываем набор и спуск высоты
         let gain = 0;
         for (let i = 1; i < elevations.length; i++) {
             const diff = elevations[i] - elevations[i - 1];
             if (diff > 0) gain += diff;
         }
 
-        // Обновляем статистику
         document.getElementById('max-elevation').textContent = `${Math.round(maxElevation)} м`;
         document.getElementById('min-elevation').textContent = `${Math.round(minElevation)} м`;
         document.getElementById('elevation-gain').textContent = `${Math.round(gain)} м`;
 
-        // Очищаем canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Рисуем фон
         ctx.fillStyle = 'rgba(255,255,255,0.1)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Рисуем график высот
         ctx.beginPath();
         ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 2;
@@ -491,7 +553,6 @@ class RoutesApp {
             }
         });
         
-        // Замыкаем область под графиком
         ctx.lineTo(canvas.width, canvas.height);
         ctx.lineTo(0, canvas.height);
         ctx.closePath();
@@ -514,9 +575,26 @@ class RoutesApp {
         const totalDistance = this.routeSegments.reduce((sum, segment) => sum + segment.distance, 0);
         const totalDuration = this.routeSegments.reduce((sum, segment) => sum + segment.duration, 0);
         
+        const totalDistanceKm = totalDistance / 1000;
+        const totalDurationHours = totalDuration / 3600;
+        const averageSpeed = totalDurationHours > 0 ? totalDistanceKm / totalDurationHours : 0;
+        
         document.getElementById('total-distance').textContent = this.formatDistance(totalDistance);
         document.getElementById('total-duration').textContent = this.formatDuration(totalDuration);
         document.getElementById('points-count').textContent = this.routePoints.length;
+        
+        const averageSpeedElement = document.getElementById('average-speed') || 
+            (() => {
+                const infoContainer = document.getElementById('route-info');
+                const speedElement = document.createElement('div');
+                speedElement.className = 'info-item';
+                speedElement.id = 'average-speed';
+                speedElement.innerHTML = '<span>Средняя скорость:</span><span id="average-speed-value">-</span>';
+                infoContainer.appendChild(speedElement);
+                return speedElement;
+            })();
+        
+        document.getElementById('average-speed-value').textContent = `${averageSpeed.toFixed(1)} км/ч`;
         
         document.getElementById('route-info').style.display = 'block';
     }
@@ -541,7 +619,7 @@ class RoutesApp {
     }
 
     clearRoute() {
-        // Полностью очищаем все данные маршрута
+        // Полностью очищаем все слои и данные
         this.routePoints.forEach(point => {
             if (point.marker) {
                 this.pointsLayer.removeLayer(point.marker);
@@ -552,11 +630,16 @@ class RoutesApp {
         this.routeSegments = [];
         this.routeGeometry = [];
         this.routeLayer.clearLayers();
+        this.pointsLayer.clearLayers();
         this.clearElevationData();
         this.updatePointsList();
         this.updateUI();
         document.getElementById('route-info').style.display = 'none';
         document.getElementById('elevation-profile').style.display = 'none';
+        
+        localStorage.removeItem('currentRoute');
+        
+        this.showToast('Маршрут очищен');
     }
 
     fitRouteBounds() {
@@ -694,6 +777,68 @@ class RoutesApp {
         }
     }
 
+    saveCurrentRoute() {
+        try {
+            const currentRoute = {
+                points: this.routePoints.map(point => ({
+                    lat: point.latlng.lat,
+                    lng: point.latlng.lng,
+                    name: point.name
+                })),
+                segments: this.routeSegments.map(segment => ({
+                    transport: segment.transport,
+                    geometry: segment.geometry,
+                    distance: segment.distance,
+                    duration: segment.duration
+                }))
+            };
+            localStorage.setItem('currentRoute', JSON.stringify(currentRoute));
+        } catch (error) {
+            console.error('Error saving current route:', error);
+        }
+    }
+
+    loadCurrentRoute() {
+        try {
+            const currentRoute = localStorage.getItem('currentRoute');
+            if (currentRoute) {
+                const routeData = JSON.parse(currentRoute);
+                
+                // Восстанавливаем точки
+                routeData.points.forEach(pointData => {
+                    const latlng = L.latLng(pointData.lat, pointData.lng);
+                    this.addRoutePointFromData(latlng, pointData.name);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading current route:', error);
+        }
+    }
+
+    addRoutePointFromData(latlng, name) {
+        const point = {
+            id: Date.now() + Math.random(),
+            latlng: latlng,
+            name: name,
+            marker: null
+        };
+
+        point.marker = L.circleMarker(latlng, {
+            radius: 6,
+            fillColor: '#dc2626',
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(this.pointsLayer);
+
+        point.marker.bindTooltip(name, { permanent: false, direction: 'top' });
+
+        this.routePoints.push(point);
+        this.updatePointsList();
+        this.updateUI();
+    }
+
     updateSavedRoutesList() {
         const container = document.getElementById('saved-routes-list');
         
@@ -731,11 +876,44 @@ class RoutesApp {
         
         this.clearRoute();
         
-        // Восстанавливаем точки
+        // Восстанавливаем точки и сегменты
         route.points.forEach(pointData => {
             const latlng = L.latLng(pointData.lat, pointData.lng);
-            this.addRoutePoint(latlng, pointData.name);
+            this.addRoutePointFromData(latlng, pointData.name);
         });
+        
+        // Восстанавливаем сегменты маршрута
+        if (route.segments && this.routePoints.length >= 2) {
+            this.routeSegments = route.segments.map(segmentData => {
+                const startIndex = this.routePoints.findIndex(p => 
+                    p.latlng.lat === segmentData.start.latlng.lat && 
+                    p.latlng.lng === segmentData.start.latlng.lng
+                );
+                const endIndex = this.routePoints.findIndex(p => 
+                    p.latlng.lat === segmentData.end.latlng.lat && 
+                    p.latlng.lng === segmentData.end.latlng.lng
+                );
+                
+                if (startIndex !== -1 && endIndex !== -1) {
+                    const segment = {
+                        start: this.routePoints[startIndex],
+                        end: this.routePoints[endIndex],
+                        transport: segmentData.transport,
+                        geometry: segmentData.geometry,
+                        distance: segmentData.distance,
+                        duration: segmentData.duration,
+                        polyline: null
+                    };
+                    this.drawRouteSegment(segment);
+                    return segment;
+                }
+                return null;
+            }).filter(segment => segment !== null);
+            
+            this.updateRouteGeometry();
+            this.updateRouteInfo();
+            this.updateTransportSegments();
+        }
         
         this.showToast(`Маршрут "${route.name}" загружен`);
     }
@@ -756,7 +934,6 @@ class RoutesApp {
         const routeName = document.getElementById('route-name-input').value.trim() || 
                          `Маршрут_${new Date().toISOString().split('T')[0]}`;
         
-        // Нормализуем имя файла
         const normalizedName = routeName
             .replace(/[^a-zA-Z0-9а-яА-Я\s_-]/g, '')
             .replace(/\s+/g, '_')
@@ -770,7 +947,7 @@ class RoutesApp {
         <time>${new Date().toISOString()}</time>
     </metadata>`;
         
-        // Добавляем точки маршрута (waypoints)
+        // Добавляем точки маршрута
         this.routePoints.forEach((point, index) => {
             gpx += `
     <wpt lat="${point.latlng.lat}" lon="${point.latlng.lng}">
@@ -779,31 +956,47 @@ class RoutesApp {
     </wpt>`;
         });
         
-        // Добавляем трек-сегменты с разными типами транспорта
-        this.routeSegments.forEach((segment, segmentIndex) => {
-            gpx += `
+        // Добавляем трек с сегментами
+        gpx += `
     <trk>
-        <name>Сегмент ${segmentIndex + 1} - ${this.getTransportName(segment.transport)}</name>
-        <type>${segment.transport}</type>
-        <trkseg>`;
+        <name>${this.escapeXml(routeName)}</name>`;
+        
+        // Группируем сегменты по типу транспорта
+        const segmentsByTransport = {};
+        this.routeSegments.forEach(segment => {
+            if (!segmentsByTransport[segment.transport]) {
+                segmentsByTransport[segment.transport] = [];
+            }
+            segmentsByTransport[segment.transport].push(segment);
+        });
+        
+        // Добавляем каждый тип транспорта как отдельный сегмент трека
+        Object.entries(segmentsByTransport).forEach(([transport, segments]) => {
+            gpx += `
+        <trkseg>
+            <extensions>
+                <transport>${transport}</transport>
+            </extensions>`;
             
-            if (segment.geometry && segment.geometry.coordinates) {
-                segment.geometry.coordinates.forEach(coord => {
-                    gpx += `
+            segments.forEach(segment => {
+                if (segment.geometry && segment.geometry.coordinates) {
+                    segment.geometry.coordinates.forEach(coord => {
+                        gpx += `
             <trkpt lat="${coord[1]}" lon="${coord[0]}">
                 <extensions>
-                    <transport>${segment.transport}</transport>
+                    <transport>${transport}</transport>
                 </extensions>
             </trkpt>`;
-                });
-            }
+                    });
+                }
+            });
             
             gpx += `
-        </trkseg>
-    </trk>`;
+        </trkseg>`;
         });
         
         gpx += `
+    </trk>
 </gpx>`;
         
         const blob = new Blob([gpx], { type: 'application/gpx+xml' });
@@ -817,6 +1010,177 @@ class RoutesApp {
         URL.revokeObjectURL(url);
         
         this.showToast('GPX файл экспортирован');
+    }
+
+    importGPX(file) {
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+                
+                const parseError = xmlDoc.getElementsByTagName('parsererror')[0];
+                if (parseError) {
+                    throw new Error('Ошибка парсинга XML: ' + parseError.textContent);
+                }
+                
+                this.parseGPXData(xmlDoc);
+                this.showToast('GPX файл успешно импортирован');
+            } catch (error) {
+                console.error('GPX import error:', error);
+                this.showToast('Ошибка импорта GPX: ' + error.message);
+            }
+        };
+        reader.onerror = () => {
+            this.showToast('Ошибка чтения файла');
+        };
+        reader.readAsText(file);
+    }
+
+    parseGPXData(xmlDoc) {
+        this.clearRoute();
+        
+        const tracks = xmlDoc.getElementsByTagName('trk');
+        const routes = xmlDoc.getElementsByTagName('rte');
+        const waypoints = xmlDoc.getElementsByTagName('wpt');
+        
+        const allPoints = [];
+        let transportType = this.currentTransport; // По умолчанию используем текущий тип
+        
+        // Собираем точки из waypoints
+        if (waypoints.length > 0) {
+            for (let point of waypoints) {
+                const lat = parseFloat(point.getAttribute('lat'));
+                const lon = parseFloat(point.getAttribute('lon'));
+                const nameElement = point.getElementsByTagName('name')[0];
+                const name = nameElement ? nameElement.textContent : '';
+                
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    allPoints.push({ lat, lon, name });
+                }
+            }
+        }
+        
+        // Если есть треки, используем их точки
+        if (tracks.length > 0) {
+            allPoints.length = 0; // Очищаем points от waypoints
+            
+            for (let track of tracks) {
+                const trackSegments = track.getElementsByTagName('trkseg');
+                for (let segment of trackSegments) {
+                    // Пытаемся получить тип транспорта из расширений сегмента
+                    const extensions = segment.getElementsByTagName('extensions')[0];
+                    if (extensions) {
+                        const transportElement = extensions.getElementsByTagName('transport')[0];
+                        if (transportElement) {
+                            transportType = transportElement.textContent;
+                        }
+                    }
+                    
+                    const trackPoints = segment.getElementsByTagName('trkpt');
+                    for (let point of trackPoints) {
+                        const lat = parseFloat(point.getAttribute('lat'));
+                        const lon = parseFloat(point.getAttribute('lon'));
+                        
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            allPoints.push({ lat, lon, name: '' });
+                        }
+                    }
+                }
+            }
+        }
+        // Если нет треков, но есть маршруты
+        else if (routes.length > 0) {
+            allPoints.length = 0;
+            
+            for (let route of routes) {
+                const routePoints = route.getElementsByTagName('rtept');
+                for (let point of routePoints) {
+                    const lat = parseFloat(point.getAttribute('lat'));
+                    const lon = parseFloat(point.getAttribute('lon'));
+                    
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        allPoints.push({ lat, lon, name: '' });
+                    }
+                }
+            }
+        }
+        
+        if (allPoints.length === 0) {
+            throw new Error('В файле не найдены точки маршрута');
+        }
+        
+        // Устанавливаем тип транспорта из GPX
+        this.currentTransport = transportType;
+        document.getElementById('transport-mode').value = transportType;
+        
+        const maxMarkers = 20;
+        const displayPoints = this.getDistributedPoints(allPoints, maxMarkers);
+        
+        // Добавляем точки на карту
+        displayPoints.forEach((point, index) => {
+            const latlng = L.latLng(point.lat, point.lon);
+            const name = point.name || (index === 0 ? 'Старт' : 
+                        index === displayPoints.length - 1 ? 'Финиш' : 
+                        `Точка ${index + 1}`);
+            this.addRoutePointFromData(latlng, name);
+        });
+        
+        // Строим маршрут между отображенными точками
+        if (displayPoints.length >= 2) {
+            this.buildRouteFromDisplayPoints(displayPoints, transportType);
+        }
+    }
+
+    getDistributedPoints(points, maxCount) {
+        if (points.length <= maxCount) {
+            return points;
+        }
+        
+        const result = [];
+        const step = (points.length - 1) / (maxCount - 1);
+        
+        for (let i = 0; i < maxCount; i++) {
+            const index = Math.min(Math.round(i * step), points.length - 1);
+            result.push(points[index]);
+        }
+        
+        if (result[0] !== points[0]) {
+            result[0] = points[0];
+        }
+        if (result[result.length - 1] !== points[points.length - 1]) {
+            result[result.length - 1] = points[points.length - 1];
+        }
+        
+        return result;
+    }
+
+    async buildRouteFromDisplayPoints(points, transportType) {
+        if (points.length < 2) return;
+        
+        try {
+            // Строим маршрут последовательно между отображенными точками
+            for (let i = 0; i < points.length - 1; i++) {
+                const startPoint = this.routePoints[i];
+                const endPoint = this.routePoints[i + 1];
+                
+                await this.buildRouteSegment(startPoint, endPoint);
+            }
+            
+            // Фокусируем карту на всем маршруте
+            if (this.routeSegments.length > 0) {
+                const bounds = new L.LatLngBounds(
+                    this.routeSegments.map(segment => [segment.polyline.getBounds().getNorth(), segment.polyline.getBounds().getEast()])
+                );
+                this.map.fitBounds(bounds);
+            }
+            
+        } catch (error) {
+            console.error('Route building error:', error);
+            this.showToast('❌ Ошибка построения маршрута из GPX: ' + error.message);
+        }
     }
 
     escapeXml(unsafe) {
@@ -847,6 +1211,7 @@ class RoutesApp {
         if (newName !== null && newName.trim() !== '') {
             this.routePoints[index].name = newName.trim();
             this.updatePointsList();
+            this.saveCurrentRoute();
         }
     }
 

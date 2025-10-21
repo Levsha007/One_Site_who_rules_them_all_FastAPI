@@ -1,4 +1,5 @@
 # main.py - FastAPI сервер с PostgreSQL
+import asyncio
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -302,6 +303,54 @@ async def read_spectrum(request: Request):
 @app.get("/route", response_class=HTMLResponse)
 async def read_route_planner(request: Request):
     return templates.TemplateResponse("route.html", {"request": request})
+
+# ==================== 3D VIEWER РОУТЫ ====================
+
+@app.get("/3d-viewer", response_class=HTMLResponse)
+async def read_3d_viewer(request: Request):
+    return templates.TemplateResponse("3d-viewer.html", {"request": request})
+
+@app.post("/api/upload-3d-model")
+async def upload_3d_model(file: UploadFile = File(...)):
+    """Загрузить 3D модель на сервер"""
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Файл не выбран")
+    
+    # Проверяем расширение файла
+    allowed_extensions = {'.obj', '.stl', '.gltf', '.glb'}
+    file_extension = Path(file.filename).suffix.lower()
+    
+    if file_extension not in allowed_extensions:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Неподдерживаемый формат файла. Разрешены: {', '.join(allowed_extensions)}"
+        )
+    
+    # Создаем папку для 3D моделей если не существует
+    models_dir = UPLOADS_DIR / "3d-models"
+    models_dir.mkdir(exist_ok=True)
+    
+    # Генерируем уникальное имя файла
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = models_dir / unique_filename
+    
+    try:
+        # Сохраняем файл
+        async with aiofiles.open(file_path, 'wb') as buffer:
+            content = await file.read()
+            await buffer.write(content)
+        
+        # Возвращаем URL для доступа к файлу
+        file_url = f"/static/uploads/3d-models/{unique_filename}"
+        return {
+            "success": True, 
+            "url": file_url,
+            "filename": file.filename,
+            "file_type": file_extension
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка загрузки файла: {e}")
 # ==================== РОУТЫ ДЛЯ ПРОЕКТОВ BRO CODE ====================
 
 @app.get("/projects", response_class=HTMLResponse)

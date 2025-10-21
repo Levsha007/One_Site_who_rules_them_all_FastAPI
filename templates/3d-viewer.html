@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="{{ url_for('static', path='assets/3d-icon.png') }}" type="image/x-icon">
+  <title>3D Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Brush+Script+MT&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/3d-viewer.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <div class="top-panel">
+    <button id="home-btn" class="home-btn">&larr; Главная</button>
+    <span class="current-gallery-title">3D Viewer</span>
+    <button class="theme-toggle" id="theme-toggle" aria-label="Переключить тему">☀️</button>
+  </div>
+
+  <div class="page-container">
+    <div class="page-content">
+      
+      <!-- Основной контейнер -->
+      <div class="viewer-layout">
+        
+        <!-- Левая панель - управление -->
+        <div class="left-panel">
+          <div class="panel-section">
+            <h3>📁 Загрузка моделей</h3>
+            <div class="upload-area" id="upload-area">
+              <div class="upload-content">
+                <span class="upload-icon">📁</span>
+                <p>Перетащите файлы сюда</p>
+                <button class="upload-btn" id="file-input-btn">Выберите файлы</button>
+                <input type="file" id="file-input" accept=".obj,.stl,.gltf,.glb" multiple hidden>
+              </div>
+            </div>
+            <div class="supported-formats">
+              <p>OBJ, STL, GLTF, GLB</p>
+            </div>
+            <div class="file-list" id="file-list"></div>
+          </div>
+
+          <div class="panel-section">
+            <h3>🎮 Управление камерой</h3>
+            <div class="control-grid">
+              <button id="view-front" class="control-btn" title="Вид спереди">📐 Фронт</button>
+              <button id="view-top" class="control-btn" title="Вид сверху">⬆️ Верх</button>
+              <button id="view-right" class="control-btn" title="Вид справа">↗️ Право</button>
+              <button id="reset-camera" class="control-btn" title="Сброс камеры">🔄 Сброс</button>
+              <button id="toggle-perspective" class="control-btn" title="Переключить перспективу">🎯 Орто</button>
+              <button id="focus-selected" class="control-btn" title="Фокус на выбранном">🎯 Фокус</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3>⚙️ Настройки сцены</h3>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <label>Фон:</label>
+                <select id="background-color">
+                  <option value="#111111">Тёмный</option>
+                  <option value="#1a1a2e">Ночной</option>
+                  <option value="#2c3e50">Синий</option>
+                  <option value="#34495e">Серый</option>
+                </select>
+              </div>
+              
+              <div class="setting-item">
+                <label>Сетка:</label>
+                <input type="checkbox" id="toggle-grid" checked>
+              </div>
+              
+              <div class="setting-item">
+                <label>Оси:</label>
+                <input type="checkbox" id="toggle-axes" checked>
+              </div>
+
+              <div class="setting-item">
+                <label>Тени:</label>
+                <input type="checkbox" id="toggle-shadows" checked>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Центральная область - 3D сцена -->
+        <div class="center-panel">
+          <div class="scene-container">
+            <div id="scene-canvas"></div>
+            <div class="scene-overlay" id="scene-overlay">
+              <div class="overlay-content">
+                <span class="overlay-icon">🎮</span>
+                <h3>3D Viewer</h3>
+                <p>Загрузите модели для просмотра</p>
+              </div>
+            </div>
+            <div class="scene-controls">
+              <div class="fps-counter" id="fps-counter">60 FPS</div>
+              <div class="camera-info" id="camera-info">Перспектива</div>
+            </div>
+          </div>
+
+          <!-- Нижняя панель управления -->
+          <div class="bottom-panel">
+            <div class="transform-controls">
+              <div class="transform-section">
+                <h4>Перемещение</h4>
+                <div class="transform-inputs">
+                  <div class="transform-input">
+                    <label>X:</label>
+                    <input type="number" id="position-x" value="0" step="0.1">
+                  </div>
+                  <div class="transform-input">
+                    <label>Y:</label>
+                    <input type="number" id="position-y" value="0" step="0.1">
+                  </div>
+                  <div class="transform-input">
+                    <label>Z:</label>
+                    <input type="number" id="position-z" value="0" step="0.1">
+                  </div>
+                </div>
+              </div>
+
+              <div class="transform-section">
+                <h4>Вращение</h4>
+                <div class="transform-inputs">
+                  <div class="transform-input">
+                    <label>X:</label>
+                    <input type="number" id="rotation-x" value="0" step="1">
+                  </div>
+                  <div class="transform-input">
+                    <label>Y:</label>
+                    <input type="number" id="rotation-y" value="0" step="1">
+                  </div>
+                  <div class="transform-input">
+                    <label>Z:</label>
+                    <input type="number" id="rotation-z" value="0" step="1">
+                  </div>
+                </div>
+              </div>
+
+              <div class="transform-section">
+                <h4>Масштаб</h4>
+                <div class="transform-inputs">
+                  <div class="transform-input">
+                    <input type="number" id="scale-all" value="1" step="0.1" min="0.1">
+                  </div>
+                  <div class="transform-buttons">
+                    <button id="scale-reset" class="control-btn small">1:1</button>
+                    <button id="scale-fit" class="control-btn small">Вписать</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="transform-section">
+                <h4>Выбор модели</h4>
+                <select id="model-selector">
+                  <option value="">Выберите модель</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правая панель - информация и освещение -->
+        <div class="right-panel">
+          <div class="panel-section">
+            <h3>💡 Освещение</h3>
+            <div class="light-controls">
+              <div class="setting-item">
+                <label>Ambient:</label>
+                <div class="slider-control">
+                  <input type="range" id="ambient-light" min="0" max="2" step="0.1" value="0.6" class="slider">
+                  <span id="ambient-value">0.6</span>
+                </div>
+              </div>
+              
+              <div class="setting-item">
+                <label>Directional:</label>
+                <div class="slider-control">
+                  <input type="range" id="directional-light" min="0" max="2" step="0.1" value="1.0" class="slider">
+                  <span id="directional-value">1.0</span>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>Цвет света:</label>
+                <input type="color" id="light-color" value="#ffffff">
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3>📊 Статистика</h3>
+            <div class="model-info" id="model-info">
+              <div class="info-item">
+                <span class="info-label">Моделей:</span>
+                <span id="models-count" class="info-value">0</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Вершин:</span>
+                <span id="total-vertices" class="info-value">0</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Полигонов:</span>
+                <span id="total-polygons" class="info-value">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3>⚡ Действия</h3>
+            <div class="action-buttons">
+              <button id="clear-all" class="control-btn danger">🗑️ Очистить все</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3>🎯 Управление</h3>
+            <div class="help-info">
+              <div class="help-item">
+                <span class="help-key">ЛКМ + Движение</span>
+                <span class="help-desc">Вращение</span>
+              </div>
+              <div class="help-item">
+                <span class="help-key">ПКМ + Движение</span>
+                <span class="help-desc">Панорамирование</span>
+              </div>
+              <div class="help-item">
+                <span class="help-key">Колёсико</span>
+                <span class="help-desc">Масштаб</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer class="site-footer">
+    &copy; 2025 3D Viewer. Все права защищены.
+  </footer>
+
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script src="{{ url_for('static', path='js/3d-viewer.js') }}"></script>
+</body>
+</html>

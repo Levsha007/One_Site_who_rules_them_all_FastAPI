@@ -40,7 +40,7 @@
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 14px;
     transition: var(--transition);
     backdrop-filter: blur(10px);
@@ -72,7 +72,7 @@
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 14px;
     transition: var(--transition);
     backdrop-filter: blur(10px);
@@ -136,7 +136,7 @@
 }
 
 .status-text {
-    font-family: 'Brush Script MT', cursive;
+    
     color: #ffffff;
     font-size: 14px;
 }
@@ -184,7 +184,7 @@
     border-radius: 0 12px 12px 0;
     cursor: pointer;
     font-size: 16px;
-    font-family: 'Brush Script MT', cursive;
+    
     transition: var(--transition);
     backdrop-filter: blur(20px);
     box-shadow: var(--glass-shadow);
@@ -285,7 +285,7 @@
 
 .category-header h3 {
     margin: 0;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 1.1rem;
     color: #ffffff;
 }
@@ -318,7 +318,7 @@
 
 .setting-group label {
     display: block;
-    font-family: 'Brush Script MT', cursive;
+    
     color: #ffffff;
     margin-bottom: 8px;
     font-size: 0.95rem;
@@ -332,7 +332,7 @@
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.8);
     color: #ffffff;
-    font-family: 'Brush Script MT', cursive;
+    
     backdrop-filter: blur(10px);
     transition: var(--transition);
     font-size: 14px;
@@ -381,7 +381,7 @@
 }
 
 .slider-value {
-    font-family: 'Brush Script MT', cursive;
+    
     color: #c0392b;
     font-size: 0.9rem;
     margin-left: 10px;
@@ -389,7 +389,7 @@
 }
 
 .setting-description {
-    font-family: 'Brush Script MT', cursive;
+    
     color: #cccccc;
     font-size: 0.8rem;
     margin-top: 5px;
@@ -436,7 +436,7 @@
 }
 
 .color-scheme-btn span {
-    font-family: 'Brush Script MT', cursive;
+    
     color: #ffffff;
     font-size: 0.7rem;
     text-align: center;
@@ -466,7 +466,7 @@
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 0.8rem;
     transition: var(--transition);
     flex: 1;
@@ -489,7 +489,7 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 0.9rem;
     transition: var(--transition);
     text-align: center;
@@ -543,7 +543,7 @@
     padding: 10px 15px;
     border-radius: 6px;
     cursor: pointer;
-    font-family: 'Brush Script MT', cursive;
+    
     font-size: 0.8rem;
     transition: var(--transition);
     width: 100%;

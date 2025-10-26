@@ -15,7 +15,7 @@ body[data-theme="light"] {
 }
 
 body {
-  font-family: 'Brush Script MT', cursive;
+  
   margin: 0;
   background: var(--bg);
   color: var(--text);

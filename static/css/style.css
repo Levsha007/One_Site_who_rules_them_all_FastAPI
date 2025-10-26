@@ -33,7 +33,7 @@ body[data-theme="light"] {
 
 /* === Тело документа === */
 body {
-  font-family: 'Brush Script MT', cursive;
+  
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -268,7 +268,7 @@ details input, details select, details button {
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 12px;
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 details button {
@@ -482,7 +482,7 @@ details button:hover {
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.2);
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 .rename-input button {
@@ -493,7 +493,7 @@ details button:hover {
   border: none;
   cursor: pointer;
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 /* === Номера картинок === */
@@ -620,7 +620,7 @@ details button:hover {
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 12px;
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
   background: var(--bg);
   color: var(--text);
 }
@@ -773,7 +773,7 @@ details button:hover {
   z-index: 9999;
   display: none;
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 .toast.show { display: block; animation: toast-in 0.35s ease; }
@@ -797,7 +797,7 @@ details button:hover {
   display: none;
   text-align: center;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 /* === Padding для gallery-nav === */
@@ -852,7 +852,7 @@ details button:hover {
   border: 1px solid rgba(0,0,0,0.2);
   border-radius: 12px;
   font-size: 14px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 .sort-controls {
@@ -881,7 +881,7 @@ details button:hover {
   border: 1px solid rgba(0,0,0,0.2);
   background: var(--card-bg);
   color: var(--text);
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 .view-mode-controls {

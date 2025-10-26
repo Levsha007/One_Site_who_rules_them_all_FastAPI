@@ -22,7 +22,7 @@ body[data-theme="light"] {
 
 /* Общие стили как в основном style.css */
 body {
-  font-family: 'Brush Script MT', cursive;
+  
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -66,7 +66,7 @@ body {
   background: var(--card-bg);
   color: var(--text);
   font-size: 16px;
-  font-family: 'Brush Script MT', cursive;
+  
 }
 
 #city-input:focus {
@@ -81,7 +81,7 @@ body {
   border-radius: 16px;
   background: var(--weather-blue);
   color: white;
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;

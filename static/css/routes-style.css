@@ -46,7 +46,7 @@
   border-radius: 8px;
   background: var(--card-bg);
   color: var(--text);
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 13px;
   box-sizing: border-box;
 }
@@ -85,7 +85,7 @@
   border-radius: 8px;
   background: var(--card-bg);
   color: var(--text);
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 12px;
 }
 
@@ -106,7 +106,7 @@
   padding: 0 10px;
   border: none;
   border-radius: 8px;
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -377,7 +377,7 @@
   border-radius: 6px;
   background: var(--card-bg);
   color: var(--text);
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 11px;
 }
 
@@ -508,7 +508,7 @@
   text-align: left;
   cursor: pointer;
   border-radius: 4px;
-  font-family: 'Brush Script MT', cursive;
+  
   font-size: 12px;
   white-space: nowrap;
   min-width: 140px;

@@ -5,7 +5,7 @@ from datetime import datetime
 # Настройки подключения к БД
 DB_CONFIG = {
     "host": "localhost",
-    "database": "my_app_db", 
+    "database": "ваша_бд", 
     "user": "postgres",
     "password": "ваш_пароль",  # замените на ваш пароль
     "port": "5432"
